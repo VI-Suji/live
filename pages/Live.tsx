@@ -74,6 +74,19 @@ const LiveNow: React.FC<LiveNowProps> = ({ channelId }) => {
 
     return (
         <div className="w-full flex justify-center items-center mt-1 px-1">
+            <style>{`
+                @keyframes glass-shimmer {
+                    0% { transform: translateX(-40%); opacity: 0.08; }
+                    50% { transform: translateX(40%); opacity: 0.14; }
+                    100% { transform: translateX(-40%); opacity: 0.08; }
+                }
+                @keyframes subtle-wash {
+                    0% { transform: translateX(-10%); }
+                    50% { transform: translateX(10%); }
+                    100% { transform: translateX(-10%); }
+                }
+            `}</style>
+
             <div className="flex flex-col lg:flex-row items-center gap-4 w-full max-w-5xl p-3 rounded-3xl transition-all duration-300">
                 {/* Left: YouTube Icon */}
                 <div
@@ -90,19 +103,20 @@ const LiveNow: React.FC<LiveNowProps> = ({ channelId }) => {
                     )}
                 </div>
 
-                {/* Center: Live Video or Liquid Glass Placeholder */}
+                {/* Center: Live Video or Enhanced Liquid Glass Placeholder */}
                 <div className="flex-1 w-full flex justify-center">
                     <div
-                        className={`relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border shadow-xl transition-all duration-300
-                            ${isLive ? "border-white/20 bg-black" : "border-white/8 bg-white/6"}`}
+                        className={`relative w-full ${isLive ? "max-w-4xl" : "max-w-[calc(100vw-24px)] sm:max-w-4xl"} aspect-video rounded-2xl overflow-hidden border shadow-xl transition-all duration-300 mx-auto
+                            ${isLive ? "border-white/20 bg-black" : "border-white/10 bg-transparent"}`}
                         style={
                             isLive
                                 ? undefined
                                 : {
-                                      WebkitBackdropFilter: "blur(12px) saturate(120%)",
-                                      backdropFilter: "blur(12px) saturate(120%)",
+                                      WebkitBackdropFilter: "blur(20px) saturate(140%)",
+                                      backdropFilter: "blur(20px) saturate(140%)",
                                       background:
-                                          "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
+                                          "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))",
+                                      boxShadow: "inset 0 8px 30px rgba(255,255,255,0.02), 0 8px 30px rgba(2,6,23,0.12)",
                                   }
                         }
                     >
@@ -119,8 +133,8 @@ const LiveNow: React.FC<LiveNowProps> = ({ channelId }) => {
                                 Checking live status...
                             </div>
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-800 font-semibold text-lg">
-                                <div className="max-w-lg text-center px-6 z-10">
+                            <div className="w-full h-full flex items-center justify-center text-gray-800 font-semibold text-lg z-10 relative">
+                                <div className="max-w-lg text-center px-4">
                                     <div className="mb-3 text-2xl">No live stream right now</div>
                                     <div className="text-sm text-gray-600">
                                         We will automatically update when the channel goes live.
@@ -129,68 +143,95 @@ const LiveNow: React.FC<LiveNowProps> = ({ channelId }) => {
                             </div>
                         )}
 
-                        {/* Liquid glass decorative layers ONLY when not live */}
+                        {/* Enhanced liquid glass layers when not live */}
                         {!isLive && (
                             <>
-                                {/* soft blurred highlights */}
+                                {/* heavy frosted layer */}
                                 <div
                                     aria-hidden
                                     className="pointer-events-none absolute inset-0 rounded-2xl"
                                     style={{
                                         background:
-                                            "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015))",
+                                            "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
                                     }}
                                 />
 
-                                {/* subtle glossy ellipse (top-left) */}
+                                {/* moving shimmer wash */}
                                 <div
                                     aria-hidden
-                                    className="pointer-events-none absolute -left-16 -top-12 w-72 h-36 rounded-full opacity-40 blur-2xl"
+                                    className="pointer-events-none absolute inset-0 rounded-2xl overflow-hidden"
+                                    style={{
+                                        mixBlendMode: "overlay",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: "-40%",
+                                            left: "-40%",
+                                            width: "180%",
+                                            height: "180%",
+                                            background:
+                                                "linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.01) 60%, rgba(255,255,255,0.02))",
+                                            transform: "translateZ(0)",
+                                            animation: "glass-shimmer 4.8s linear infinite",
+                                        }}
+                                    />
+                                    <div
+                                        style={{
+                                            position: "absolute",
+                                            top: 0,
+                                            left: "-20%",
+                                            width: "140%",
+                                            height: "100%",
+                                            background:
+                                                "linear-gradient(120deg, rgba(255,255,255,0.015), rgba(200,200,255,0.01), rgba(255,255,255,0.015))",
+                                            opacity: 0.7,
+                                            filter: "blur(20px)",
+                                            transform: "translateZ(0)",
+                                            animation: "subtle-wash 6s ease-in-out infinite",
+                                        }}
+                                    />
+                                </div>
+
+                                {/* glossy highlight (top-left) */}
+                                <div
+                                    aria-hidden
+                                    className="pointer-events-none absolute -left-16 -top-12 w-80 h-40 rounded-full opacity-50 blur-3xl"
                                     style={{
                                         background:
-                                            "radial-gradient(closest-side, rgba(255,255,255,0.28), rgba(255,255,255,0.03))",
+                                            "radial-gradient(closest-side, rgba(255,255,255,0.32), rgba(255,255,255,0.02))",
                                         transform: "rotate(-12deg)",
                                     }}
                                 />
 
-                                {/* soft bottom sheen */}
+                                {/* bottom soft reflection */}
                                 <div
                                     aria-hidden
-                                    className="pointer-events-none absolute left-0 right-0 bottom-0 h-14 rounded-b-2xl opacity-25"
+                                    className="pointer-events-none absolute left-0 right-0 bottom-0 h-16 rounded-b-2xl opacity-30"
                                     style={{
                                         background: "linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.06))",
                                     }}
                                 />
 
-                                {/* animated subtle color wash for life */}
-                                <div
-                                    aria-hidden
-                                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-6"
-                                    style={{
-                                        background:
-                                            "linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01) 30%, rgba(255,255,255,0.02))",
-                                        mixBlendMode: "overlay",
-                                    }}
-                                />
-
-                                {/* very subtle noise (SVG overlay) */}
-                                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" aria-hidden>
-                                    <filter id="grain-filter">
-                                        <feTurbulence baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" result="turb" />
-                                        <feColorMatrix type="saturate" values="0" />
-                                        <feBlend in="SourceGraphic" in2="turb" mode="overlay" />
-                                    </filter>
-                                    <rect width="100%" height="100%" fill="transparent" filter="url(#grain-filter)" opacity="0.02" />
-                                </svg>
-
-                                {/* subtle inner shadow to give depth */}
+                                {/* inner depth shadow */}
                                 <div
                                     aria-hidden
                                     className="pointer-events-none absolute inset-0 rounded-2xl"
                                     style={{
-                                        boxShadow: "inset 0 6px 30px rgba(0,0,0,0.18), inset 0 -6px 20px rgba(255,255,255,0.02)",
+                                        boxShadow: "inset 0 10px 40px rgba(0,0,0,0.22), inset 0 -6px 20px rgba(255,255,255,0.02)",
                                     }}
                                 />
+
+                                {/* subtle grain overlay */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" aria-hidden>
+                                    <filter id="grain-filter-lg">
+                                        <feTurbulence baseFrequency="0.6" numOctaves="2" stitchTiles="stitch" result="turb" />
+                                        <feColorMatrix type="saturate" values="0" />
+                                        <feBlend in="SourceGraphic" in2="turb" mode="overlay" />
+                                    </filter>
+                                    <rect width="100%" height="100%" fill="transparent" filter="url(#grain-filter-lg)" opacity="0.02" />
+                                </svg>
                             </>
                         )}
                     </div>
