@@ -123,7 +123,7 @@ const LiveNow: React.FC<LiveNowProps> = ({ channelId }) => {
                                 <div className="max-w-lg text-center px-6 z-10">
                                     <div className="mb-3 text-2xl">No live stream right now</div>
                                     <div className="text-sm text-gray-600">
-                                        We'll automatically update when the channel goes live.
+                                        We will automatically update when the channel goes live.
                                     </div>
                                 </div>
                             </div>

@@ -196,7 +196,7 @@ const Header: React.FC = () => {
                     {MENU_ITEMS.map((item, i) => (
                         <button
                             key={item}
-                            ref={(el) => (itemRefs.current[i] = el)}
+                            ref={(el) => { itemRefs.current[i] = el; }}
                             onClick={() => handleItemClick(i, item)}
                             className={`relative z-10 flex-none md:flex-1 text-center px-2 py-1 text-sm font-semibold transition-colors duration-300 ${
                                 active === item ? "text-gray-900" : "text-gray-600 hover:text-gray-900"
