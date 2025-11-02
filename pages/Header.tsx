@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { FiSearch, FiBell, FiX } from "react-icons/fi";
 
-const MENU_ITEMS = ["HOME", "TECHNOLOGY", "BUSINESS"];
+const MENU_ITEMS = ["HOME", "നാട്ടുവാർത്തകൾ", "BUSINESS"];
 
 const Header: React.FC = () => {
     const [active, setActive] = useState<string>(MENU_ITEMS[0]);
@@ -89,7 +89,7 @@ const Header: React.FC = () => {
                         searchOpen ? "hidden md:block" : "block"
                     } md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center text-2xl md:text-4xl font-bold text-gray-900 pl-2 md:pl-0`}
                 >
-                    THE NEWS DAILY
+                    ഗ്രാമിക
                 </h1>
 
                 {/* right controls */}
@@ -198,7 +198,7 @@ const Header: React.FC = () => {
                             key={item}
                             ref={(el) => { itemRefs.current[i] = el; }}
                             onClick={() => handleItemClick(i, item)}
-                            className={`relative z-10 flex-none md:flex-1 text-center px-2 py-1 text-sm font-semibold transition-colors duration-300 ${
+                            className={`relative z-10 flex-none md:flex-1 text-center px-2 py-1 text-md font-semibold transition-colors duration-300 ${
                                 active === item ? "text-gray-900" : "text-gray-600 hover:text-gray-900"
                             }`}
                             aria-current={active === item ? "page" : undefined}

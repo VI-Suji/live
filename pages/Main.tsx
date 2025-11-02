@@ -6,6 +6,7 @@ import LiveNow from "./Live";
 import CarouselSection from "./CarouselSection";
 import BentoGridSection from "./Bentogrid";
 import { FaCopyright } from "react-icons/fa";
+import VideoPlayer from "./Video";
 
 const MainArea: React.FC = () => {
     return (
@@ -16,11 +17,11 @@ const MainArea: React.FC = () => {
                     {/* Row 1: Heading + Subtext + Button */}
                     <div className="flex flex-col gap-4 w-full">
                         <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight w-full">
-                            Welcome to The News Daily
+                            നമസ്കാരം,
                         </h2>
                         <p className="text-gray-700 text-lg sm:text-xl w-full">
-                            Stay updated with the latest headlines, trending technology, and business news.
-                            Our Android-inspired interface gives you a clean and interactive reading experience.
+                            ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!
+                            ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം, നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.
                         </p>
                         <button
                             className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-blue-400 to-purple-500 
@@ -36,7 +37,8 @@ const MainArea: React.FC = () => {
                         <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-tight w-full">
                             Live Now
                         </h2>
-                        <LiveNow channelId="UCup3etEdjyF1L3sRbU-rKLw" />
+                        {/* <LiveNow channelId="UCup3etEdjyF1L3sRbU-rKLw" /> */}
+                        <VideoPlayer src="/videos/sample.mp4" title="My Uploaded Video" />
                     </div>
                 </div>
 
@@ -95,8 +97,9 @@ const MainArea: React.FC = () => {
 
                             {/* Description */}
                             <p className="text-gray-700 text-md leading-relaxed p-2">
-                                Discover the latest trends and breakthroughs in technology that are shaping the industry today. From AI advancements to groundbreaking software releases, stay informed with detailed insights and updates that matter.
-                                Discover the latest trends and breakthroughs in technology that are shaping the industry today. From AI advancements to groundbreaking software releases, stay informed with detailed insights and updates that matter.
+                                ഇവിടെ നമ്മൾ പങ്കുവെയ്ക്കുന്നത് നമ്മുടെ ഗ്രാമങ്ങളിലെ സംഭവങ്ങൾ, സംസ്കാരങ്ങൾ, കർഷകരുടെ ജീവിതരേഖകൾ, നാട്ടുവാർത്തകൾ, സാമൂഹിക വിഷയങ്ങൾ, പ്രാദേശിക വികസനങ്ങൾ എന്നിവയാണ്. ഗ്രാമിക ചാനൽ നിങ്ങളുടെ ശബ്ദമാണ് — നാട്ടിൻപുറങ്ങളുടെ സ്വരമായി, 
+                                വിശ്വാസത്തോടെയും സത്യസന്ധതയോടെയും മുന്നോട്ട് പോകുന്ന മാധ്യമം. ഗ്രാമിക — ഗ്രാമത്തിന്റെ മണം, ജനങ്ങളുടെ മനസ്സ്, വാർത്തയുടെ നൈതികത.
+നമ്മളൊന്നിച്ചാകുമ്പോൾ ഗ്രാമങ്ങൾ വളരും, വാർത്തകൾ ജീവിക്കും. 🌾📢
                             </p>
                         </div>
 
@@ -120,7 +123,7 @@ const MainArea: React.FC = () => {
                         {/* Left: Copyright Icon + Text */}
                         <div className="flex items-center gap-2">
                             <FaCopyright className="text-5xl sm:text-3xl" />
-                            <span className="font-bold">Copyright News Daily Limited 2025. All rights reserved.</span>
+                            <span className="font-bold">Copyright Gramika Limited 2025. All rights reserved.</span>
                         </div>
                     </div>
                 </footer>
