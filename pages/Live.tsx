@@ -11,7 +11,8 @@ export default function LiveNow({ channelId }: LiveNowProps) {
     const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=0`;
 
     return (
-        <div className="w-full">
+        // make component centered and width 5/6
+        <div className="w-5/6 mx-auto">
             <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
                 {/* Icon (top on small, left on md+) */}
                 <div
@@ -78,22 +79,72 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                         }`}
                     />
 
-                    {/* Liquid glass overlay */}
-                    <div
-                        aria-hidden
-                        className="absolute left-3 bottom-3 md:left-6 md:bottom-6 z-30 flex items-center gap-2.5
-                                   px-3 py-2 rounded-lg bg-white/5 border border-white/10 shadow-lg backdrop-blur-md text-white min-w-[120px]"
-                        style={{
-                            boxShadow:
-                                "0 6px 24px rgba(2,6,23,0.45), inset 0 1px 0 rgba(255,255,255,0.03)",
-                        }}
-                    >
+                    {/* Corner shadows to imply a subtle glass look (no full overlay) */}
+                    <div className="absolute inset-0 pointer-events-none z-30">
+                        {/* top-left highlight */}
                         <div
-                            className="w-2.5 h-2.5 rounded-full bg-red-500"
-                            style={{ boxShadow: "0 0 10px rgba(255,59,48,0.8)" }}
+                            style={{
+                                top: -12,
+                                left: -12,
+                                width: 120,
+                                height: 120,
+                                borderRadius: 999,
+                                filter: "blur(28px)",
+                                background:
+                                    "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), rgba(255,255,255,0.02) 30%, transparent 60%)",
+                            }}
+                            className="absolute"
                         />
-                        <div className="text-sm font-semibold">LIVE NOW</div>
-                        <div className="text-xs font-medium opacity-80 ml-2">Watch</div>
+                        {/* top-right highlight */}
+                        <div
+                            style={{
+                                top: -8,
+                                right: -8,
+                                width: 100,
+                                height: 100,
+                                borderRadius: 999,
+                                filter: "blur(22px)",
+                                background:
+                                    "radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08), transparent 50%)",
+                            }}
+                            className="absolute"
+                        />
+                        {/* bottom-left soft shadow */}
+                        <div
+                            style={{
+                                bottom: -10,
+                                left: -10,
+                                width: 120,
+                                height: 120,
+                                borderRadius: 999,
+                                filter: "blur(28px)",
+                                background:
+                                    "radial-gradient(circle at 20% 80%, rgba(0,0,0,0.12), rgba(0,0,0,0.04) 35%, transparent 60%)",
+                            }}
+                            className="absolute"
+                        />
+                        {/* bottom-right stronger shadow */}
+                        <div
+                            style={{
+                                bottom: -14,
+                                right: -14,
+                                width: 160,
+                                height: 160,
+                                borderRadius: 999,
+                                filter: "blur(36px)",
+                                background:
+                                    "radial-gradient(circle at 80% 80%, rgba(0,0,0,0.16), rgba(0,0,0,0.06) 35%, transparent 60%)",
+                            }}
+                            className="absolute"
+                        />
+                        {/* subtle inner rim to help define edges */}
+                        <div
+                            className="absolute inset-0 rounded-xl pointer-events-none"
+                            style={{
+                                boxShadow:
+                                    "inset 0 1px 0 rgba(255,255,255,0.02), inset 0 -1px 8px rgba(0,0,0,0.06)",
+                            }}
+                        />
                     </div>
                 </a>
             </div>
