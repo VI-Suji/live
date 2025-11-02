@@ -109,23 +109,17 @@ const MainArea: React.FC = () => {
                 <BentoGridSection />
             </section>
             <section>
-                <footer className="w-full flex justify-center my-8">
-                    <div className="max-w-[1200px] w-full flex flex-col sm:flex-row items-center justify-between gap-2 py-4 px-6 
-                      bg-gradient-to-br from-blue-300 to-purple-200 hover:from-blue-400 hover:to-purple-300 
-                      backdrop-blur-md rounded-2xl text-white text-sm sm:text-base shadow-lg">
-
+                <footer className="w-full flex justify-center my-8 px-10">
+                    <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-6 
+      bg-white backdrop-blur-md rounded-2xl text-black text-sm sm:text-base shadow-lg">
                         {/* Left: Copyright Icon + Text */}
-                        <div className="text-black flex items-center gap-2">
-                            <FaCopyright className="text-5xl" />
+                        <div className="flex items-center gap-2">
+                            <FaCopyright className="text-5xl sm:text-3xl" />
                             <span className="font-bold">Copyright News Daily Limited 2025. All rights reserved.</span>
-                        </div>
-
-                        {/* Right: Optional small note or social link */}
-                        <div className="font-bold text-black text-xs sm:text-sm">
-                            Designed with ❤️ for News Lovers
                         </div>
                     </div>
                 </footer>
+
             </section>
         </>
     );

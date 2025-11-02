@@ -11,18 +11,17 @@ export default function LiveNow({ channelId }: LiveNowProps) {
     const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=0`;
 
     return (
-        // make component centered and width 5/6
-        <div className="w-5/6 mx-auto">
+        <div className="sm:w-5/6 w-full mx-auto">
             <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
-                {/* Icon (top on small, left on md+) */}
+                {/* Icon (hidden on mobile, wider, vertically centered) */}
                 <div
                     aria-hidden
-                    className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg grid place-items-center
+                    className="hidden md:flex flex-shrink-0 rounded-lg grid place-items-center
                                bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md"
                 >
                     <svg
-                        width="28"
-                        height="28"
+                        width="36"
+                        height="36"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -51,15 +50,14 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                     href={`https://www.youtube.com/channel/${channelId}/live`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative flex-1 rounded-xl overflow-hidden min-h-[140px] aspect-video
-                               shadow-2xl no-underline w-full"
+                    className="relative w-full md:flex-1 rounded-xl overflow-hidden aspect-video md:aspect-video shadow-2xl no-underline max-w-full"
                 >
-                    {/* fallback background (blurred until iframe loads) */}
+
+                    {/* fallback background */}
                     <div
                         aria-hidden
-                        className={`absolute inset-0 bg-cover bg-center transition-all duration-300 ${
-                            loaded ? "filter-none" : "blur-md saturate-105"
-                        }`}
+                        className={`absolute inset-0 bg-cover bg-center transition-all duration-300 ${loaded ? "filter-none" : "blur-md saturate-105"
+                            }`}
                         style={{
                             backgroundImage:
                                 "linear-gradient(135deg, rgba(15,23,42,1) 0%, rgba(7,16,40,1) 100%), url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"400\"><rect width=\"100%\" height=\"100%\" fill=\"#071028\"/></svg>')",
@@ -74,14 +72,12 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                         onLoad={() => setLoaded(true)}
-                        className={`absolute inset-0 w-full h-full border-0 z-20 bg-transparent transition-opacity duration-300 ${
-                            loaded ? "opacity-100" : "opacity-0"
-                        }`}
+                        className={`absolute inset-0 w-full h-full border-0 z-20 bg-transparent transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"
+                            }`}
                     />
 
-                    {/* Corner shadows to imply a subtle glass look (no full overlay) */}
+                    {/* corner shadows */}
                     <div className="absolute inset-0 pointer-events-none z-30">
-                        {/* top-left highlight */}
                         <div
                             style={{
                                 top: -12,
@@ -95,7 +91,6 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                             }}
                             className="absolute"
                         />
-                        {/* top-right highlight */}
                         <div
                             style={{
                                 top: -8,
@@ -109,7 +104,6 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                             }}
                             className="absolute"
                         />
-                        {/* bottom-left soft shadow */}
                         <div
                             style={{
                                 bottom: -10,
@@ -123,7 +117,6 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                             }}
                             className="absolute"
                         />
-                        {/* bottom-right stronger shadow */}
                         <div
                             style={{
                                 bottom: -14,
@@ -137,7 +130,6 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                             }}
                             className="absolute"
                         />
-                        {/* subtle inner rim to help define edges */}
                         <div
                             className="absolute inset-0 rounded-xl pointer-events-none"
                             style={{
