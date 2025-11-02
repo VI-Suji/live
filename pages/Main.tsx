@@ -14,7 +14,7 @@ const MainArea: React.FC = () => {
                     <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight w-full">
                         Welcome to The News Daily
                     </h2>
-                    <p className="text-gray-700 text-lg sm:text-xl w-5/6">
+                    <p className="text-gray-700 text-lg sm:text-xl w-full">
                         Stay updated with the latest headlines, trending technology, and business news.
                         Our Android-inspired interface gives you a clean and interactive reading experience.
                     </p>
