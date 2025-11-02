@@ -17,7 +17,7 @@ export default function LiveNow({ channelId }: LiveNowProps) {
                 <div
                     aria-hidden
                     className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg grid place-items-center
-                               bg-gradient-to-br from-rose-500 to-amber-300 shadow-md"
+                               bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md"
                 >
                     <svg
                         width="28"
