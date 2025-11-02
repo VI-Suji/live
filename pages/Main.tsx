@@ -22,9 +22,14 @@ const MainArea: React.FC = () => {
                             Stay updated with the latest headlines, trending technology, and business news.
                             Our Android-inspired interface gives you a clean and interactive reading experience.
                         </p>
-                        <button className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md hover:shadow-lg rounded-full text-white font-semibold transition-all duration-200 active:scale-95 w-max">
+                        <button
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-blue-400 to-purple-500 
+             hover:from-blue-500 hover:to-purple-600 shadow-md hover:shadow-lg 
+             rounded-full hover:rounded-xl active:rounded-md 
+             transition-all duration-100 ease-linear active:scale-95 text-white font-semibold w-max"
+                        >
                             Read More
-                            <FiArrowRight className="text-lg" />
+                            <FiArrowRight className="text-lg transition-transform duration-100 ease-linear group-hover:translate-x-1" />
                         </button>
                     </div>
                     <div className="flex flex-col gap-2 w-full">

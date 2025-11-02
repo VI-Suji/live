@@ -138,9 +138,14 @@ export default function CarouselSection() {
 
                 {/* View More Button */}
                 <div className="flex justify-center m-6">
-                    <button className="bg-gray-100 text-gray-900 font-bold py-3 px-10 rounded-full text-lg hover:bg-gray-200 transition-all duration-200 shadow-md bg-gradient-to-br from-blue-300 to-purple-200 hover:from-blue-400 hover:to-purple-300 hover:shadow-lg flex items-center gap-2">
+                    <button
+                        className="flex items-center gap-2 px-10 py-3 bg-gradient-to-br from-blue-300 to-purple-200 
+             hover:from-blue-400 hover:to-purple-300 shadow-md hover:shadow-lg 
+             rounded-full hover:rounded-xl active:rounded-md 
+             transition-all duration-100 ease-linear active:scale-95 text-gray-900 font-bold text-lg"
+                    >
                         View More
-                        <FaChevronRight />
+                        <FaChevronRight className="text-lg transition-transform duration-100 ease-linear group-hover:translate-x-1" />
                     </button>
                 </div>
             </div>
