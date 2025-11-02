@@ -109,7 +109,7 @@ const MainArea: React.FC = () => {
                 <BentoGridSection />
             </section>
             <section>
-                <footer className="w-full flex justify-center mt-8">
+                <footer className="w-full flex justify-center my-8">
                     <div className="max-w-[1200px] w-full flex flex-col sm:flex-row items-center justify-between gap-2 py-4 px-6 
                       bg-gradient-to-br from-blue-300 to-purple-200 hover:from-blue-400 hover:to-purple-300 
                       backdrop-blur-md rounded-2xl text-white text-sm sm:text-base shadow-lg">
