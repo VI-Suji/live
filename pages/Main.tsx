@@ -13,7 +13,7 @@ const MainArea: React.FC = () => {
         <>
             <section
                 id="home"
-                className="w-full bg-[#f8f8f8] flex flex-col lg:flex-row items-start justify-between px-4 sm:px-8 py-4 gap-8 scroll-mt-24"
+                className="w-full bg-[#f8f8f8] flex flex-col lg:flex-row items-start justify-between px-4 sm:px-8 py-4 gap-8 scroll-mt-30"
             >
                 {/* Left Column */}
                 <div className="flex flex-col p-1 sm:p-5 gap-10 w-full lg:w-3/4">
