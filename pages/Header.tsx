@@ -101,8 +101,7 @@ const Header: React.FC = () => {
 
                 {/* Title */}
                 <h1
-                    className={`${searchOpen ? "hidden md:block" : "block"
-                        } md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center text-2xl md:text-6xl font-bold text-gray-900 pl-2 md:pl-0`}
+                    className={`md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center text-2xl md:text-6xl font-bold text-gray-900 pl-2 md:pl-0`}
                 >
                     ഗ്രാമിക
                 </h1>

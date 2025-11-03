@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { FiArrowRight } from "react-icons/fi";
 import LiveNow from "./Live";
 import CarouselSection from "./CarouselSection";
@@ -9,6 +9,12 @@ import { FaCopyright } from "react-icons/fa";
 import VideoPlayer from "./Video";
 
 const MainArea: React.FC = () => {
+    const topStoriesRef = useRef<HTMLElement>(null);
+
+    const handleScrollToTopStories = () => {
+        topStoriesRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     return (
         <>
             <section
@@ -25,12 +31,13 @@ const MainArea: React.FC = () => {
                         <p className="text-gray-700 text-lg sm:text-xl w-full">
                             ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം! ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം, നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.
                         </p>
-                        <a href="#top-stories">
-                            <button className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md hover:shadow-lg rounded-full hover:rounded-xl active:rounded-md transition-all duration-100 ease-linear active:scale-95 text-white font-semibold w-max">
-                                Read More
-                                <FiArrowRight className="text-lg transition-transform duration-100 ease-linear group-hover:translate-x-1" />
-                            </button>
-                        </a>
+                        <button
+                            onClick={handleScrollToTopStories}
+                            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md hover:shadow-lg rounded-full hover:rounded-xl active:rounded-md transition-all duration-300 ease-in-out active:scale-95 text-white font-semibold w-max"
+                        >
+                            Read More
+                            <FiArrowRight className="text-lg transition-transform duration-100 ease-linear group-hover:translate-x-1" />
+                        </button>
                     </div>
 
                     {/* Live Now */}
@@ -94,20 +101,27 @@ const MainArea: React.FC = () => {
                 </div>
             </section>
 
-            <section id="top-stories" className="bg-[#121212] text-white w-full scroll-mt-30">
+            <section
+                ref={topStoriesRef}
+                id="top-stories"
+                className="bg-[#121212] text-white w-full scroll-mt-30 transition-all duration-500"
+            >
                 {/* Title */}
                 <h2 className="m-10 pt-5 text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
                     Top Stories
                 </h2>
                 <CarouselSection />
             </section>
+
             <section id="socials" className="bg-[#f8f8f8] text-white w-full scroll-mt-24">
                 <BentoGridSection />
             </section>
+
             <section className="py-5 bg-black">
                 <footer className="w-full flex justify-center my-8 px-10">
                     <div className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-6 
-      bg-white backdrop-blur-md rounded-2xl text-black text-sm sm:text-base shadow-lg">
+                        bg-white backdrop-blur-md rounded-2xl text-black text-sm sm:text-base shadow-lg"
+                    >
                         {/* Left: Copyright Icon + Text */}
                         <div className="flex items-center gap-2">
                             <FaCopyright className="text-5xl sm:text-3xl" />
@@ -115,7 +129,6 @@ const MainArea: React.FC = () => {
                         </div>
                     </div>
                 </footer>
-
             </section>
         </>
     );
