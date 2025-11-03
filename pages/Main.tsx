@@ -37,8 +37,9 @@ const MainArea: React.FC = () => {
                         <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-tight w-full">
                             Live Now
                         </h2>
+                        {/* <VideoPlayer src="/videos/sample.mp4" title="My Uploaded Video" /> */}
+                        <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
                         {/* <LiveNow channelId="UCup3etEdjyF1L3sRbU-rKLw" /> */}
-                        <VideoPlayer src="/videos/sample.mp4" title="My Uploaded Video" />
                     </div>
                 </div>
 
