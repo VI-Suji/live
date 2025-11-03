@@ -45,7 +45,7 @@ const socialItems = [
 
 export default function SocialBentoGrid() {
   return (
-    <section className="w-11/12 md:w-5/6 mx-auto p-10 my-16 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3">
+    <section className="w-11/12 md:w-5/6 mx-auto p-10 mt-16 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3">
       {socialItems.map((item) => {
         let gridClass = `relative rounded-3xl overflow-hidden shadow-lg cursor-pointer group flex items-center justify-center text-white 
                         bg-gradient-to-br ${item.color} bg-opacity-40 backdrop-blur-lg border border-white/20`;

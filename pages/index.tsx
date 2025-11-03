@@ -13,7 +13,7 @@ export default function Home() {
   // );
 
   return (
-    <div>
+    <div className='bg-[#f8f8f8]'>
       <Header />
       <MainArea />
     </div>

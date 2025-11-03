@@ -35,6 +35,12 @@ const stories: Story[] = [
         img: "https://images.unsplash.com/photo-1581092334646-4f6c5a8eafc0?w=1280&h=720&q=80&auto=format&fit=crop",
         text: "വിപണിയിലെ മുൻനിര കമ്പനികളുടെ ഓഹരികൾ ഉയരുന്നു. വിദഗ്ധർ അടുത്ത ആഴ്ച വിപണിയിൽ കൂടുതൽ വളർച്ച പ്രതീക്ഷിക്കുന്നു.",
     },
+    {
+        id: 5,
+        title: "Global Highlights",
+        img: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=1280&h=720&q=80&auto=format&fit=crop",
+        text: "സിംഗപ്പൂരിന്റെ ഓഹരി വിപണിയിൽ ഉച്ചതിരിഞ്ഞ് ഇടിവ് രേഖപ്പെടുത്തി. എന്നാൽ വിദഗ്ധർ ഇത് താൽക്കാലികമാണെന്ന് വിലയിരുത്തുന്നു.",
+    },
 ];
 
 export default function CarouselSection() {
@@ -138,7 +144,7 @@ export default function CarouselSection() {
 
                 {/* View More Button */}
                 <div className="flex justify-center m-6">
-                    <button
+                    {/* <button
                         className="flex items-center gap-2 px-10 py-3 bg-gradient-to-br from-blue-300 to-purple-200 
              hover:from-blue-400 hover:to-purple-300 shadow-md hover:shadow-lg 
              rounded-full hover:rounded-xl active:rounded-md 
@@ -146,7 +152,7 @@ export default function CarouselSection() {
                     >
                         View More
                         <FaChevronRight className="text-lg transition-transform duration-100 ease-linear group-hover:translate-x-1" />
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </>
