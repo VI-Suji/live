@@ -43,7 +43,7 @@ const socialItems = [
   
 ];
 
-export default function SocialBentoGrid() {
+export default function Socials() {
   return (
     <section className="w-11/12 md:w-5/6 mx-auto p-10 mt-16 grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3">
       {socialItems.map((item) => {

@@ -43,7 +43,7 @@ const stories: Story[] = [
     },
 ];
 
-export default function CarouselSection() {
+export default function TopStories() {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     function scrollNext() {

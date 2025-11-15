@@ -2,9 +2,9 @@
 
 import React, { useRef } from "react";
 import { FiArrowRight } from "react-icons/fi";
-import LiveNow from "./Live";
-import CarouselSection from "./CarouselSection";
-import BentoGridSection from "./Bentogrid";
+import LiveNow from "../components/LiveComponent";
+import CarouselSection from "../components/TopStoriesComponent";
+import BentoGridSection from "../components/SocialsComponent";
 import { FaCopyright } from "react-icons/fa";
 import VideoPlayer from "./Video";
 
