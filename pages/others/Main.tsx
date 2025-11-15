@@ -6,7 +6,7 @@ import LiveNow from "../components/LiveComponent";
 import CarouselSection from "../components/TopStoriesComponent";
 import BentoGridSection from "../components/SocialsComponent";
 import { FaCopyright } from "react-icons/fa";
-import VideoPlayer from "./Video";
+// import VideoPlayer from "./Video";
 
 const MainArea: React.FC = () => {
     const topStoriesRef = useRef<HTMLElement>(null);

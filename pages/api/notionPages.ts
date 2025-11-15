@@ -19,32 +19,16 @@ type NotionPost = {
   title: string;
   img: string;
   text: string;
+  date: string;
+  author: string;
+  pageId: string;
 };
 
-// Helper function to parse paragraph content
-const parseParagraph = (blocks: BlockObjectResponse[]): NotionPost => {
-  const result: NotionPost = { id: null, title: "", img: "", text: "" };
-
-  blocks.forEach((block) => {
-    if (block.type === "paragraph" && block.paragraph.rich_text.length > 0) {
-      const content = block.paragraph.rich_text
-        .map((rt) => rt.plain_text)
-        .join("");
-
-      // Extract fields using regex
-      const idMatch = content.match(/id:\s*(\d+)/);
-      const titleMatch = content.match(/title:\s*"(.+?)"/);
-      const imgMatch = content.match(/img:\s*"(.+?)"/);
-      const textMatch = content.match(/text:\s*"([\s\S]+?)"$/); // [\s\S] handles multiline
-
-      if (idMatch) result.id = parseInt(idMatch[1]);
-      if (titleMatch) result.title = titleMatch[1];
-      if (imgMatch) result.img = imgMatch[1];
-      if (textMatch) result.text = textMatch[1];
-    }
-  });
-
-  return result;
+// Helper to parse "key: value" from a string
+const parseBlockContent = (content: string): { key: string; value: string } | null => {
+  const match = content.match(/^(\w+):\s*"?(.*?)"?$/);
+  if (!match) return null;
+  return { key: match[1].trim(), value: match[2].trim() };
 };
 
 export default async function handler(
@@ -55,16 +39,56 @@ export default async function handler(
     const data: NotionPost[] = [];
 
     for (const pageId of PAGE_IDS) {
-      // Get blocks of the page
       const response = await notion.blocks.children.list({
         block_id: pageId,
         page_size: 50,
       });
 
-      const parsed = parseParagraph(response.results as BlockObjectResponse[]);
+      const blocks = response.results.slice(0, 6) as BlockObjectResponse[];
 
-      // Only add if id exists
-      if (parsed.id !== null) data.push(parsed);
+      const post: NotionPost = {
+        id: null,
+        title: "",
+        img: "",
+        text: "",
+        date: "",
+        author: "",
+        pageId,
+      };
+
+      blocks.forEach((block) => {
+        if (block.type === "paragraph" && "paragraph" in block && block.paragraph.rich_text.length > 0) {
+          const content = block.paragraph.rich_text.map((t) => t.plain_text).join("");
+          const kv = parseBlockContent(content);
+          if (!kv) return;
+
+          switch (kv.key.toLowerCase()) {
+            case "id":
+              post.id = parseInt(kv.value, 10) || null;
+              break;
+            case "title":
+              post.title = kv.value;
+              break;
+            case "img":
+              // remove HTML tags if present
+              post.img = kv.value.replace(/<[^>]+>/g, "");
+              break;
+            case "text":
+              post.text = kv.value;
+              break;
+            case "date":
+              post.date = kv.value;
+              break;
+            case "author":
+              post.author = kv.value;
+              break;
+            default:
+              break;
+          }
+        }
+      });
+
+      data.push(post);
     }
 
     res.status(200).json(data);

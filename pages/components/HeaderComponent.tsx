@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { FiBell, FiSearch, FiX } from "react-icons/fi";
 
 // Each menu item has a label and a target section ID
 const MENU_ITEMS = [
@@ -96,12 +95,12 @@ const Header: React.FC = () => {
     return (
         <header className="w-full bg-[#f8f8f8] backdrop-blur-2xl border-b border-white/30 shadow-sm sticky top-0 z-50">
             {/* Top Row */}
-            <div className="flex items-center justify-between px-3 md:px-6 py-3 relative">
+            <div className="flex items-center justify-between px-3 md:px-6 py-3 sm:py-8 relative">
                 <div className="hidden md:block w-24" />
 
                 {/* Title */}
                 <h1
-                    className={`md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center text-2xl md:text-6xl font-bold text-gray-900 pl-2 md:pl-0`}
+                    className="md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center text-2xl md:text-6xl font-bold text-gray-900 pl-2 md:pl-0"
                 >
                     ഗ്രാമിക
                 </h1>
@@ -109,7 +108,7 @@ const Header: React.FC = () => {
                 {/* Right controls */}
                 <div className="flex items-center gap-2 md:gap-3 ml-auto">
                     {/* Desktop search */}
-                    <div className="hidden md:flex items-center w-56 bg-gray-100 hover:bg-gray-200 rounded-full px-2 py-1.5 shadow-sm hover:shadow-md transition-all duration-200">
+                    {/* <div className="hidden md:flex items-center w-56 bg-gray-100 hover:bg-gray-200 rounded-full px-2 py-1.5 shadow-sm hover:shadow-md transition-all duration-200">
                         <FiSearch className="text-gray-700 text-lg" />
                         <input
                             type="text"
@@ -117,10 +116,10 @@ const Header: React.FC = () => {
                             className="bg-transparent outline-none px-2 text-sm text-gray-800 placeholder-gray-500"
                             aria-label="Search"
                         />
-                    </div>
+                    </div> */}
 
                     {/* Mobile search */}
-                    <div className="relative md:hidden h-10">
+                    {/* <div className="relative md:hidden h-10">
                         <motion.div
                             initial={false}
                             animate={searchOpen ? { width: 220 } : { width: 40 }}
@@ -169,7 +168,7 @@ const Header: React.FC = () => {
                                 </motion.button>
                             </div>
                         </motion.div>
-                    </div>
+                    </div> */}
                     {/* notification */}
                     {/* <button type="button" aria-label="Notifications" className="relative w-10 h-10 md:w-10 md:h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 flex-shrink-0" >
                         <FiBell className="text-gray-700 text-xl" /> <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white" />
