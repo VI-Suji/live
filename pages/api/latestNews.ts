@@ -3,7 +3,7 @@ import { Client } from "@notionhq/client";
 import { BlockObjectResponse, RichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
 
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
-const PAGE_ID = "2acdb281-6d9b-806d-a2ba-f83293c16344";
+const PAGE_ID = "2acdb2816d9b806da2baf83293c16344";
 
 type NewsData = {
   date: string;
