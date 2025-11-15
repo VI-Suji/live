@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { FaCalendarAlt, FaUser } from "react-icons/fa";
 
@@ -76,9 +77,9 @@ type DividerBlock = {
 type ImageBlock = {
   id: string;
   type: "image";
-  image: 
-    | { type: "external"; external: { url: string } }
-    | { type: "file"; file: { url: string } };
+  image:
+  | { type: "external"; external: { url: string } }
+  | { type: "file"; file: { url: string } };
 };
 
 type CalloutBlock = {
@@ -205,7 +206,14 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
     <div className="min-h-screen bg-[#f8f8f8] text-gray-900 relative">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="relative w-full h-[360px] rounded-3xl overflow-hidden shadow-2xl mb-10 bg-white/20 backdrop-blur-2xl border border-white/30">
-          {imageUrl && <img src={imageUrl} alt="Blog" className="absolute inset-0 w-full h-full object-cover opacity-40" />}
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt="Blog"
+              fill
+              className="object-cover opacity-40"
+            />
+          )}
           <div className="relative z-10 p-10 flex flex-col justify-end h-full">
             <h1 className="text-xl sm:text-5xl font-extrabold leading-tight drop-shadow-md">{pageData.title}</h1>
             <div className="mt-4 flex items-center gap-6 text-gray-800 font-medium backdrop-blur-md bg-white/40 px-4 py-2 rounded-full shadow-md">
@@ -247,8 +255,7 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
 
               case "image":
                 const url = block.image.type === "external" ? block.image.external.url : block.image.file.url;
-                return <img  key={block.id} src={url} alt="Notion Image" className="relative w-full rounded-2xl overflow-hidden shadow-lg hover:scale-102 transform transition-all duration-300" />;
-
+                return <img key={block.id} src={url} alt="Notion Image" className="relative w-full rounded-2xl overflow-hidden shadow-lg hover:scale-102 transform transition-all duration-300" />;
               case "callout":
                 return (
                   <div key={block.id} className="flex items-center gap-4 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 p-5 rounded-xl shadow-md backdrop-blur-sm transition transform hover:scale-[1.02]">

@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { FaNewspaper, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type Post = {
     id: string;        // Notion page ID
@@ -107,11 +108,13 @@ export default function TopStories() {
                                 className="snap-start flex-shrink-0 w-[90%] sm:w-[85%] md:w-1/2 lg:w-1/3 bg-[#f8f8f8] text-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
                             >
                                 {/* Image */}
-                                <div className="aspect-[16/9] w-full">
-                                    <img
-                                        src={post.img || ""}
+                                <div className="aspect-[16/9] w-full relative">
+                                    <Image
+                                        src={post.img || "/fallback.jpg"} // provide fallback if empty
                                         alt={post.title}
-                                        className="w-full h-full object-cover"
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 100vw"
                                     />
                                 </div>
 
