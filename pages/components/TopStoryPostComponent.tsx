@@ -205,23 +205,38 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
   return (
     <div className="min-h-screen bg-[#f8f8f8] text-gray-900 relative">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="relative w-full h-[360px] rounded-3xl overflow-hidden shadow-2xl mb-10 bg-white/20 backdrop-blur-2xl border border-white/30">
+        <div className="relative w-full h-[260px] sm:h-[360px] rounded-3xl overflow-hidden shadow-2xl mb-10 bg-white/20 backdrop-blur-2xl border border-white/30">
+
           {imageUrl && (
             <Image
               src={imageUrl}
-              alt="Blog"
+              alt="Blog header image"
               fill
               className="object-cover opacity-40"
             />
           )}
-          <div className="relative z-10 p-10 flex flex-col justify-end h-full">
-            <h1 className="text-xl sm:text-5xl font-extrabold leading-tight drop-shadow-md">{pageData.title}</h1>
-            <div className="mt-4 flex items-center gap-6 text-gray-800 font-medium backdrop-blur-md bg-white/40 px-4 py-2 rounded-full shadow-md">
-              <span className="flex items-center gap-2"><FaCalendarAlt /> {date || "Unknown Date"}</span>
-              <span className="flex items-center gap-2"><FaUser /> {author || "Gramika Team"}</span>
+
+          <div className="relative z-10 p-6 sm:p-10 flex flex-col justify-end h-full">
+            <h1 className="text-lg sm:text-5xl font-extrabold leading-tight drop-shadow-md">
+              {pageData.title}
+            </h1>
+
+            <div className="text-xs sm:text-xl mt-4 w-fit flex flex-wrap items-center gap-4 sm:gap-6 text-gray-800 font-medium backdrop-blur-md bg-white/40 px-4 py-2 rounded-full shadow-md">
+              <span className="flex items-center gap-2">
+                <FaCalendarAlt />
+                {date
+                  ? date
+                  : new Date().toLocaleDateString()}
+              </span>
+
+              <span className="flex items-center gap-2">
+                <FaUser />
+                {author || "Gramika Team"}
+              </span>
             </div>
           </div>
         </div>
+
 
         <article className="flex-1 bg-white/20 backdrop-blur-3xl shadow-xl border border-white/20 rounded-3xl p-10 leading-relaxed text-gray-900 space-y-8">
           {pageData.blocks.map((block) => {
@@ -230,13 +245,13 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
                 return <p className="text-md sm:text-lg text-gray-800" key={block.id}>{renderRichText(block.paragraph.rich_text)}</p>;
 
               case "heading_1":
-                return <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-900 drop-shadow-md" key={block.id}>{block.heading_1.rich_text.map(t => t.plain_text).join("")}</h1>;
+                return <h1 className="text-lg sm:text-4xl font-extrabold text-gray-900 drop-shadow-md" key={block.id}>{block.heading_1.rich_text.map(t => t.plain_text).join("")}</h1>;
 
               case "heading_2":
-                return <h2 className="text-xl sm:text-3xl font-bold text-gray-900 border-l-4 border-blue-400 pl-4" key={block.id}>{block.heading_2.rich_text.map(t => t.plain_text).join("")}</h2>;
+                return <h2 className="text-md sm:text-3xl font-bold text-gray-900 border-l-4 border-blue-400 pl-4" key={block.id}>{block.heading_2.rich_text.map(t => t.plain_text).join("")}</h2>;
 
               case "heading_3":
-                return <h3 className="text-md sm:text-2xl font-semibold text-gray-800" key={block.id}>{block.heading_3.rich_text.map(t => t.plain_text).join("")}</h3>;
+                return <h3 className="text-sm sm:text-2xl font-semibold text-gray-800" key={block.id}>{block.heading_3.rich_text.map(t => t.plain_text).join("")}</h3>;
 
               case "bulleted_list_item":
                 return <ul className="list-disc list-inside text-gray-700 space-y-1" key={block.id}><li>{block.bulleted_list_item.rich_text.map(t => t.plain_text).join("")}</li></ul>;
