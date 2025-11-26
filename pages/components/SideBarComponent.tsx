@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import AdOne from "./AdFirstComponent";
 import AdTwo from "./AdSecondComponent";
+import DoctorsAvailable from "./DoctorsAvailableComponent";
+import Obituaries from "./ObituariesComponent";
 
 interface NewsItem {
   date: string; // "2025-11-15"
@@ -22,25 +24,22 @@ const Sidebar = () => {
 
   // Loader component
   const renderLoader = () => (
-    <div className="flex flex-col justify-start w-full bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-lg p-4 gap-4 animate-pulse">
+    <div className="flex flex-col justify-start w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-6 gap-6 animate-pulse">
       {/* Header */}
-      <div className="w-full flex justify-center">
-        <div className="bg-gradient-to-tr from-white/20 via-white/10 to-white/20 backdrop-blur-md rounded-xl py-4 px-4 w-full h-16 sm:h-20 md:h-24"></div>
-      </div>
-
-      {/* Date placeholders */}
-      <div className="w-full flex justify-end items-center gap-2">
-        <div className="w-10 h-8 bg-white/20 backdrop-blur-md rounded-full shadow"></div>
-        <div className="w-28 sm:w-32 h-8 bg-white/20 backdrop-blur-md rounded-full shadow"></div>
+      <div className="w-full flex justify-between items-center border-b border-gray-100 pb-6">
+        <div className="h-8 bg-gray-200 rounded-lg w-1/3"></div>
+        <div className="h-3 w-3 bg-red-200 rounded-full"></div>
       </div>
 
       {/* Content placeholders */}
-      <div className="w-full flex flex-col gap-2">
-        <div className="h-6 bg-white/20 rounded w-3/4"></div>
-        <div className="h-6 bg-white/20 rounded w-full"></div>
-        <div className="h-6 bg-white/20 rounded w-5/6"></div>
-        <div className="h-4 bg-white/20 rounded w-full"></div>
-        <div className="h-4 bg-white/20 rounded w-11/12"></div>
+      <div className="w-full flex flex-col gap-4">
+        <div className="flex gap-4">
+          <div className="w-16 h-16 bg-gray-200 rounded-2xl flex-shrink-0"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -60,45 +59,44 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full lg:w-1/4 h-full gap-6 px-0 sm:px-4 lg:px-8">
+    <div className="flex flex-col items-center justify-start w-full lg:w-[35%] h-full gap-8 mt-8 lg:mt-0">
       <AdOne />
 
-      {/* News Card or Loader */}
-      {news ? (
-        <div className="flex flex-col justify-start w-full bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-lg p-4 gap-4">
-          {/* Header */}
-          <div className="w-full flex justify-center">
-            <h3 className="bg-gradient-to-tr from-blue-200 to-purple-200 backdrop-blur-md rounded-xl py-4 px-4 text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 w-full text-center">
-              Latest News
-            </h3>
-          </div>
-
-          {/* Right-aligned Date */}
-          <div className="w-full flex justify-end items-center gap-2">
-            <div className="relative w-10 h-8 bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-gray-900 font-bold shadow transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
-              {day}
-            </div>
-            <div className="relative w-28 sm:w-32 h-8 bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-gray-900 font-bold text-sm shadow p-2 transform transition-all duration-300 hover:scale-105 hover:shadow-lg overflow-hidden">
-              {month} {year}
-            </div>
-          </div>
-
-          {/* Content Section */}
-          <div className="w-full flex flex-col gap-2">
-            <h4 className="text-gray-900 font-bold text-lg sm:text-xl leading-snug line-clamp-3 p-2">
-              {news.heading}
-            </h4>
-            <hr className="border-black/20 my-1" />
-            <p className="text-gray-700 text-md sm:text-lg leading-relaxed p-2 whitespace-pre-line">
-              {news.content}
-            </p>
-          </div>
+      {/* News Widget */}
+      <div className="w-full bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden sticky top-24 z-30">
+        <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+          <h3 className="font-black text-xl text-gray-900">Latest News</h3>
+          <span className="flex h-3 w-3 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          </span>
         </div>
-      ) : (
-        renderLoader()
-      )}
+
+        {news ? (
+          <div className="p-6 flex flex-col gap-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl text-blue-600">
+                <span className="text-xl font-black">{day}</span>
+                <span className="text-xs font-bold uppercase">{month}</span>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2">
+                  {news.heading}
+                </h4>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {news.content}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          renderLoader()
+        )}
+      </div>
 
       <AdTwo />
+      <DoctorsAvailable />
+      <Obituaries />
     </div>
   );
 };
