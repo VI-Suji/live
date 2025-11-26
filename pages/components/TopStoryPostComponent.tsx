@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { FaCalendarAlt, FaUser } from "react-icons/fa";
+import { getDirectImageUrl } from "../../utils/imageUtils";
 
 // ------------------- TYPES -------------------
 
@@ -199,8 +200,9 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
   }
 
   const firstImage = pageData.blocks.find((b): b is ImageBlock => b.type === "image");
-  const imageUrl =
+  const rawImageUrl =
     firstImage?.image.type === "external" ? firstImage.image.external.url : firstImage?.image.file.url ?? "https://images.unsplash.com/photo-1522199710521-72d69614c702?w=1600&q=80";
+  const imageUrl = getDirectImageUrl(rawImageUrl);
 
   return (
     <div className="min-h-screen bg-[#f8f8f8] text-gray-900 relative">
@@ -269,7 +271,8 @@ export default function BlogPost({ pageId, author, date }: BlogPostProps) {
                 return <hr className="border-gray-300 my-8" key={block.id} />;
 
               case "image":
-                const url = block.image.type === "external" ? block.image.external.url : block.image.file.url;
+                const rawBlockUrl = block.image.type === "external" ? block.image.external.url : block.image.file.url;
+                const url = getDirectImageUrl(rawBlockUrl);
                 return <img key={block.id} src={url} alt="Notion Image" className="relative w-full rounded-2xl overflow-hidden shadow-lg hover:scale-102 transform transition-all duration-300" />;
               case "callout":
                 return (

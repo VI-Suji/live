@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Client } from "@notionhq/client";
 import { BlockObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { getDirectImageUrl } from "../../utils/imageUtils";
 
 // Initialize Notion client
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
@@ -71,7 +72,8 @@ export default async function handler(
               break;
             case "img":
               // remove HTML tags if present
-              post.img = kv.value.replace(/<[^>]+>/g, "");
+              const rawUrl = kv.value.replace(/<[^>]+>/g, "");
+              post.img = getDirectImageUrl(rawUrl);
               break;
             case "text":
               post.text = kv.value;
