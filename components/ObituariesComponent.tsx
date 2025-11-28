@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { FiUser } from "react-icons/fi";
 
 const Obituaries = () => {
     const [obituaries, setObituaries] = useState<any[]>([]);
@@ -56,8 +57,8 @@ const Obituaries = () => {
                                             className="object-cover"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
-                                            No Img
+                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                            <FiUser className="w-10 h-10 text-gray-300" />
                                         </div>
                                     )}
                                 </div>

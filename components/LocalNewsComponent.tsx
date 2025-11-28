@@ -70,7 +70,7 @@ const LocalNews = () => {
                                 <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors mb-2 sm:mb-3">
                                     {news.title}
                                 </h3>
-                                <p className="text-sm sm:text-base text-gray-500 line-clamp-3 sm:line-clamp-4 mb-2 sm:mb-4">
+                                <p className="text-sm sm:text-base text-gray-500 mb-2 sm:mb-4">
                                     {news.description || "സംഭവത്തിന്റെ വിശദമായ കവറേജ്, പ്രധാന വ്യക്തികളുമായുള്ള അഭിമുഖങ്ങൾ, ചടങ്ങിൽ പങ്കെടുത്ത പ്രാദേശിക നിവാസികൾ എന്നിവ ഉൾപ്പെടുന്നു."}
                                 </p>
                             </div>

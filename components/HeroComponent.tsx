@@ -1,5 +1,5 @@
 import React from "react";
-import { FiArrowRight, FiPlay } from "react-icons/fi";
+import { FiArrowRight } from "react-icons/fi";
 
 interface Props {
     onReadMore: () => void;
@@ -11,8 +11,7 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
         welcomeMessage: "ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!",
         tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
         description: "നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.",
-        ctaButtonText: "Explore Now",
-        secondaryButtonText: "Watch Live"
+        ctaButtonText: "Explore Now"
     });
 
     React.useEffect(() => {
@@ -27,8 +26,7 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
                             welcomeMessage: data.welcomeMessage || "ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!",
                             tagline: data.tagline || "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
                             description: data.description || "നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.",
-                            ctaButtonText: data.ctaButtonText || "Explore Now",
-                            secondaryButtonText: data.secondaryButtonText || "Watch Live"
+                            ctaButtonText: data.ctaButtonText || "Explore Now"
                         });
                     }
                 }
@@ -67,15 +65,7 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
                     {heroData.ctaButtonText}
                     <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </button>
-                <button
-                    onClick={() => document.getElementById('live-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="group flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-900 border border-gray-200 rounded-2xl font-bold text-base sm:text-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 w-full sm:w-auto"
-                >
-                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                        <FiPlay className="text-red-600 text-sm ml-0.5" />
-                    </div>
-                    {heroData.secondaryButtonText}
-                </button>
+
             </div>
         </div>
     );

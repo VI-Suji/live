@@ -13,16 +13,7 @@ export default function LiveNow({ channelId }: LiveNowProps) {
     return (
         <div id="live-section" className="w-full max-w-3xl mx-auto">
             <div className="relative rounded-3xl overflow-hidden shadow-xl bg-black border border-gray-200 aspect-video group">
-                {/* Status Bar */}
-                <div className="absolute top-4 left-4 z-30 flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600 rounded-full shadow-lg">
-                        <span className="relative flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                        </span>
-                        <span className="text-white text-xs font-bold uppercase tracking-wider">Live Now</span>
-                    </div>
-                </div>
+
 
                 {/* Fallback & Iframe */}
                 <div className="absolute inset-0 bg-gray-900">

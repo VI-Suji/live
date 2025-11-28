@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
 import BreakingNewsTicker from "./BreakingNewsTicker";
@@ -105,6 +106,37 @@ const Header: React.FC = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    // Scroll Spy Logic
+    useEffect(() => {
+        const handleScrollSpy = () => {
+            const scrollPosition = window.scrollY + 150; // Offset for header height
+
+            // Create a copy of menu items and reverse it to check from bottom up
+            // This ensures nested or overlapping sections are handled correctly (most specific first)
+            const items = [...menuItems].reverse();
+
+            for (const item of items) {
+                const section = document.getElementById(item.target);
+                if (section) {
+                    const { offsetTop, offsetHeight } = section;
+                    if (
+                        scrollPosition >= offsetTop &&
+                        scrollPosition < offsetTop + offsetHeight
+                    ) {
+                        setActiveSection(item.target);
+                        break;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener("scroll", handleScrollSpy);
+        // Call once on mount/update to set initial state
+        handleScrollSpy();
+
+        return () => window.removeEventListener("scroll", handleScrollSpy);
+    }, [menuItems]);
+
     // Smooth scroll handler
     const scrollToSection = (targetId: string) => {
         const section = document.getElementById(targetId);
@@ -138,9 +170,18 @@ const Header: React.FC = () => {
                         <div className="flex items-center justify-between">
                             {/* Logo */}
                             <div
-                                className="cursor-pointer z-50 relative"
+                                className="cursor-pointer z-50 relative flex items-center gap-3"
                                 onClick={() => scrollToSection("home")}
                             >
+                                <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                                    <Image
+                                        src="/gramika.png"
+                                        alt="Gramika Logo"
+                                        fill
+                                        className="object-contain"
+                                        priority
+                                    />
+                                </div>
                                 <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight transition-colors duration-300 ${isScrolled || mobileMenuOpen ? "text-gray-900" : "text-gray-900"
                                     }`}>
                                     ഗ്രാമിക

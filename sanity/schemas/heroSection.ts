@@ -32,12 +32,6 @@ export default {
             type: 'string',
             initialValue: 'Start Reading',
         },
-        {
-            name: 'secondaryButtonText',
-            title: 'Secondary Button Text',
-            type: 'string',
-            initialValue: 'Watch Live',
-        },
     ],
     preview: {
         select: {

@@ -11,7 +11,6 @@ type HeroSection = {
     tagline?: string;
     description?: string;
     ctaButtonText?: string;
-    secondaryButtonText?: string;
 };
 
 export default function HeroSectionAdmin() {
@@ -26,7 +25,6 @@ export default function HeroSectionAdmin() {
         tagline: "",
         description: "",
         ctaButtonText: "",
-        secondaryButtonText: "",
     });
 
     useEffect(() => {
@@ -50,7 +48,6 @@ export default function HeroSectionAdmin() {
                     tagline: data.tagline || "",
                     description: data.description || "",
                     ctaButtonText: data.ctaButtonText || "",
-                    secondaryButtonText: data.secondaryButtonText || "",
                 });
             }
         } catch (error) {
@@ -82,7 +79,6 @@ export default function HeroSectionAdmin() {
                     tagline: responseData.tagline || "",
                     description: responseData.description || "",
                     ctaButtonText: responseData.ctaButtonText || "",
-                    secondaryButtonText: responseData.secondaryButtonText || "",
                 });
                 setMessage({ type: 'success', text: '✅ Hero section updated successfully!' });
                 setTimeout(() => setMessage(null), 3000);
@@ -157,24 +153,16 @@ export default function HeroSectionAdmin() {
                                 placeholder="Brief description of your website..."
                             />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormInput
-                                    label="CTA Button Text"
-                                    optional
-                                    type="text"
-                                    value={formData.ctaButtonText}
-                                    onChange={(e) => setFormData({ ...formData, ctaButtonText: e.target.value })}
-                                    placeholder="e.g. Explore Stories"
-                                />
-                                <FormInput
-                                    label="Secondary Button Text"
-                                    optional
-                                    type="text"
-                                    value={formData.secondaryButtonText}
-                                    onChange={(e) => setFormData({ ...formData, secondaryButtonText: e.target.value })}
-                                    placeholder="e.g. Learn More"
-                                />
-                            </div>
+                            <FormInput
+                                label="CTA Button Text"
+                                optional
+                                type="text"
+                                value={formData.ctaButtonText}
+                                onChange={(e) => setFormData({ ...formData, ctaButtonText: e.target.value })}
+                                placeholder="e.g. Explore Stories"
+                            />
+
+
 
                             <Button
                                 type="submit"
@@ -189,6 +177,6 @@ export default function HeroSectionAdmin() {
                     )}
                 </AdminCard>
             </AdminLayout>
-        </AdminAuthGuard>
+        </AdminAuthGuard >
     );
 }

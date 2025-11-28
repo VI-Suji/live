@@ -48,27 +48,28 @@ const MainSection: React.FC = () => {
         <main className="w-full min-h-screen pt-36 sm:pt-40 lg:pt-32">{/* Adjusted mobile padding */}
             {/* Hero Section - Light with subtle gradient */}
             <section
-                id="home"
                 className="relative bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden"
             >
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 lg:py-16 flex flex-col lg:flex-row items-start justify-center gap-6 sm:gap-8">
                     <div className="flex flex-col gap-8 sm:gap-10 w-full lg:w-[65%]">
-                        {siteSettings.heroSectionVisible && (
-                            <Hero onReadMore={handleScrollToTopStories} />
-                        )}
+                        <div id="home" className="flex flex-col gap-8 sm:gap-10">
+                            {siteSettings.heroSectionVisible && (
+                                <Hero onReadMore={handleScrollToTopStories} />
+                            )}
 
-                        {/* Live Section with Card Style */}
-                        {siteSettings.liveStreamVisible && (
-                            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-100">
-                                <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                                    <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
-                                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900">
-                                        Live Now
-                                    </h2>
+                            {/* Live Section with Card Style */}
+                            {siteSettings.liveStreamVisible && (
+                                <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-100">
+                                    <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                                        <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+                                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900">
+                                            Live Now
+                                        </h2>
+                                    </div>
+                                    <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
                                 </div>
-                                <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Local News Section */}
                         <section
