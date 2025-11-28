@@ -189,7 +189,7 @@ const Header: React.FC = () => {
 
                 {/* Live Date & Time */}
                 <div className={`transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-xl shadow-sm" : "bg-white/95 backdrop-blur-md"} border-b border-white/20`}>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+                    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1 sm:py-2">
                         <LiveDateTime />
                     </div>
                 </div>
