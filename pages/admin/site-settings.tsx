@@ -113,88 +113,98 @@ export default function SiteSettingsAdmin() {
                                 <h3 className="text-lg font-bold text-gray-900 mb-4">Section Visibility</h3>
 
                                 {/* Live Stream */}
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200 gap-4">
                                     <div className="flex-1">
-                                        <label htmlFor="liveStream" className="font-bold text-gray-900 cursor-pointer">
+                                        <label htmlFor="liveStream" className="font-bold text-gray-900 cursor-pointer block">
                                             Live Stream Section
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">Show/hide the YouTube live stream on homepage</p>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        id="liveStream"
-                                        checked={formData.liveStreamVisible}
-                                        onChange={(e) => setFormData({ ...formData, liveStreamVisible: e.target.checked })}
-                                        className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center justify-end w-full sm:w-auto">
+                                        <input
+                                            type="checkbox"
+                                            id="liveStream"
+                                            checked={formData.liveStreamVisible}
+                                            onChange={(e) => setFormData({ ...formData, liveStreamVisible: e.target.checked })}
+                                            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Hero Section */}
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200 gap-4">
                                     <div className="flex-1">
-                                        <label htmlFor="heroSection" className="font-bold text-gray-900 cursor-pointer">
+                                        <label htmlFor="heroSection" className="font-bold text-gray-900 cursor-pointer block">
                                             Hero Section
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">Show/hide the hero section on homepage</p>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        id="heroSection"
-                                        checked={formData.heroSectionVisible}
-                                        onChange={(e) => setFormData({ ...formData, heroSectionVisible: e.target.checked })}
-                                        className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center justify-end w-full sm:w-auto">
+                                        <input
+                                            type="checkbox"
+                                            id="heroSection"
+                                            checked={formData.heroSectionVisible}
+                                            onChange={(e) => setFormData({ ...formData, heroSectionVisible: e.target.checked })}
+                                            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Advertisements */}
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200 gap-4">
                                     <div className="flex-1">
-                                        <label htmlFor="advertisements" className="font-bold text-gray-900 cursor-pointer">
+                                        <label htmlFor="advertisements" className="font-bold text-gray-900 cursor-pointer block">
                                             Advertisements
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">Show/hide all advertisements on the site</p>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        id="advertisements"
-                                        checked={formData.advertisementsVisible}
-                                        onChange={(e) => setFormData({ ...formData, advertisementsVisible: e.target.checked })}
-                                        className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center justify-end w-full sm:w-auto">
+                                        <input
+                                            type="checkbox"
+                                            id="advertisements"
+                                            checked={formData.advertisementsVisible}
+                                            onChange={(e) => setFormData({ ...formData, advertisementsVisible: e.target.checked })}
+                                            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Latest News */}
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200 gap-4">
                                     <div className="flex-1">
-                                        <label htmlFor="latestNews" className="font-bold text-gray-900 cursor-pointer">
+                                        <label htmlFor="latestNews" className="font-bold text-gray-900 cursor-pointer block">
                                             Latest News Widget
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">Show/hide the latest news widget on homepage</p>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        id="latestNews"
-                                        checked={formData.latestNewsVisible}
-                                        onChange={(e) => setFormData({ ...formData, latestNewsVisible: e.target.checked })}
-                                        className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center justify-end w-full sm:w-auto">
+                                        <input
+                                            type="checkbox"
+                                            id="latestNews"
+                                            checked={formData.latestNewsVisible}
+                                            onChange={(e) => setFormData({ ...formData, latestNewsVisible: e.target.checked })}
+                                            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Top Stories */}
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200 gap-4">
                                     <div className="flex-1">
-                                        <label htmlFor="topStories" className="font-bold text-gray-900 cursor-pointer">
+                                        <label htmlFor="topStories" className="font-bold text-gray-900 cursor-pointer block">
                                             Top Stories Section
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">Show/hide the top stories section on homepage</p>
                                     </div>
-                                    <input
-                                        type="checkbox"
-                                        id="topStories"
-                                        checked={formData.topStoriesVisible}
-                                        onChange={(e) => setFormData({ ...formData, topStoriesVisible: e.target.checked })}
-                                        className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <div className="flex items-center justify-end w-full sm:w-auto">
+                                        <input
+                                            type="checkbox"
+                                            id="topStories"
+                                            checked={formData.topStoriesVisible}
+                                            onChange={(e) => setFormData({ ...formData, topStoriesVisible: e.target.checked })}
+                                            className="w-6 h-6 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

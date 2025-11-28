@@ -186,9 +186,11 @@ export default function BreakingNewsAdmin() {
                                         expiryDate: "",
                                     });
                                 }}
-                                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
                             >
-                                <FaPlus /> <span>Add Breaking News</span>
+                                <FaPlus />
+                                <span className="hidden sm:inline">Add Breaking News</span>
+                                <span className="sm:hidden">Add</span>
                             </button>
                         </div>
                     </div>
@@ -287,18 +289,18 @@ export default function BreakingNewsAdmin() {
                                         <label htmlFor="active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
 
-                                    <div className="flex gap-3 pt-4">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
                                             disabled={saving}
-                                            className="flex-1 bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-1"
                                         >
                                             {saving ? "Saving..." : "Save"}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowForm(false)}
-                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300"
+                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold hover:bg-gray-300 order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -325,7 +327,7 @@ export default function BreakingNewsAdmin() {
                                 {newsList.map((news) => (
                                     <div
                                         key={news._id}
-                                        className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                                        className="p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
                                         onClick={() => {
                                             setEditingItem(news);
                                             setFormData({
@@ -338,9 +340,9 @@ export default function BreakingNewsAdmin() {
                                             setShowForm(true);
                                         }}
                                     >
-                                        <div className="flex justify-between items-start gap-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                            <div className="flex-1 w-full">
+                                                <div className="flex flex-wrap items-center gap-3 mb-2">
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${news.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                                         {news.active ? 'Active' : 'Inactive'}
                                                     </span>
@@ -348,13 +350,13 @@ export default function BreakingNewsAdmin() {
                                                         Priority {news.priority}
                                                     </span>
                                                 </div>
-                                                <h3 className="font-bold text-lg text-gray-900 mb-2">{news.title}</h3>
+                                                <h3 className="font-bold text-lg text-gray-900 mb-2 break-words">{news.title}</h3>
                                                 {news.link && (
                                                     <a
                                                         href={news.link}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="text-sm text-blue-600 hover:underline block mb-2"
+                                                        className="text-sm text-blue-600 hover:underline block mb-2 break-all"
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         {news.link}
@@ -366,7 +368,7 @@ export default function BreakingNewsAdmin() {
                                                     </p>
                                                 )}
                                             </div>
-                                            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                                 <button
                                                     onClick={() => {
                                                         setEditingItem(news);
@@ -380,12 +382,14 @@ export default function BreakingNewsAdmin() {
                                                         setShowForm(true);
                                                     }}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Edit"
                                                 >
                                                     <FaEdit size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(news._id)}
                                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Delete"
                                                 >
                                                     <FaTrash size={18} />
                                                 </button>

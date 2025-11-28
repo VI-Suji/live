@@ -45,7 +45,7 @@ const MainSection: React.FC = () => {
     };
 
     return (
-        <main className="w-full min-h-screen pt-32 sm:pt-28 lg:pt-32">{/* Increased mobile padding for header + ticker + date/time */}
+        <main className="w-full min-h-screen pt-44 sm:pt-40 lg:pt-32">{/* Increased mobile padding for header + ticker + date/time */}
             {/* Hero Section - Light with subtle gradient */}
             <section
                 id="home"

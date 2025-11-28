@@ -204,14 +204,14 @@ export default function TopStoriesAdmin() {
                                         {editingStory ? "Edit Story" : "Add New Story"}
                                     </h2>
                                 </div>
-                                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">
                                             Main Image *
                                         </label>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                             {(formData.mainImage || editingStory?.mainImage) && (
-                                                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
                                                         src={formData.mainImage?.previewUrl || (typeof formData.mainImage === 'string' ? formData.mainImage : editingStory?.mainImage || '')}
                                                         alt="Preview"
@@ -348,10 +348,10 @@ export default function TopStoriesAdmin() {
                                         </label>
                                     </div>
 
-                                    <div className="flex gap-3 pt-4">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
-                                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors order-1 sm:order-1"
                                         >
                                             {editingStory ? "Update Story" : "Create Story"}
                                         </button>
@@ -361,7 +361,7 @@ export default function TopStoriesAdmin() {
                                                 setShowForm(false);
                                                 setEditingStory(null);
                                             }}
-                                            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                                            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -395,28 +395,28 @@ export default function TopStoriesAdmin() {
                                     className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
                                     onClick={() => handleEdit(story)}
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <h3 className="text-xl font-bold text-gray-900">
+                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                                        <div className="flex-1 w-full">
+                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 break-words">
                                                     {story.title}
                                                 </h3>
                                                 {story.featured && (
-                                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded">
+                                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded flex-shrink-0">
                                                         FEATURED
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2 break-words">
                                                 {story.excerpt ? story.excerpt.replace(/<[^>]+>/g, '') : "No excerpt"}
                                             </p>
-                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm text-gray-500">
                                                 <span>By {story.author || "Unknown"}</span>
-                                                <span>•</span>
+                                                <span className="hidden sm:inline">•</span>
                                                 <span>{story.category || "Uncategorized"}</span>
                                                 {story.publishedAt && (
                                                     <>
-                                                        <span>•</span>
+                                                        <span className="hidden sm:inline">•</span>
                                                         <span>
                                                             {new Date(story.publishedAt).toLocaleDateString()}
                                                         </span>
@@ -424,20 +424,22 @@ export default function TopStoriesAdmin() {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => handleEdit(story)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                className="flex-1 sm:flex-none px-4 py-2 sm:p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-2"
                                                 title="Edit"
                                             >
                                                 <FaEdit />
+                                                <span className="sm:hidden text-sm font-medium">Edit</span>
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(story._id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                className="flex-1 sm:flex-none px-4 py-2 sm:p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-2"
                                                 title="Delete"
                                             >
                                                 <FaTrash />
+                                                <span className="sm:hidden text-sm font-medium">Delete</span>
                                             </button>
                                         </div>
                                     </div>

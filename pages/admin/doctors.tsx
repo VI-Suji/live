@@ -179,9 +179,11 @@ export default function DoctorsAdmin() {
                                         active: true,
                                     });
                                 }}
-                                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
                             >
-                                <FaPlus /> <span>Add Doctor</span>
+                                <FaPlus />
+                                <span className="hidden sm:inline">Add Doctor</span>
+                                <span className="sm:hidden">Add</span>
                             </button>
                         </div>
                     </div>
@@ -267,14 +269,14 @@ export default function DoctorsAdmin() {
                                         />
                                         <label htmlFor="doctor-active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button type="submit" className="flex-1 bg-red-600 text-white py-2 rounded-lg font-bold">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                                        <button type="submit" className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
                                             Save
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowForm(false)}
-                                            className="px-4 bg-gray-200 text-gray-700 py-2 rounded-lg font-bold"
+                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -288,7 +290,7 @@ export default function DoctorsAdmin() {
                         {doctors.map((doc) => (
                             <div
                                 key={doc._id}
-                                className="bg-white p-6 rounded-xl border border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                                className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-gray-50 transition-colors gap-4"
                                 onClick={() => {
                                     setEditingItem(doc);
                                     setFormData({
@@ -303,17 +305,17 @@ export default function DoctorsAdmin() {
                                     setShowForm(true);
                                 }}
                             >
-                                <div>
-                                    <h3 className="font-bold text-lg text-gray-900">{doc.name}</h3>
-                                    <p className="text-gray-700 font-medium">{doc.specialization}</p>
-                                    <p className="text-sm text-gray-600">{doc.hospital}</p>
-                                    <p className="text-xs mt-1">
+                                <div className="flex-1 w-full">
+                                    <h3 className="font-bold text-lg text-gray-900 break-words">{doc.name}</h3>
+                                    <p className="text-gray-700 font-medium break-words">{doc.specialization}</p>
+                                    <p className="text-sm text-gray-600 break-words">{doc.hospital}</p>
+                                    <p className="text-xs mt-2">
                                         <span className={`px-2 py-1 rounded ${doc.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                             {doc.active ? 'Active' : 'Inactive'}
                                         </span>
                                     </p>
                                 </div>
-                                <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                     {/* Active Toggle */}
                                     <button
                                         onClick={() => handleToggleActive(doc)}

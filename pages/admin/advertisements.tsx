@@ -168,9 +168,11 @@ export default function AdvertisementsAdmin() {
                                         endDate: "",
                                     });
                                 }}
-                                className="flex items-center gap-2 px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
                             >
-                                <FaPlus /> <span>Add Ad</span>
+                                <FaPlus />
+                                <span className="hidden sm:inline">Add Ad</span>
+                                <span className="sm:hidden">Add</span>
                             </button>
                         </div>
                     </div>
@@ -209,7 +211,7 @@ export default function AdvertisementsAdmin() {
                                             </div>
                                         )}
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-bold text-gray-700 mb-2">Upload Image</label>
                                                 <input
@@ -327,7 +329,7 @@ export default function AdvertisementsAdmin() {
                                             placeholder="https://example.com"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-bold mb-2 text-gray-900">Start Date</label>
                                             <input
@@ -357,18 +359,18 @@ export default function AdvertisementsAdmin() {
                                         />
                                         <label htmlFor="ad-active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
-                                    <div className="flex gap-3 pt-4">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
                                             disabled={saving}
-                                            className="flex-1 bg-pink-600 text-white py-2 rounded-lg font-bold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 bg-pink-600 text-white py-3 rounded-xl font-bold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-1"
                                         >
                                             {saving ? "Saving..." : "Save"}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowForm(false)}
-                                            className="px-4 bg-gray-200 text-gray-700 py-2 rounded-lg font-bold"
+                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -382,7 +384,7 @@ export default function AdvertisementsAdmin() {
                         {ads.map((ad) => (
                             <div
                                 key={ad._id}
-                                className="bg-white p-6 rounded-xl border border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                                className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-gray-50 transition-colors gap-4"
                                 onClick={() => {
                                     setEditingItem(ad);
                                     setFormData({
@@ -396,20 +398,20 @@ export default function AdvertisementsAdmin() {
                                     setShowForm(true);
                                 }}
                             >
-                                <div>
-                                    <h3 className="font-bold text-lg text-gray-900">{ad.title}</h3>
-                                    <p className="text-gray-700 text-sm font-medium">Position: {ad.position}</p>
-                                    <p className="text-sm text-gray-600">
+                                <div className="flex-1 w-full">
+                                    <h3 className="font-bold text-lg text-gray-900 break-words">{ad.title}</h3>
+                                    <p className="text-gray-700 text-sm font-medium break-words">Position: {ad.position}</p>
+                                    <p className="text-sm text-gray-600 break-words">
                                         {ad.startDate ? new Date(ad.startDate).toLocaleDateString() : 'No start'} -
                                         {ad.endDate ? new Date(ad.endDate).toLocaleDateString() : 'No end'}
                                     </p>
-                                    <p className="text-xs mt-1">
+                                    <p className="text-xs mt-2">
                                         <span className={`px-2 py-1 rounded ${ad.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                             {ad.active ? 'Active' : 'Inactive'}
                                         </span>
                                     </p>
                                 </div>
-                                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         onClick={() => {
                                             setEditingItem(ad);
@@ -424,12 +426,14 @@ export default function AdvertisementsAdmin() {
                                             setShowForm(true);
                                         }}
                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                                        title="Edit"
                                     >
                                         <FaEdit />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(ad._id)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                        title="Delete"
                                     >
                                         <FaTrash />
                                     </button>

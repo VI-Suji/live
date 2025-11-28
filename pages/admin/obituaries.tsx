@@ -151,9 +151,11 @@ export default function ObituariesAdmin() {
                                         active: true,
                                     });
                                 }}
-                                className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors"
                             >
-                                <FaPlus /> <span>Add Obituary</span>
+                                <FaPlus />
+                                <span className="hidden sm:inline">Add Obituary</span>
+                                <span className="sm:hidden">Add</span>
                             </button>
                         </div>
                     </div>
@@ -167,9 +169,9 @@ export default function ObituariesAdmin() {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Photo *</label>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                             {(formData.photo || (editingItem as any)?.photo) && (
-                                                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
                                                         src={typeof formData.photo === 'string' ? formData.photo : (editingItem as any)?.photo || ''}
                                                         alt="Preview"
@@ -277,14 +279,14 @@ export default function ObituariesAdmin() {
                                         />
                                         <label htmlFor="obituary-active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button type="submit" className="flex-1 bg-gray-800 text-white py-2 rounded-lg font-bold">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                                        <button type="submit" className="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
                                             Save
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowForm(false)}
-                                            className="px-4 bg-gray-200 text-gray-700 py-2 rounded-lg font-bold"
+                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -298,7 +300,7 @@ export default function ObituariesAdmin() {
                         {obituaries.map((item) => (
                             <div
                                 key={item._id}
-                                className="bg-white p-6 rounded-xl border border-gray-200 flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+                                className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-gray-50 transition-colors gap-4"
                                 onClick={() => {
                                     setEditingItem(item);
                                     setFormData({
@@ -312,17 +314,17 @@ export default function ObituariesAdmin() {
                                     setShowForm(true);
                                 }}
                             >
-                                <div>
-                                    <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
-                                    <p className="text-gray-700 font-medium">{item.place} • {item.age} years</p>
-                                    <p className="text-sm text-gray-600">Died: {new Date(item.dateOfDeath).toLocaleDateString()}</p>
-                                    <p className="text-xs mt-1">
+                                <div className="flex-1 w-full">
+                                    <h3 className="font-bold text-lg text-gray-900 break-words">{item.name}</h3>
+                                    <p className="text-gray-700 font-medium break-words">{item.place} • {item.age} years</p>
+                                    <p className="text-sm text-gray-600 break-words">Died: {new Date(item.dateOfDeath).toLocaleDateString()}</p>
+                                    <p className="text-xs mt-2">
                                         <span className={`px-2 py-1 rounded ${item.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                             {item.active ? 'Active' : 'Inactive'}
                                         </span>
                                     </p>
                                 </div>
-                                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                     <button
                                         onClick={() => {
                                             setEditingItem(item);
@@ -337,12 +339,14 @@ export default function ObituariesAdmin() {
                                             setShowForm(true);
                                         }}
                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                                        title="Edit"
                                     >
                                         <FaEdit />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(item._id)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                        title="Delete"
                                     >
                                         <FaTrash />
                                     </button>

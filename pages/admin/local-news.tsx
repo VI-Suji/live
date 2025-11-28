@@ -136,9 +136,11 @@ export default function LocalNewsAdmin() {
                                     setEditingItem(null);
                                     setFormData({ title: "", description: "", order: news.length + 1 });
                                 }}
-                                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-md transition-all hover:scale-105"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-md transition-all hover:scale-105"
                             >
-                                <FaPlus /> <span>Add News</span>
+                                <FaPlus />
+                                <span className="hidden sm:inline">Add News</span>
+                                <span className="sm:hidden">Add</span>
                             </button>
                         </div>
                     </div>
@@ -152,9 +154,9 @@ export default function LocalNewsAdmin() {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Image *</label>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                             {(formData.image || editingItem?.image) && (
-                                                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
+                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
                                                         src={typeof formData.image === 'string' ? formData.image : editingItem?.image || ''}
                                                         alt="Preview"
@@ -231,14 +233,14 @@ export default function LocalNewsAdmin() {
                                             placeholder="1"
                                         />
                                     </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button type="submit" className="flex-1 bg-green-600 text-white py-2 rounded-lg font-bold">
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                                        <button type="submit" className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
                                             Save
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setShowForm(false)}
-                                            className="px-4 bg-gray-200 text-gray-700 py-2 rounded-lg font-bold"
+                                            className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold order-2 sm:order-2"
                                         >
                                             Cancel
                                         </button>
@@ -265,7 +267,7 @@ export default function LocalNewsAdmin() {
                                 {news.map((item) => (
                                     <div
                                         key={item._id}
-                                        className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                                        className="p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
                                         onClick={() => {
                                             setEditingItem(item);
                                             setFormData({
@@ -276,17 +278,17 @@ export default function LocalNewsAdmin() {
                                             setShowForm(true);
                                         }}
                                     >
-                                        <div className="flex justify-between items-start gap-4">
-                                            <div className="flex-1">
-                                                <h3 className="font-bold text-lg text-gray-900 mb-2">{item.title}</h3>
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                            <div className="flex-1 w-full">
+                                                <h3 className="font-bold text-lg text-gray-900 mb-2 break-words">{item.title}</h3>
                                                 {item.description && (
-                                                    <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                                                    <p className="text-gray-600 text-sm mb-2 break-words">{item.description}</p>
                                                 )}
                                                 <div className="text-xs text-gray-500">
                                                     <span>Order: {item.order}</span>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
                                                 <button
                                                     onClick={() => {
                                                         setEditingItem(item);
@@ -298,12 +300,14 @@ export default function LocalNewsAdmin() {
                                                         setShowForm(true);
                                                     }}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="Edit"
                                                 >
                                                     <FaEdit size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(item._id)}
                                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Delete"
                                                 >
                                                     <FaTrash size={18} />
                                                 </button>
