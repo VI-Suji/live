@@ -123,13 +123,31 @@ export default function TopStories() {
                     >
                         {/* Image Background */}
                         <div className="absolute inset-0">
-                            <Image
-                                src={post.mainImage || "https://images.unsplash.com/photo-1522199710521-72d69614c702?w=1600&q=80"}
-                                alt={post.title}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
+                            {post.mainImage ? (
+                                <>
+                                    <Image
+                                        src={post.mainImage}
+                                        alt={post.title}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
+                                </>
+                            ) : (
+                                <>
+                                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-gray-800" />
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                        <Image
+                                            src="/gramika.png"
+                                            alt="Gramika"
+                                            width={200}
+                                            height={200}
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
+                                </>
+                            )}
                         </div>
 
                         {/* Content */}

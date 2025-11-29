@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import AdOne from "./AdFirstComponent";
 import AdTwo from "./AdSecondComponent";
+import BannerAd from "./BannerAdComponent";
 import DoctorsAvailable from "./DoctorsAvailableComponent";
 import Obituaries from "./ObituariesComponent";
+import LocalNews from "./LocalNewsComponent";
 
 interface NewsItem {
   date: string; // "2025-11-15"
@@ -77,7 +79,9 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
     <div className="flex flex-col items-center justify-start w-full lg:w-[35%] h-full gap-8 mt-8 lg:mt-0">
       {showAds && <AdOne />}
 
-      {/* News Widget */}
+
+
+      {/* Latest News Widget - Now Second */}
       {showNews && (
         <div className="w-full bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden sticky top-24 z-30">
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
@@ -115,7 +119,22 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         </div>
       )}
 
+
+
       {showAds && <AdTwo />}
+
+      {/* Local News Widget - Mobile Only (Swapped with Latest News) */}
+      <div className="w-full lg:hidden">
+        <LocalNews />
+      </div>
+
+      {/* Banner Ad - Between Local News and Doctors - Mobile Only */}
+      {showAds && (
+        <div className="w-full lg:hidden">
+          <BannerAd />
+        </div>
+      )}
+
       <DoctorsAvailable />
       <Obituaries />
     </div>

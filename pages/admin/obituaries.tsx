@@ -173,7 +173,7 @@ export default function ObituariesAdmin() {
                                             {(formData.photo || (editingItem as any)?.photo) && (
                                                 <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
-                                                        src={typeof formData.photo === 'string' ? formData.photo : (editingItem as any)?.photo || ''}
+                                                        src={formData.photo?.previewUrl || (editingItem as any)?.photo || ''}
                                                         alt="Preview"
                                                         className="w-full h-full object-cover"
                                                     />
@@ -204,6 +204,7 @@ export default function ObituariesAdmin() {
                                                                         _type: "reference",
                                                                         _ref: asset._id,
                                                                     },
+                                                                    previewUrl: asset.url, // Store URL for preview
                                                                 } as any,
                                                             });
                                                         }

@@ -11,7 +11,7 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
         welcomeMessage: "ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!",
         tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
         description: "നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.",
-        ctaButtonText: "Explore Now"
+        ctaButtonText: "View Stories"
     });
 
     React.useEffect(() => {
@@ -26,7 +26,7 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
                             welcomeMessage: data.welcomeMessage || "ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!",
                             tagline: data.tagline || "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
                             description: data.description || "നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.",
-                            ctaButtonText: data.ctaButtonText || "Explore Now"
+                            ctaButtonText: data.ctaButtonText || "View Stories"
                         });
                     }
                 }

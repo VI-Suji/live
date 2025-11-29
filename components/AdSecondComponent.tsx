@@ -31,7 +31,7 @@ export default function AdTwo() {
 
     if (!ad || !ad.active) {
         return (
-            <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-100">
+            <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
                 <Image
                     src="/gramika.png"
                     alt="Gramika"
@@ -43,7 +43,7 @@ export default function AdTwo() {
     }
 
     return (
-        <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-100">
+        <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
             {ad.video ? (
                 <video
                     src={ad.video}

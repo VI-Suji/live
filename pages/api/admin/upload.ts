@@ -26,11 +26,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const form = new IncomingForm();
 
-    form.parse(req, async (err, fields, files) => {
-        if (err) {
-            console.error('Form parsing error:', err);
-            return res.status(500).json({ error: 'Error parsing form' });
-        }
+    try {
+        const { files } = await new Promise<{ fields: any; files: any }>((resolve, reject) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) reject(err);
+                resolve({ fields, files });
+            });
+        });
 
         // Handle both array and single file cases (formidable v3)
         const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
@@ -39,18 +41,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        try {
-            const fileStream = fs.createReadStream(uploadedFile.filepath);
-            const type = req.query.type === 'file' ? 'file' : 'image';
+        const fileStream = fs.createReadStream(uploadedFile.filepath);
+        const type = req.query.type === 'file' ? 'file' : 'image';
 
-            const asset = await sanityClient.assets.upload(type, fileStream, {
-                filename: uploadedFile.originalFilename || 'upload',
-            });
+        const asset = await sanityClient.assets.upload(type, fileStream, {
+            filename: uploadedFile.originalFilename || 'upload',
+        });
 
-            return res.status(200).json(asset);
-        } catch (uploadError) {
-            console.error('Upload error:', uploadError);
-            return res.status(500).json({ error: 'Upload failed' });
-        }
-    });
+        return res.status(200).json(asset);
+    } catch (error) {
+        console.error('Upload error:', error);
+        return res.status(500).json({ error: 'Upload failed' });
+    }
 }

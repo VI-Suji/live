@@ -31,6 +31,8 @@ export default function TopStoriesAdmin() {
     const [showForm, setShowForm] = useState(false);
     const [editingStory, setEditingStory] = useState<TopStory | null>(null);
 
+    const [isUploading, setIsUploading] = useState(false);
+
     // Form state
     const [formData, setFormData] = useState<{
         title: string;
@@ -87,6 +89,11 @@ export default function TopStoriesAdmin() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isUploading) {
+            alert("Please wait for images to finish uploading.");
+            return;
+        }
 
         const payload = {
             ...formData,
@@ -221,6 +228,7 @@ export default function TopStoriesAdmin() {
                                             )}
                                             <input
                                                 type="file"
+
                                                 accept="image/*"
                                                 onChange={async (e) => {
                                                     const file = e.target.files?.[0];
@@ -312,6 +320,8 @@ export default function TopStoriesAdmin() {
                                         onChange={(content: string) =>
                                             setFormData({ ...formData, excerpt: content })
                                         }
+                                        onUploadStart={() => setIsUploading(true)}
+                                        onUploadEnd={() => setIsUploading(false)}
                                     />
 
                                     <div>
@@ -351,9 +361,13 @@ export default function TopStoriesAdmin() {
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
-                                            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors order-1 sm:order-1"
+                                            disabled={isUploading}
+                                            className={`flex-1 px-6 py-3 text-white rounded-xl font-semibold transition-colors order-1 sm:order-1 ${isUploading
+                                                    ? "bg-gray-400 cursor-not-allowed"
+                                                    : "bg-blue-600 hover:bg-blue-700"
+                                                }`}
                                         >
-                                            {editingStory ? "Update Story" : "Create Story"}
+                                            {isUploading ? "Uploading Image..." : (editingStory ? "Update Story" : "Create Story")}
                                         </button>
                                         <button
                                             type="button"

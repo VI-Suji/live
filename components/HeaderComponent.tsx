@@ -157,79 +157,78 @@ const Header: React.FC = () => {
 
     return (
         <>
-            {/* Fixed Container for both Ticker and Header */}
-            <div className="fixed top-0 left-0 right-0 z-50 flex flex-col">
-                {/* Main Header */}
-                <header
-                    className={`relative w-full transition-all duration-300 ${isScrolled || mobileMenuOpen
-                        ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/20 py-3"
-                        : "bg-transparent py-5"
-                        }`}
-                >
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-between">
-                            {/* Logo */}
-                            <div
-                                className="cursor-pointer z-50 relative flex items-center gap-3"
-                                onClick={() => scrollToSection("home")}
-                            >
-                                <div className="relative w-10 h-10 sm:w-12 sm:h-12">
-                                    <Image
-                                        src="/gramika.png"
-                                        alt="Gramika Logo"
-                                        fill
-                                        className="object-contain"
-                                        priority
-                                    />
-                                </div>
-                                <h1 className={`text-2xl sm:text-3xl font-extrabold tracking-tight transition-colors duration-300 ${isScrolled || mobileMenuOpen ? "text-gray-900" : "text-gray-900"
-                                    }`}>
-                                    ഗ്രാമിക
-                                </h1>
+            {/* Fixed Main Header (Logo + Navigation Only) */}
+            <header
+                className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled || mobileMenuOpen
+                    ? "bg-white backdrop-blur-xl shadow-md border-b border-white/20 py-3"
+                    : "bg-white backdrop-blur-lg shadow-sm py-5"
+                    }`}
+            >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between">
+                        {/* Logo */}
+                        <div
+                            className="cursor-pointer z-50 relative flex items-center gap-3"
+                            onClick={() => scrollToSection("home")}
+                        >
+                            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                                <Image
+                                    src="/gramika.png"
+                                    alt="Gramika Logo"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
                             </div>
-
-                            {/* Desktop Navigation */}
-                            <nav className="hidden md:flex items-center gap-8">
-                                {menuItems.map((item) => (
-                                    <div key={item.label} className="relative">
-                                        <button
-                                            onClick={() => scrollToSection(item.target)}
-                                            className={`text-sm font-bold tracking-wide transition-colors duration-300 hover:text-blue-600 ${activeSection === item.target ? "text-blue-600" : "text-gray-600"
-                                                }`}
-                                        >
-                                            {item.label}
-                                        </button>
-                                        {activeSection === item.target && (
-                                            <motion.div
-                                                layoutId="underline"
-                                                className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-600"
-                                                initial={false}
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
-                            </nav>
-
-                            {/* Mobile Menu Button */}
-                            <button
-                                className="md:hidden z-50 p-2 text-gray-900 focus:outline-none"
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                aria-label="Toggle menu"
-                            >
-                                {mobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
-                            </button>
+                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+                                ഗ്രാമിക
+                            </h1>
                         </div>
-                    </div>
-                </header>
 
+                        {/* Desktop Navigation */}
+                        <nav className="hidden md:flex items-center gap-8">
+                            {menuItems.map((item) => (
+                                <div key={item.label} className="relative">
+                                    <button
+                                        onClick={() => scrollToSection(item.target)}
+                                        className={`text-sm font-bold tracking-wide transition-colors duration-300 hover:text-blue-600 ${activeSection === item.target ? "text-blue-600" : "text-gray-600"
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </button>
+                                    {activeSection === item.target && (
+                                        <motion.div
+                                            layoutId="underline"
+                                            className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-600"
+                                            initial={false}
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </nav>
+
+                        {/* Mobile Menu Button */}
+                        <button
+                            className="md:hidden z-50 p-2 text-gray-900 focus:outline-none"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            {mobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Scrollable Content Below Fixed Header */}
+            <div className="pt-20 sm:pt-24"> {/* Spacer for fixed header - adjusted for proper spacing */}
                 {/* Breaking News Ticker */}
-                <div className="relative z-[60]">
+                <div className="relative z-40 bg-white">
                     <BreakingNewsTicker />
                 </div>
 
                 {/* Live Date & Time */}
-                <div className={`transition-all duration-300 ${isScrolled ? "bg-white/80 backdrop-blur-xl shadow-sm" : "bg-white/95 backdrop-blur-md"} border-b border-white/20`}>
+                <div className="bg-white/95 backdrop-blur-md border-b border-gray-200">
                     <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1 sm:py-2">
                         <LiveDateTime />
                     </div>

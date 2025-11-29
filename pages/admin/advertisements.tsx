@@ -195,7 +195,7 @@ export default function AdvertisementsAdmin() {
                                                 {(formData.image || (editingItem as any)?.image) && (
                                                     <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-gray-300">
                                                         <img
-                                                            src={typeof formData.image === 'string' ? formData.image : (editingItem as any)?.image || ''}
+                                                            src={formData.image?.previewUrl || (editingItem as any)?.image || ''}
                                                             alt="Preview"
                                                             className="w-full h-full object-cover"
                                                         />
@@ -239,6 +239,7 @@ export default function AdvertisementsAdmin() {
                                                                             _type: "reference",
                                                                             _ref: asset._id,
                                                                         },
+                                                                        previewUrl: asset.url, // Store URL for preview
                                                                     } as any,
                                                                     video: undefined, // Clear video if image is uploaded
                                                                 });

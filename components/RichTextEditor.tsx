@@ -1,16 +1,158 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
 interface RichTextEditorProps {
     value: string;
     onChange: (content: string) => void;
+    onUploadStart?: () => void;
+    onUploadEnd?: () => void;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onUploadStart, onUploadEnd }) => {
     const quillRef = useRef<any>(null);
 
-    const modules = {
+    const imageHandler = React.useCallback(() => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files?.[0];
+            if (file) {
+                // Notify parent that upload started
+                if (onUploadStart) onUploadStart();
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Get quill instance
+                let quill = quillRef.current?.getEditor();
+                if (!quill) {
+                    if (onUploadEnd) onUploadEnd();
+                    return;
+                }
+
+                // Save current selection
+                const range = quill.getSelection(true);
+                if (!range) {
+                    if (onUploadEnd) onUploadEnd();
+                    return;
+                }
+
+                // Insert temporary loading text
+                const loadingText = "[Uploading...]";
+                const insertIndex = range.index;
+                quill.insertText(insertIndex, loadingText, { 'color': '#999', 'italic': true });
+
+                // Move cursor after loading text
+                quill.setSelection(insertIndex + loadingText.length);
+
+                try {
+                    // Upload to Sanity
+                    const res = await fetch("/api/admin/upload?type=image", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Upload failed with status: " + res.status);
+                    }
+
+                    const asset = await res.json();
+                    console.log("Upload success, asset:", asset);
+
+                    // RE-GET quill instance to ensure we have the live one
+                    quill = quillRef.current?.getEditor();
+                    if (!quill) return;
+
+                    // Find and remove the placeholder text
+                    const content = quill.getText();
+                    let placeholderIndex = content.indexOf(loadingText);
+
+                    // If exact match not found, try to find partial matches
+                    if (placeholderIndex === -1) {
+                        // Look for common partial remnants
+                        const partials = ['[Uploading', 'Uploading...', 'Uploading'];
+                        for (const partial of partials) {
+                            placeholderIndex = content.indexOf(partial);
+                            if (placeholderIndex !== -1) {
+                                // Find the end - look for ] or just use partial length
+                                const endBracket = content.indexOf(']', placeholderIndex);
+                                const lengthToDelete = endBracket !== -1
+                                    ? (endBracket - placeholderIndex + 1)
+                                    : partial.length;
+                                quill.deleteText(placeholderIndex, lengthToDelete);
+                                break;
+                            }
+                        }
+                    } else {
+                        // Delete the exact loading text
+                        quill.deleteText(placeholderIndex, loadingText.length);
+                    }
+
+                    // Insert the image at the cleaned position
+                    if (asset.url) {
+                        const finalIndex = placeholderIndex !== -1 ? placeholderIndex : insertIndex;
+                        quill.insertEmbed(finalIndex, 'image', asset.url);
+                        quill.setSelection(finalIndex + 1);
+
+                        // Final cleanup: remove any remaining fragments like '...]' or '..]'
+                        setTimeout(() => {
+                            const q = quillRef.current?.getEditor();
+                            if (q) {
+                                const text = q.getText();
+                                const fragments = ['...]', '..]', '..', ']'];
+                                for (const fragment of fragments) {
+                                    const idx = text.indexOf(fragment);
+                                    if (idx !== -1) {
+                                        q.deleteText(idx, fragment.length);
+                                        break; // Only remove one fragment at a time
+                                    }
+                                }
+                            }
+                        }, 50);
+                    } else {
+                        console.error("Invalid asset response (missing url):", asset);
+                        alert("Image uploaded but URL is missing.");
+                    }
+
+                } catch (err) {
+                    console.error("Image upload failed", err);
+
+                    // RE-GET quill instance and clean up placeholder
+                    quill = quillRef.current?.getEditor();
+                    if (quill) {
+                        const content = quill.getText();
+                        let placeholderIndex = content.indexOf(loadingText);
+
+                        if (placeholderIndex !== -1) {
+                            quill.deleteText(placeholderIndex, loadingText.length);
+                        } else {
+                            // Try to find and remove partial matches
+                            const partials = ['[Uploading', 'Uploading...', 'Uploading', '...]', '..]'];
+                            for (const partial of partials) {
+                                placeholderIndex = content.indexOf(partial);
+                                if (placeholderIndex !== -1) {
+                                    quill.deleteText(placeholderIndex, partial.length);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    alert("Image upload failed. Please try again.");
+                } finally {
+                    // Notify parent that upload ended
+                    if (onUploadEnd) onUploadEnd();
+                }
+            }
+        };
+    }, [onUploadStart, onUploadEnd]);
+
+    // Memoize modules to prevent re-initialization of the editor on every render
+    const modules = useMemo(() => ({
         toolbar: {
             container: [
                 [{ 'header': [1, 2, 3, false] }],
@@ -24,52 +166,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
                 image: imageHandler
             }
         }
-    };
-
-    function imageHandler() {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files?.[0];
-            if (file) {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                try {
-                    // Get quill instance
-                    const quill = quillRef.current?.getEditor();
-                    if (!quill) return;
-
-                    const range = quill.getSelection(true);
-
-                    // Show loading state
-                    quill.insertEmbed(range.index, 'image', 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjY2NjIiBzdHJva2Utd2lkdGg9IjQiLz48L3N2Zz4=');
-
-                    // Upload to Sanity
-                    const res = await fetch("/api/admin/upload?type=image", {
-                        method: "POST",
-                        body: formData,
-                    });
-                    const asset = await res.json();
-
-                    if (asset.url) {
-                        // Remove loading placeholder
-                        quill.deleteText(range.index, 1);
-                        // Insert actual image
-                        quill.insertEmbed(range.index, 'image', asset.url);
-                        // Move cursor to next position
-                        quill.setSelection(range.index + 1);
-                    }
-                } catch (err) {
-                    console.error("Image upload failed", err);
-                    alert("Image upload failed. Please try again.");
-                }
-            }
-        };
-    }
+    }), [imageHandler]);
 
     return (
         <div className="bg-white text-gray-900">

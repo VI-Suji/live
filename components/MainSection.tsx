@@ -8,6 +8,7 @@ import LiveNow from "./LiveComponent";
 import TopStories from "./TopStoriesComponent";
 import Footer from "./FooterComponent";
 import LocalNews from "./LocalNewsComponent";
+import BannerAd from "./BannerAdComponent";
 
 const MainSection: React.FC = () => {
     const topStoriesRef = useRef<HTMLElement>(null);
@@ -45,7 +46,7 @@ const MainSection: React.FC = () => {
     };
 
     return (
-        <main className="w-full min-h-screen pt-36 sm:pt-40 lg:pt-32">{/* Adjusted mobile padding */}
+        <main className="w-full min-h-screen">{/* No padding - seamless flow from header sections */}
             {/* Hero Section - Light with subtle gradient */}
             <section
                 className="relative bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden"
@@ -71,10 +72,10 @@ const MainSection: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Local News Section */}
+                        {/* Local News Section - Desktop Only */}
                         <section
-                            ref={topStoriesRef}
                             id="local-news"
+                            className="hidden lg:block"
                         >
                             <LocalNews />
                         </section>
@@ -83,6 +84,15 @@ const MainSection: React.FC = () => {
                     <Sidebar siteSettings={siteSettings} />
                 </div>
             </section>
+
+            {/* Banner Ad Section - Full width, pushes down sidebar content - Desktop Only */}
+            {siteSettings.advertisementsVisible && (
+                <section className="hidden lg:block bg-gradient-to-br from-gray-50 via-white to-blue-50 py-6 sm:py-8">
+                    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+                        <BannerAd />
+                    </div>
+                </section>
+            )}
 
             {/* Top Stories Section - Dark dramatic */}
             {siteSettings.topStoriesVisible && (

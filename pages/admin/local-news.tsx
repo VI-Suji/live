@@ -75,12 +75,6 @@ export default function LocalNewsAdmin() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Check if trying to add more than 3 items
-        if (!editingItem && news.length >= 3) {
-            alert("⚠️ Maximum 3 local news items allowed.\n\nPlease delete an existing item first.");
-            return;
-        }
-
         const payload = {
             ...formData,
             publishedAt: new Date().toISOString(),
@@ -150,7 +144,7 @@ export default function LocalNewsAdmin() {
                     {showForm && (
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                             <div className="bg-white rounded-2xl max-w-lg w-full p-6">
-                                <h2 className="text-2xl font-bold mb-4">{editingItem ? "Edit News" : "Add News"}</h2>
+                                <h2 className="text-2xl font-bold mb-4 text-gray-900">{editingItem ? "Edit News" : "Add News"}</h2>
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Image *</label>
@@ -253,9 +247,9 @@ export default function LocalNewsAdmin() {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-lg font-bold text-gray-900">
-                                All Local News ({news.length}/3 items)
+                                All Local News ({news.length} items)
                             </h2>
-                            <p className="text-sm text-gray-600 mt-1">Maximum 3 local news items allowed</p>
+                            <p className="text-sm text-gray-600 mt-1">Manage your local news items</p>
                         </div>
 
                         {loading ? (
