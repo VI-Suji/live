@@ -116,14 +116,32 @@ const Header: React.FC = () => {
             const items = [...menuItems].reverse();
 
             for (const item of items) {
-                const section = document.getElementById(item.target);
+                let targetId = item.target;
+
+                // Handle responsive Local News section
+                if (targetId === 'local-news') {
+                    const desktop = document.getElementById('local-news-desktop');
+                    const mobile = document.getElementById('local-news-mobile');
+
+                    // Check which one is visible
+                    if (desktop && desktop.offsetParent !== null) {
+                        targetId = 'local-news-desktop';
+                    } else if (mobile && mobile.offsetParent !== null) {
+                        targetId = 'local-news-mobile';
+                    }
+                }
+
+                const section = document.getElementById(targetId);
                 if (section) {
-                    const { offsetTop, offsetHeight } = section;
+                    const rect = section.getBoundingClientRect();
+                    const absoluteTop = rect.top + window.scrollY;
+                    const height = rect.height;
+
                     if (
-                        scrollPosition >= offsetTop &&
-                        scrollPosition < offsetTop + offsetHeight
+                        scrollPosition >= absoluteTop &&
+                        scrollPosition < absoluteTop + height
                     ) {
-                        setActiveSection(item.target);
+                        setActiveSection(item.target); // Keep original target for active state
                         break;
                     }
                 }
@@ -139,7 +157,21 @@ const Header: React.FC = () => {
 
     // Smooth scroll handler
     const scrollToSection = (targetId: string) => {
-        const section = document.getElementById(targetId);
+        let actualTargetId = targetId;
+
+        // Handle responsive Local News section
+        if (targetId === 'local-news') {
+            const desktop = document.getElementById('local-news-desktop');
+            const mobile = document.getElementById('local-news-mobile');
+
+            if (desktop && desktop.offsetParent !== null) {
+                actualTargetId = 'local-news-desktop';
+            } else if (mobile && mobile.offsetParent !== null) {
+                actualTargetId = 'local-news-mobile';
+            }
+        }
+
+        const section = document.getElementById(actualTargetId);
         if (section) {
             // Offset for sticky header (increased to account for breaking news ticker)
             const headerOffset = 120;

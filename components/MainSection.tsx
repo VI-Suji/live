@@ -74,7 +74,7 @@ const MainSection: React.FC = () => {
 
                         {/* Local News Section - Desktop Only */}
                         <section
-                            id="local-news"
+                            id="local-news-desktop"
                             className="hidden lg:block"
                         >
                             <LocalNews />

@@ -124,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
       {showAds && <AdTwo />}
 
       {/* Local News Widget - Mobile Only (Swapped with Latest News) */}
-      <div className="w-full lg:hidden">
+      <div id="local-news-mobile" className="w-full lg:hidden">
         <LocalNews />
       </div>
 
