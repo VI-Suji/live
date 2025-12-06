@@ -34,9 +34,9 @@ const socialItems = [
   {
     id: 4,
     title: "WhatsApp",
-    subtitle: "Get instant news alerts",
+    subtitle: "Join our WhatsApp group",
     icon: <FaWhatsapp className="text-3xl" />,
-    link: "#",
+    link: "https://chat.whatsapp.com/Hyue1YLgww0E3DYtgQK97J",
     gradient: "from-green-400 to-green-600",
     hoverGlow: "group-hover:shadow-green-500/50",
   },

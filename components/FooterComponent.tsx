@@ -49,7 +49,9 @@ const Footer = () => {
                                 <FaYoutube size={18} />
                             </a>
                             <a
-                                href="#"
+                                href="https://wa.me/918714360034"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-green-500 hover:scale-110 transition-all duration-300 border border-white/10"
                             >
                                 <FaWhatsapp size={18} />
@@ -67,7 +69,7 @@ const Footer = () => {
                             </li>
                             <li className="flex items-center gap-3 md:justify-end">
                                 <FaPhone className="text-green-400" />
-                                <span>+91 98765 43210</span>
+                                <span>+91 87143 60034</span>
                             </li>
                             <li className="flex items-start gap-3 md:justify-end md:text-right">
                                 <FaMapMarkerAlt className="text-red-400 mt-1" />
