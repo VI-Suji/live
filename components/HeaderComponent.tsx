@@ -253,7 +253,7 @@ const Header: React.FC = () => {
                             className="absolute left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex items-center gap-2 sm:gap-3"
                             onClick={() => scrollToSection("home")}
                         >
-                            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
+                            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
                                 ഗ്രാമിക
                             </h1>
                         </div>
