@@ -15,9 +15,7 @@ const Obituaries = () => {
             .finally(() => setLoading(false));
     }, []);
 
-    const gridClass = obituaries.length === 1
-        ? "grid-cols-1"
-        : "grid grid-cols-2 gap-4";
+    const gridClass = "flex flex-col gap-4";
 
     if (!loading && obituaries.length === 0) {
         return null;
