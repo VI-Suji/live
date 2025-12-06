@@ -101,6 +101,13 @@ export default {
                 ],
             },
         },
+        {
+            name: 'active',
+            title: 'Active',
+            type: 'boolean',
+            description: 'Show/hide this story on the website',
+            initialValue: true,
+        },
     ],
     preview: {
         select: {

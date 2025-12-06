@@ -57,7 +57,12 @@ export default function AdvertisementsAdmin() {
             const res = await fetch(`/api/admin/advertisements?t=${Date.now()}`); // We need to implement GET in this route
             if (res.ok) {
                 const data = await res.json();
-                setAds(data);
+                // Normalize active field (undefined = true for legacy items)
+                const normalizedData = data.map((item: any) => ({
+                    ...item,
+                    active: item.active !== false
+                }));
+                setAds(normalizedData);
             }
         } catch (error) {
             console.error("Error fetching ads:", error);
@@ -85,6 +90,29 @@ export default function AdvertisementsAdmin() {
         } catch (error) {
             console.error("Error deleting:", error);
             setAds(previousAds); // Revert
+        }
+    };
+
+    const handleToggleActive = async (ad: Advertisement) => {
+        // Optimistic update
+        const updatedAd = { ...ad, active: !ad.active };
+        setAds(ads.map(a => a._id === ad._id ? updatedAd : a));
+
+        try {
+            const res = await fetch("/api/admin/advertisements", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ _id: ad._id, active: !ad.active }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            // Revert on error
+            setAds(ads.map(a => a._id === ad._id ? ad : a));
+            alert("❌ Failed to update status");
         }
     };
 
@@ -413,6 +441,17 @@ export default function AdvertisementsAdmin() {
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                    {/* Active Toggle */}
+                                    <button
+                                        onClick={() => handleToggleActive(ad)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 ${ad.active ? 'bg-green-500' : 'bg-gray-500'}`}
+                                        title={ad.active ? "Deactivate" : "Activate"}
+                                    >
+                                        <span
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${ad.active ? 'translate-x-6' : 'translate-x-1'}`}
+                                        />
+                                    </button>
+
                                     <button
                                         onClick={() => {
                                             setEditingItem(ad);

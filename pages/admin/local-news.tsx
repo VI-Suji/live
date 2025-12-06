@@ -12,6 +12,7 @@ type LocalNews = {
     description?: string;
     publishedAt?: string;
     order?: number;
+    active: boolean;
 };
 
 export default function LocalNewsAdmin() {
@@ -24,11 +25,13 @@ export default function LocalNewsAdmin() {
         title: string;
         description: string;
         order: number;
+        active: boolean;
         image?: any;
     }>({
         title: "",
         description: "",
         order: 1,
+        active: true,
     });
 
     useEffect(() => {
@@ -37,9 +40,14 @@ export default function LocalNewsAdmin() {
 
     const fetchNews = async () => {
         try {
-            const res = await fetch(`/api/sanity/localNews?t=${Date.now()}`);
+            const res = await fetch(`/api/sanity/localNews?all=true&t=${Date.now()}`);
             const data = await res.json();
-            setNews(data);
+            // Normalize active field (undefined = true for legacy items)
+            const normalizedData = data.map((item: any) => ({
+                ...item,
+                active: item.active !== false
+            }));
+            setNews(normalizedData);
         } catch (error) {
             console.error("Error fetching local news:", error);
         } finally {
@@ -72,6 +80,29 @@ export default function LocalNewsAdmin() {
         }
     };
 
+    const handleToggleActive = async (item: LocalNews) => {
+        // Optimistic update
+        const updatedItem = { ...item, active: !item.active };
+        setNews(news.map(n => n._id === item._id ? updatedItem : n));
+
+        try {
+            const res = await fetch("/api/admin/local-news", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ _id: item._id, active: !item.active }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            // Revert on error
+            setNews(news.map(n => n._id === item._id ? item : n));
+            alert("❌ Failed to update status");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -97,7 +128,7 @@ export default function LocalNewsAdmin() {
                 alert(editingItem ? "✅ Updated successfully!" : "✅ Created successfully!");
                 setShowForm(false);
                 setEditingItem(null);
-                setFormData({ title: "", description: "", order: 1 });
+                setFormData({ title: "", description: "", order: 1, active: true });
 
                 // Update local state
                 if (method === "POST") {
@@ -128,7 +159,7 @@ export default function LocalNewsAdmin() {
                                 onClick={() => {
                                     setShowForm(true);
                                     setEditingItem(null);
-                                    setFormData({ title: "", description: "", order: news.length + 1 });
+                                    setFormData({ title: "", description: "", order: news.length + 1, active: true });
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-md transition-all hover:scale-105"
                             >
@@ -227,6 +258,16 @@ export default function LocalNewsAdmin() {
                                             placeholder="1"
                                         />
                                     </div>
+                                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            id="local-news-active"
+                                            checked={formData.active}
+                                            onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                                            className="w-5 h-5 text-green-600 rounded focus:ring-2 focus:ring-green-500"
+                                        />
+                                        <label htmlFor="local-news-active" className="font-bold text-gray-900">Active (Show on Website)</label>
+                                    </div>
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button type="submit" className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
                                             Save
@@ -268,6 +309,7 @@ export default function LocalNewsAdmin() {
                                                 title: item.title,
                                                 description: item.description || "",
                                                 order: item.order || 1,
+                                                active: item.active ?? true,
                                             });
                                             setShowForm(true);
                                         }}
@@ -281,8 +323,24 @@ export default function LocalNewsAdmin() {
                                                 <div className="text-xs text-gray-500">
                                                     <span>Order: {item.order}</span>
                                                 </div>
+                                                <p className="text-xs mt-2">
+                                                    <span className={`px-2 py-1 rounded ${item.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                        {item.active ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </p>
                                             </div>
                                             <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                {/* Active Toggle */}
+                                                <button
+                                                    onClick={() => handleToggleActive(item)}
+                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${item.active ? 'bg-green-500' : 'bg-gray-500'}`}
+                                                    title={item.active ? "Deactivate" : "Activate"}
+                                                >
+                                                    <span
+                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${item.active ? 'translate-x-6' : 'translate-x-1'}`}
+                                                    />
+                                                </button>
+
                                                 <button
                                                     onClick={() => {
                                                         setEditingItem(item);
@@ -290,6 +348,7 @@ export default function LocalNewsAdmin() {
                                                             title: item.title,
                                                             description: item.description || "",
                                                             order: item.order || 1,
+                                                            active: item.active ?? true,
                                                         });
                                                         setShowForm(true);
                                                     }}

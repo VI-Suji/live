@@ -19,6 +19,7 @@ const MainSection: React.FC = () => {
         latestNewsVisible: true,
         topStoriesVisible: true,
     });
+    const [hasActiveTopStories, setHasActiveTopStories] = useState(true);
 
     useEffect(() => {
         const fetchSettings = () => {
@@ -38,6 +39,22 @@ const MainSection: React.FC = () => {
 
         fetchSettings();
         const interval = setInterval(fetchSettings, 10000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        // Check if there are any active top stories
+        const checkTopStories = () => {
+            fetch('/api/sanity/topStories')
+                .then(res => res.json())
+                .then(data => {
+                    setHasActiveTopStories(data && data.length > 0);
+                })
+                .catch(() => setHasActiveTopStories(false));
+        };
+
+        checkTopStories();
+        const interval = setInterval(checkTopStories, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -95,7 +112,7 @@ const MainSection: React.FC = () => {
             )}
 
             {/* Top Stories Section - Dark dramatic */}
-            {siteSettings.topStoriesVisible && (
+            {siteSettings.topStoriesVisible && hasActiveTopStories && (
                 <section
                     ref={topStoriesRef}
                     id="top-stories"

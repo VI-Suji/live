@@ -65,7 +65,9 @@ const Footer = () => {
                         <ul className="space-y-4 text-sm text-gray-400">
                             <li className="flex items-center gap-3 md:justify-end">
                                 <FaEnvelope className="text-blue-400" />
-                                <span>kootcablecommunications@gmail.com</span>
+                                <a href="mailto:newsgramika@gmail.com" className="hover:text-white transition-colors">
+                                    newsgramika@gmail.com
+                                </a>
                             </li>
                             <li className="flex items-center gap-3 md:justify-end">
                                 <FaPhone className="text-green-400" />
@@ -85,8 +87,8 @@ const Footer = () => {
                         © 2025 Gramika Limited. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-sm text-gray-500">
-                        <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                        <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</a>
                     </div>
                 </div>
             </div>

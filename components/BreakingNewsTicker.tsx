@@ -6,6 +6,8 @@ type BreakingNewsItem = {
     title: string;
     link?: string;
     priority: number;
+    startDate?: string;
+    expiryDate?: string;
 };
 
 export default function BreakingNewsTicker() {
@@ -32,6 +34,18 @@ export default function BreakingNewsTicker() {
     if (news.length === 0) {
         return null;
     }
+
+    const formatDateTime = (dateString?: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
 
     return (
         <div className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white overflow-hidden shadow-lg relative z-50">

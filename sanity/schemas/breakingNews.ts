@@ -27,9 +27,15 @@ export default {
             name: 'priority',
             title: 'Priority',
             type: 'number',
-            description: 'Lower number = higher priority (1, 2, 3)',
-            validation: (Rule: any) => Rule.required().min(1).max(3),
+            description: 'Lower number = higher priority (1, 2, 3, etc.)',
+            validation: (Rule: any) => Rule.required().min(1),
             initialValue: 1,
+        },
+        {
+            name: 'startDate',
+            title: 'Start Date & Time',
+            type: 'datetime',
+            description: 'When this news should start showing (leave empty to show immediately)',
         },
         {
             name: 'expiryDate',

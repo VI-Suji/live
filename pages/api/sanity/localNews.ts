@@ -6,14 +6,28 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const query = `*[_type == "localNews"] | order(order asc, publishedAt desc) {
-      _id,
-      title,
-      "image": image.asset->url,
-      description,
-      publishedAt,
-      order
-    }`;
+        // Check if we should show all items (for admin) or only active (for public)
+        const showAll = req.query.all === 'true';
+
+        const query = showAll
+            ? `*[_type == "localNews"] | order(order asc, publishedAt desc) {
+                _id,
+                title,
+                "image": image.asset->url,
+                description,
+                publishedAt,
+                order,
+                active
+              }`
+            : `*[_type == "localNews" && active == true] | order(order asc, publishedAt desc) {
+                _id,
+                title,
+                "image": image.asset->url,
+                description,
+                publishedAt,
+                order,
+                active
+              }`;
 
         const localNews = await sanityClient.fetch(query);
 

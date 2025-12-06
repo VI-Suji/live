@@ -43,7 +43,7 @@ const contentTypes = [
         name: "Breaking News",
         icon: FaBolt,
         href: "/admin/breaking-news",
-        description: "Manage scrolling ticker (max 3)",
+        description: "Manage scrolling ticker",
         color: "from-orange-500 to-red-600",
     },
     {

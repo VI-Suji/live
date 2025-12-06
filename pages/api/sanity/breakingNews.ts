@@ -8,13 +8,16 @@ export default async function handler(
     try {
         const now = new Date().toISOString();
 
-        const query = `*[_type == "breakingNews" && active == true && 
-      (!defined(expiryDate) || expiryDate > $now)] | order(priority asc, _createdAt desc) [0...3] {
+        const query = `*[_type == "breakingNews" && (active == true || !defined(active)) && 
+      (!defined(startDate) || startDate <= $now) &&
+      (!defined(expiryDate) || expiryDate > $now)] | order(priority asc, _createdAt desc) {
       _id,
       title,
       link,
       active,
-      priority
+      priority,
+      startDate,
+      expiryDate
     }`;
 
         const breakingNews = await sanityClient.fetch(query, { now });

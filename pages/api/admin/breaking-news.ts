@@ -27,6 +27,7 @@ export default async function handler(
                         link,
                         active,
                         priority,
+                        startDate,
                         expiryDate
                     }
                 `);

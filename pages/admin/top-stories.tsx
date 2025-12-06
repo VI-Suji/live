@@ -23,6 +23,7 @@ type TopStory = {
     publishedAt?: string;
     featured?: boolean;
     category?: string;
+    active: boolean;
 };
 
 export default function TopStoriesAdmin() {
@@ -41,6 +42,7 @@ export default function TopStoriesAdmin() {
         excerpt: string;
         category: string;
         featured: boolean;
+        active: boolean;
         mainImage?: any;
     }>({
         title: "",
@@ -49,6 +51,7 @@ export default function TopStoriesAdmin() {
         excerpt: "",
         category: "news",
         featured: false,
+        active: true,
     });
 
     useEffect(() => {
@@ -57,9 +60,14 @@ export default function TopStoriesAdmin() {
 
     const fetchStories = async () => {
         try {
-            const res = await fetch("/api/sanity/topStories");
+            const res = await fetch("/api/sanity/topStories?all=true");
             const data = await res.json();
-            setStories(data);
+            // Normalize active field (undefined = true for legacy items)
+            const normalizedData = data.map((item: any) => ({
+                ...item,
+                active: item.active !== false
+            }));
+            setStories(normalizedData);
         } catch (error) {
             console.error("Error fetching stories:", error);
         } finally {
@@ -84,6 +92,29 @@ export default function TopStoriesAdmin() {
         } catch (error) {
             console.error("Error deleting story:", error);
             alert("Error deleting story");
+        }
+    };
+
+    const handleToggleActive = async (story: TopStory) => {
+        // Optimistic update
+        const updatedStory = { ...story, active: !story.active };
+        setStories(stories.map(s => s._id === story._id ? updatedStory : s));
+
+        try {
+            const res = await fetch("/api/admin/top-stories", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ _id: story._id, active: !story.active }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            // Revert on error
+            setStories(stories.map(s => s._id === story._id ? story : s));
+            alert("❌ Failed to update status");
         }
     };
 
@@ -129,6 +160,7 @@ export default function TopStoriesAdmin() {
                     excerpt: "",
                     category: "news",
                     featured: false,
+                    active: true,
                 });
                 fetchStories();
             } else {
@@ -149,6 +181,7 @@ export default function TopStoriesAdmin() {
             excerpt: story.excerpt || "",
             category: story.category || "news",
             featured: story.featured || false,
+            active: story.active ?? true,
         });
         setEditingStory(story);
         setShowForm(true);
@@ -188,6 +221,7 @@ export default function TopStoriesAdmin() {
                                         excerpt: "",
                                         category: "news",
                                         featured: false,
+                                        active: true,
                                     });
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors text-sm flex-shrink-0"
@@ -358,13 +392,28 @@ export default function TopStoriesAdmin() {
                                         </label>
                                     </div>
 
+                                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            id="active"
+                                            checked={formData.active}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, active: e.target.checked })
+                                            }
+                                            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <label htmlFor="active" className="font-bold text-gray-900">
+                                            Active (Show on Website)
+                                        </label>
+                                    </div>
+
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
                                             disabled={isUploading}
                                             className={`flex-1 px-6 py-3 text-white rounded-xl font-semibold transition-colors order-1 sm:order-1 ${isUploading
-                                                    ? "bg-gray-400 cursor-not-allowed"
-                                                    : "bg-blue-600 hover:bg-blue-700"
+                                                ? "bg-gray-400 cursor-not-allowed"
+                                                : "bg-blue-600 hover:bg-blue-700"
                                                 }`}
                                         >
                                             {isUploading ? "Uploading Image..." : (editingStory ? "Update Story" : "Create Story")}
@@ -437,8 +486,24 @@ export default function TopStoriesAdmin() {
                                                     </>
                                                 )}
                                             </div>
+                                            <p className="text-xs mt-2">
+                                                <span className={`px-2 py-1 rounded ${story.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                    {story.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                            {/* Active Toggle */}
+                                            <button
+                                                onClick={() => handleToggleActive(story)}
+                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${story.active ? 'bg-green-500' : 'bg-gray-500'}`}
+                                                title={story.active ? "Deactivate" : "Activate"}
+                                            >
+                                                <span
+                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${story.active ? 'translate-x-6' : 'translate-x-1'}`}
+                                                />
+                                            </button>
+
                                             <button
                                                 onClick={() => handleEdit(story)}
                                                 className="flex-1 sm:flex-none px-4 py-2 sm:p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-2"

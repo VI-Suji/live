@@ -89,25 +89,34 @@ export default function TopStories() {
         ));
     };
 
+    // Don't render anything if there are no posts (all inactive)
+    if (!loading && posts.length === 0) {
+        return null;
+    }
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-            {/* Controls */}
-            <div className="absolute top-1/2 -translate-y-1/2 -left-4 z-20 hidden lg:flex">
-                <button
-                    onClick={scrollPrev}
-                    className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
-                >
-                    <FaChevronLeft />
-                </button>
-            </div>
-            <div className="absolute top-1/2 -translate-y-1/2 -right-4 z-20 hidden lg:flex">
-                <button
-                    onClick={scrollNext}
-                    className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
-                >
-                    <FaChevronRight />
-                </button>
-            </div>
+            {/* Controls - Only show if more than 1 post on desktop, or more than 3 posts */}
+            {!loading && posts.length > 1 && (
+                <>
+                    <div className="absolute top-1/2 -translate-y-1/2 -left-4 z-20 hidden lg:flex">
+                        <button
+                            onClick={scrollPrev}
+                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+                        >
+                            <FaChevronLeft />
+                        </button>
+                    </div>
+                    <div className="absolute top-1/2 -translate-y-1/2 -right-4 z-20 hidden lg:flex">
+                        <button
+                            onClick={scrollNext}
+                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
+                        >
+                            <FaChevronRight />
+                        </button>
+                    </div>
+                </>
+            )}
 
             {/* Carousel */}
             <div
@@ -119,7 +128,12 @@ export default function TopStories() {
                     <article
                         key={post._id}
                         onClick={() => handleReadMore(post)}
-                        className="snap-start flex-shrink-0 w-full lg:w-[calc(33.333%-1rem)] h-[500px] relative rounded-3xl overflow-hidden cursor-pointer group transition-transform duration-300 hover:-translate-y-2"
+                        className={`snap-start flex-shrink-0 w-full ${posts.length === 1
+                            ? 'lg:w-full'
+                            : posts.length === 2
+                                ? 'lg:w-[calc(50%-0.75rem)]'
+                                : 'lg:w-[calc(33.333%-1rem)]'
+                            } h-[500px] relative rounded-3xl overflow-hidden cursor-pointer group transition-transform duration-300 hover:-translate-y-2`}
                     >
                         {/* Image Background */}
                         <div className="absolute inset-0">

@@ -11,6 +11,7 @@ type BreakingNews = {
     link?: string;
     active: boolean;
     priority: number;
+    startDate?: string;
     expiryDate?: string;
 };
 
@@ -26,12 +27,14 @@ export default function BreakingNewsAdmin() {
         link: string;
         active: boolean;
         priority: number;
+        startDate: string;
         expiryDate: string;
     }>({
         title: "",
         link: "",
         active: true,
         priority: 1,
+        startDate: "",
         expiryDate: "",
     });
 
@@ -45,7 +48,12 @@ export default function BreakingNewsAdmin() {
             if (res.ok) {
                 const data = await res.json();
                 console.log('Fetched breaking news:', data);
-                setNewsList(data);
+                // Normalize active field (undefined = true for legacy items)
+                const normalizedData = data.map((item: any) => ({
+                    ...item,
+                    active: item.active !== false
+                }));
+                setNewsList(normalizedData);
             }
         } catch (error) {
             console.error("Error fetching breaking news:", error);
@@ -78,21 +86,32 @@ export default function BreakingNewsAdmin() {
         }
     };
 
+    const handleToggleActive = async (news: BreakingNews) => {
+        // Optimistic update
+        const updatedNews = { ...news, active: !news.active };
+        setNewsList(newsList.map(n => n._id === news._id ? updatedNews : n));
+
+        try {
+            const res = await fetch("/api/admin/breaking-news", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ _id: news._id, active: !news.active }),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            // Revert on error
+            setNewsList(newsList.map(n => n._id === news._id ? news : n));
+            alert("❌ Failed to update status");
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
-
-        // Check active limit
-        const activeCount = newsList.filter(n => n.active).length;
-        const isActivating = formData.active;
-        // If creating new active item OR activating an existing inactive item
-        const willIncreaseActiveCount = (!editingItem && isActivating) || (editingItem && !editingItem.active && isActivating);
-
-        if (willIncreaseActiveCount && activeCount >= 3) {
-            alert("⚠️ Maximum 3 active breaking news items allowed.\n\nPlease deactivate or delete an existing item first.");
-            setSaving(false);
-            return;
-        }
 
         try {
             const url = "/api/admin/breaking-news";
@@ -111,6 +130,10 @@ export default function BreakingNewsAdmin() {
             }
 
             // Convert datetime-local to ISO string for Sanity
+            if (formData.startDate && formData.startDate.trim()) {
+                payload.startDate = new Date(formData.startDate).toISOString();
+            }
+
             if (formData.expiryDate && formData.expiryDate.trim()) {
                 payload.expiryDate = new Date(formData.expiryDate).toISOString();
             }
@@ -136,6 +159,7 @@ export default function BreakingNewsAdmin() {
                     link: "",
                     active: true,
                     priority: 1,
+                    startDate: "",
                     expiryDate: "",
                 });
 
@@ -183,6 +207,7 @@ export default function BreakingNewsAdmin() {
                                         link: "",
                                         active: true,
                                         priority: 1,
+                                        startDate: "",
                                         expiryDate: "",
                                     });
                                 }}
@@ -228,16 +253,55 @@ export default function BreakingNewsAdmin() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-bold mb-2 text-gray-900">Priority * <span className="text-xs text-gray-500 font-normal">(1 = Highest, 3 = Lowest)</span></label>
-                                        <select
+                                        <label className="block text-sm font-bold mb-2 text-gray-900">Priority * <span className="text-xs text-gray-500 font-normal">(Lower = Higher Priority)</span></label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            required
                                             value={formData.priority}
-                                            onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+                                            onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 1 })}
                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                                        >
-                                            <option value={1}>1 - Highest Priority</option>
-                                            <option value={2}>2 - Medium Priority</option>
-                                            <option value={3}>3 - Lowest Priority</option>
-                                        </select>
+                                            placeholder="1"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Lower numbers appear first (e.g., 1, 2, 3...)</p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2 text-gray-900">Start Date & Time (Optional)</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs text-gray-600 mb-1">Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={formData.startDate ? formData.startDate.split('T')[0] : ''}
+                                                    onChange={(e) => {
+                                                        const date = e.target.value;
+                                                        const time = formData.startDate ? formData.startDate.split('T')[1] : '00:00';
+                                                        setFormData({ ...formData, startDate: date ? `${date}T${time}` : '' });
+                                                    }}
+                                                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-gray-900 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white text-sm"
+                                                    style={{ colorScheme: 'light' }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-600 mb-1">Time</label>
+                                                <input
+                                                    type="time"
+                                                    value={formData.startDate ? formData.startDate.split('T')[1] || '00:00' : ''}
+                                                    onChange={(e) => {
+                                                        const time = e.target.value;
+                                                        const date = formData.startDate ? formData.startDate.split('T')[0] : '';
+                                                        if (date) {
+                                                            setFormData({ ...formData, startDate: `${date}T${time}` });
+                                                        }
+                                                    }}
+                                                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-gray-900 focus:border-red-500 focus:ring-2 focus:ring-red-200 bg-white text-sm"
+                                                    style={{ colorScheme: 'light' }}
+                                                    disabled={!formData.startDate || !formData.startDate.split('T')[0]}
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">News will start showing from this date & time (leave empty to show immediately)</p>
                                     </div>
 
                                     <div>
@@ -313,9 +377,9 @@ export default function BreakingNewsAdmin() {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="p-6 border-b border-gray-200">
                             <h2 className="text-lg font-bold text-gray-900">
-                                All Breaking News ({newsList.filter(n => n.active).length}/3 active)
+                                All Breaking News ({newsList.filter(n => n.active).length} active)
                             </h2>
-                            <p className="text-sm text-gray-600 mt-1">Only up to 3 active breaking news will be shown on the website</p>
+                            <p className="text-sm text-gray-600 mt-1">All active breaking news will be shown on the website</p>
                         </div>
 
                         {loading ? (
@@ -335,6 +399,7 @@ export default function BreakingNewsAdmin() {
                                                 link: news.link || "",
                                                 active: news.active,
                                                 priority: news.priority,
+                                                startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
                                                 expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
                                             });
                                             setShowForm(true);
@@ -362,6 +427,11 @@ export default function BreakingNewsAdmin() {
                                                         {news.link}
                                                     </a>
                                                 )}
+                                                {news.startDate && (
+                                                    <p className="text-xs text-gray-500">
+                                                        Starts: {new Date(news.startDate).toLocaleString()}
+                                                    </p>
+                                                )}
                                                 {news.expiryDate && (
                                                     <p className="text-xs text-gray-500">
                                                         Expires: {new Date(news.expiryDate).toLocaleString()}
@@ -369,6 +439,17 @@ export default function BreakingNewsAdmin() {
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                {/* Active Toggle */}
+                                                <button
+                                                    onClick={() => handleToggleActive(news)}
+                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${news.active ? 'bg-green-500' : 'bg-gray-500'}`}
+                                                    title={news.active ? "Deactivate" : "Activate"}
+                                                >
+                                                    <span
+                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${news.active ? 'translate-x-6' : 'translate-x-1'}`}
+                                                    />
+                                                </button>
+
                                                 <button
                                                     onClick={() => {
                                                         setEditingItem(news);
@@ -377,6 +458,7 @@ export default function BreakingNewsAdmin() {
                                                             link: news.link || "",
                                                             active: news.active,
                                                             priority: news.priority,
+                                                            startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
                                                             expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
                                                         });
                                                         setShowForm(true);

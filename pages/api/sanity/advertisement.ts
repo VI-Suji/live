@@ -15,7 +15,7 @@ export default async function handler(
         const today = new Date().toISOString().split('T')[0];
         console.log('Fetching advertisement for position:', position, 'on date:', today);
 
-        const query = `*[_type == "advertisement" && position == $position && active == true && 
+        const query = `*[_type == "advertisement" && position == $position && (active == true || !defined(active)) && 
       (!defined(startDate) || startDate <= $today) && 
       (!defined(endDate) || endDate >= $today)][0] {
       _id,

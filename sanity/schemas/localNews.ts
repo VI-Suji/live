@@ -43,6 +43,13 @@ export default {
             type: 'number',
             description: 'Lower numbers appear first',
         },
+        {
+            name: 'active',
+            title: 'Active',
+            type: 'boolean',
+            description: 'Show/hide this news item on the website',
+            initialValue: true,
+        },
     ],
     orderings: [
         {
