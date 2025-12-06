@@ -65,7 +65,7 @@ const Footer = () => {
                         <ul className="space-y-4 text-sm text-gray-400">
                             <li className="flex items-center gap-3 md:justify-end">
                                 <FaEnvelope className="text-blue-400" />
-                                <span>contact@gramika.tv</span>
+                                <span>kootcablecommunications@gmail.com</span>
                             </li>
                             <li className="flex items-center gap-3 md:justify-end">
                                 <FaPhone className="text-green-400" />
@@ -73,7 +73,7 @@ const Footer = () => {
                             </li>
                             <li className="flex items-start gap-3 md:justify-end md:text-right">
                                 <FaMapMarkerAlt className="text-red-400 mt-1" />
-                                <span>Gramika Media House,<br />Kochi, Kerala, India</span>
+                                <span>Gramika, Kuthuparmba Co. Op Rural Bank Complex,<br />Paral, Kuthuparamba</span>
                             </li>
                         </ul>
                     </div>
