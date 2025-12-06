@@ -69,10 +69,7 @@ const Obituaries = () => {
                                 <p className="text-sm text-gray-600">{person.place}</p>
                                 {person.funeralDetails?.trim() && (
                                     <div className="mt-3 w-full bg-gray-50 rounded-xl p-3 border border-gray-100 text-left">
-                                        <div className="flex items-center gap-1.5 mb-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">വ്യസനസമേതം</span>
-                                        </div>
+
                                         <p className="text-sm text-gray-700 leading-relaxed font-medium">
                                             {person.funeralDetails}
                                         </p>

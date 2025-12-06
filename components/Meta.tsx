@@ -11,7 +11,7 @@ interface MetaProps {
 const Meta = ({
     title = "Gramika - ഗ്രാമിക | ഗ്രാമീണതയുടെ ഹൃദയതാളം",
     description = "ഏറ്റവും പുതിയ പ്രാദേശിക വാർത്തകൾ, വിശേഷങ്ങൾ, അറിയിപ്പുകൾ എന്നിവ അറിയാൻ ഗ്രാമിക സന്ദർശിക്കുക. Truthful news and updates at your fingertips.",
-    keywords = "Gramika, Malayalam News, Kerala News, Local News, Breaking News, Live News, Gramika TV",
+    keywords = "Gramika, Gramika Web, Gramika News, Gramika TV, News Gramika, ഗ്രാമിക, Malayalam News, Kerala News, Local News, Breaking News, Live News, Kuthuparamba News",
     image = "https://www.gramika.in/gramika.png",
     url = "https://www.gramika.in"
 }: MetaProps) => {
