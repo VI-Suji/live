@@ -9,7 +9,7 @@ interface MetaProps {
 }
 
 const Meta = ({
-    title = "Gramika - ഗ്രാമിക | ഗ്രാമീണതയുടെ ഹൃദയതാളം",
+    title = "Gramika News - ഗ്രാമിക | ഗ്രാമീണതയുടെ ഹൃദയതാളം",
     description = "ഏറ്റവും പുതിയ പ്രാദേശിക വാർത്തകൾ, വിശേഷങ്ങൾ, അറിയിപ്പുകൾ എന്നിവ അറിയാൻ ഗ്രാമിക സന്ദർശിക്കുക. Truthful news and updates at your fingertips.",
     keywords = "Gramika, Gramika Web, Gramika News, Gramika TV, News Gramika, ഗ്രാമിക, Malayalam News, Kerala News, Local News, Breaking News, Live News, Kuthuparamba News",
     image = "https://www.gramika.in/gramika.png",
@@ -50,6 +50,39 @@ const Meta = ({
 
             {/* Search Engine Verification (Optional - add codes later) */}
             {/* <meta name="google-site-verification" content="YOUR_CODE" /> */}
+
+            {/* JSON-LD Structured Data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "NewsMediaOrganization",
+                        "name": "Gramika News",
+                        "alternateName": ["Gramika", "ഗ്രാമിക", "Gramika TV", "Gramika Web"],
+                        "url": "https://www.gramika.in",
+                        "logo": "https://www.gramika.in/gramika.png",
+                        "sameAs": [
+                            "https://www.facebook.com/GRAMIKATV/",
+                            "https://www.instagram.com/gramikatv/",
+                            "https://www.youtube.com/@GramikaTv"
+                        ],
+                        "description": description,
+                        "address": {
+                            "@type": "PostalAddress",
+                            "addressLocality": "Kuthuparamba",
+                            "addressRegion": "Kerala",
+                            "addressCountry": "IN"
+                        },
+                        "contactPoint": {
+                            "@type": "ContactPoint",
+                            "telephone": "04902360808",
+                            "contactType": "newsroom",
+                            "email": "newsgramika@gmail.com"
+                        }
+                    })
+                }}
+            />
         </Head>
     );
 };
