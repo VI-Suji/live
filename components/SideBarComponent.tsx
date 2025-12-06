@@ -96,8 +96,14 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
             renderLoader()
           ) : news ? (
             <div className="p-6 flex flex-col gap-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl text-blue-600">
+              <div className="flex flex-col md:flex-row items-start gap-4">
+                {/* Mobile Date - Full Width */}
+                <div className="md:hidden w-1/2 self-end bg-blue-50/50 rounded-xl px-4 py-2 text-blue-600 font-bold text-center text-sm uppercase tracking-wide">
+                  {day} {month} {year}
+                </div>
+
+                {/* Desktop Date - Box */}
+                <div className="hidden md:flex flex-shrink-0 flex-col items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl text-blue-600">
                   <span className="text-xl font-black">{day}</span>
                   <span className="text-xs font-bold uppercase">{month}</span>
                 </div>

@@ -48,14 +48,14 @@ const LatestNewsWidget: React.FC = () => {
     return (
         <div className="flex flex-col justify-start w-full bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-lg p-4 gap-4">
             {/* Header */}
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center order-2 md:order-none">
                 <h3 className="bg-gradient-to-tr from-blue-200 to-purple-200 backdrop-blur-md rounded-xl py-4 px-4 text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 w-full text-center">
                     {news.heading}
                 </h3>
             </div>
 
             {/* Right-aligned Date */}
-            <div className="w-full flex justify-end items-center gap-2">
+            <div className="w-full flex justify-end items-center gap-2 order-1 md:order-none">
                 <div className="relative w-10 h-8 bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-gray-900 font-bold shadow transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
                     {day}
                     <div className="absolute top-0 left-0 w-full h-full rounded-full pointer-events-none bg-gradient-to-tr from-white/50 via-white/20 to-white/0 opacity-0 hover:opacity-30 animate-pulse"></div>
@@ -67,7 +67,7 @@ const LatestNewsWidget: React.FC = () => {
             </div>
 
             {/* Content Section */}
-            <div className="w-full flex flex-col gap-2">
+            <div className="w-full flex flex-col gap-2 order-3 md:order-none">
                 <hr className="border-black/20 my-1" />
                 <p className="text-gray-700 text-md sm:text-lg leading-relaxed p-2">
                     {news.content}
