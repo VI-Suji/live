@@ -39,6 +39,24 @@ export default defineType({
             type: 'boolean',
             description: 'Toggle to show/hide the top stories section',
             initialValue: true
+        },
+        {
+            name: 'headerImages',
+            title: 'Header Rotating Images',
+            type: 'array',
+            of: [{ type: 'image' }],
+            options: {
+                layout: 'grid'
+            },
+            description: 'Add up to 3 images to rotate in the header. If no images are added, the Gramika logo will be shown constant.',
+            validation: (Rule: any) => Rule.max(3)
+        },
+        {
+            name: 'rotationInterval',
+            title: 'Image Rotation Interval (seconds)',
+            type: 'number',
+            description: 'Time in seconds between image rotations. Default is 20 seconds.',
+            initialValue: 20
         }
     ]
 });

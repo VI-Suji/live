@@ -33,6 +33,8 @@ export default async function handler(
             advertisementsVisible: req.body.advertisementsVisible ?? true,
             latestNewsVisible: req.body.latestNewsVisible ?? true,
             topStoriesVisible: req.body.topStoriesVisible ?? true,
+            headerImages: req.body.headerImages,
+            rotationInterval: req.body.rotationInterval
         };
 
         console.log('Settings to save:', JSON.stringify(settingsToSave, null, 2));

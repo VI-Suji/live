@@ -18,6 +18,11 @@ const Header: React.FC = () => {
     });
     const [menuItems, setMenuItems] = useState<Array<{ label: string; target: string }>>([]);
 
+    // Rotating Image State
+    const [headerImages, setHeaderImages] = useState<string[]>(["/gramika.png"]);
+    const [rotationInterval, setRotationInterval] = useState(20000);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
     // Fetch site settings
     useEffect(() => {
         const fetchSettings = () => {
@@ -29,6 +34,20 @@ const Header: React.FC = () => {
                         heroSectionVisible: data.heroSectionVisible ?? true,
                         topStoriesVisible: data.topStoriesVisible ?? true,
                     });
+
+
+                    // Update header images - Always include Gramika logo as first item
+                    if (data.headerImages && Array.isArray(data.headerImages) && data.headerImages.length > 0) {
+                        const fetchedUrls = data.headerImages.map((img: any) => img.url);
+                        setHeaderImages(["/gramika.png", ...fetchedUrls]);
+                    } else {
+                        setHeaderImages(["/gramika.png"]);
+                    }
+
+                    // Update rotation interval
+                    if (data.rotationInterval) {
+                        setRotationInterval(data.rotationInterval * 1000);
+                    }
                 })
                 .catch(console.error);
         };
@@ -41,6 +60,16 @@ const Header: React.FC = () => {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Rotation Timer
+    useEffect(() => {
+        if (headerImages.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % headerImages.length);
+        }, rotationInterval);
+        return () => clearInterval(interval);
+    }, [headerImages, rotationInterval]);
 
     const [contentAvailability, setContentAvailability] = useState({
         localNews: false,
@@ -197,63 +226,78 @@ const Header: React.FC = () => {
                     }`}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between">
-                        {/* Logo */}
+                    <div className="flex items-center justify-between relative h-16 sm:h-20">
+                        {/* Left: Rotating Image */}
+                        <div className="flex-shrink-0 w-24 sm:w-32 flex justify-start z-10">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={currentImageIndex}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="relative w-12 h-12 sm:w-16 sm:h-16"
+                                >
+                                    <Image
+                                        src={headerImages[currentImageIndex]}
+                                        alt="Rotating"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Center: Text Only (Logo Removed) - Offset slightly left */}
                         <div
-                            className="cursor-pointer z-50 relative flex items-center gap-3"
+                            className="absolute left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex items-center gap-2 sm:gap-3"
                             onClick={() => scrollToSection("home")}
                         >
-                            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
-                                <Image
-                                    src="/gramika.png"
-                                    alt="Gramika Logo"
-                                    fill
-                                    className="object-contain"
-                                    priority
-                                />
-                            </div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
+                            <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
                                 ഗ്രാമിക
                             </h1>
                         </div>
 
-                        {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center gap-8">
-                            {menuItems.map((item) => (
-                                <div key={item.label} className="relative">
-                                    <button
-                                        onClick={() => scrollToSection(item.target)}
-                                        className={`text-sm font-bold tracking-wide transition-colors duration-300 hover:text-blue-600 ${activeSection === item.target ? "text-blue-600" : "text-gray-600"
-                                            }`}
-                                    >
-                                        {item.label}
-                                    </button>
-                                    {activeSection === item.target && (
-                                        <motion.div
-                                            layoutId="underline"
-                                            className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-600"
-                                            initial={false}
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                        />
-                                    )}
-                                </div>
-                            ))}
-                        </nav>
+                        {/* Right: Navigation & Mobile Menu */}
+                        <div className="flex-shrink-0 flex items-center justify-end z-10 w-20 sm:w-auto">
+                            {/* Desktop Navigation */}
+                            <nav className="hidden md:flex items-center gap-8">
+                                {menuItems.map((item) => (
+                                    <div key={item.label} className="relative">
+                                        <button
+                                            onClick={() => scrollToSection(item.target)}
+                                            className={`text-sm font-bold tracking-wide transition-colors duration-300 hover:text-blue-600 ${activeSection === item.target ? "text-blue-600" : "text-gray-600"
+                                                }`}
+                                        >
+                                            {item.label}
+                                        </button>
+                                        {activeSection === item.target && (
+                                            <motion.div
+                                                layoutId="underline"
+                                                className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-600"
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                    </div>
+                                ))}
+                            </nav>
 
-                        {/* Mobile Menu Button */}
-                        <button
-                            className="md:hidden z-50 p-2 text-gray-900 focus:outline-none"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            aria-label="Toggle menu"
-                        >
-                            {mobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
-                        </button>
+                            {/* Mobile Menu Button */}
+                            <button
+                                className="md:hidden p-2 text-gray-900 focus:outline-none"
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                aria-label="Toggle menu"
+                            >
+                                {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
 
             {/* Scrollable Content Below Fixed Header */}
-            <div className="pt-20 sm:pt-24"> {/* Spacer for fixed header - adjusted for proper spacing */}
+            <div className="pt-28 sm:pt-32"> {/* Spacer for fixed header - adjusted for proper spacing */}
                 {/* Breaking News Ticker */}
                 <div className="relative z-40 bg-white">
                     <BreakingNewsTicker />

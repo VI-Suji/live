@@ -12,7 +12,13 @@ export default async function handler(
             heroSectionVisible,
             advertisementsVisible,
             latestNewsVisible,
-            topStoriesVisible
+            topStoriesVisible,
+            headerImages[] {
+                ...,
+                asset,
+                "url": asset->url
+            },
+            rotationInterval
         }`;
 
         const settings = await sanityClient.fetch(query);
