@@ -1,92 +1,500 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import BlogPost from "../components/TopStoryPostComponent";
-import { FaArrowLeft } from "react-icons/fa";
-import Footer from "../components/FooterComponent";
+import Image from "next/image";
+import Head from "next/head";
+import { GetServerSideProps } from "next";
+import { FaArrowLeft, FaShareAlt, FaCalendarAlt, FaUser, FaClock, FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
+import { PortableText } from "@portabletext/react";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { sanityClient } from "../../sanity/config";
 
-type Post = {
-  id: number | string;
-  pageId: string;
+type SanityPost = {
+  _id: string;
   title: string;
-  img?: string;
-  text?: string;
-  date?: string;
+  slug: { current: string };
   author?: string;
+  mainImage?: string;
+  excerpt?: string;
+  body: any[];
+  publishedAt?: string;
+  category?: string;
 };
 
-export default function StoryPage() {
-  const router = useRouter();
-  const { pageId } = router.query;
+type Props = {
+  post: SanityPost | null;
+};
 
-  const [post, setPost] = useState<Post | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function StoryPage({ post }: Props) {
+  const router = useRouter();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  const [readingTime, setReadingTime] = useState(0);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
-    if (!pageId || typeof pageId !== "string") return;
+    if (post?.body) {
+      const text = JSON.stringify(post.body);
+      const words = text.split(/\s+/).length;
+      setReadingTime(Math.ceil(words / 200));
+    }
+  }, [post]);
 
-    const fetchPost = async () => {
-      try {
-        const res = await fetch("/api/notionPages");
-        const data: Post[] = await res.json();
+  const [shareUrl, setShareUrl] = useState('');
 
-        const currentPost = data.find((p) => p.pageId === pageId);
-        if (currentPost) setPost(currentPost);
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        setLoading(false);
-      }
-    };
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
 
-    fetchPost();
-  }, [pageId]);
+  if (router.isFallback || !post) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-12 h-12 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return new Date().toLocaleDateString();
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const shareLinks = {
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`,
+  };
+
+  const portableTextComponents = {
+    types: {
+      image: ({ value }: { value: any }) => (
+        <figure className="my-12 sm:my-16 -mx-4 sm:mx-0">
+          <div className="relative aspect-video overflow-hidden bg-gray-100">
+            <Image
+              src={value.asset?.url || value.url}
+              alt={value.alt || "Article image"}
+              fill
+              className="object-cover"
+            />
+          </div>
+          {value.caption && (
+            <figcaption className="text-center text-sm text-gray-500 mt-4 px-4 sm:px-0 italic border-t border-gray-100 pt-3">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
+      ),
+    },
+    block: {
+      h1: ({ children }: { children?: React.ReactNode }) => (
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mt-16 mb-6 leading-[1.15] tracking-tight border-l-4 border-blue-600 pl-5">
+          {children}
+        </h2>
+      ),
+      h2: ({ children }: { children?: React.ReactNode }) => (
+        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mt-14 mb-5 leading-[1.2] tracking-tight">
+          {children}
+        </h3>
+      ),
+      h3: ({ children }: { children?: React.ReactNode }) => (
+        <h4 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-10 mb-4 leading-snug">
+          {children}
+        </h4>
+      ),
+      blockquote: ({ children }: { children?: React.ReactNode }) => (
+        <blockquote className="my-10 sm:my-12 py-6 px-8 bg-gray-50 border-l-4 border-gray-900 relative">
+          <svg className="absolute top-4 left-4 w-8 h-8 text-gray-200" fill="currentColor" viewBox="0 0 32 32">
+            <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm16 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z" />
+          </svg>
+          <p className="text-xl sm:text-2xl leading-relaxed italic text-gray-800 font-serif pl-8">
+            {children}
+          </p>
+        </blockquote>
+      ),
+      normal: ({ children }: { children?: React.ReactNode }) => {
+        return (
+          <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 first-of-type:first-letter:text-7xl first-of-type:first-letter:font-bold first-of-type:first-letter:text-gray-900 first-of-type:first-letter:float-left first-of-type:first-letter:mr-3 first-of-type:first-letter:leading-[0.85]">
+            {children}
+          </p>
+        );
+      },
+    },
+    list: {
+      bullet: ({ children }: { children?: React.ReactNode }) => (
+        <ul className="space-y-3 my-8 pl-6 list-none">{children}</ul>
+      ),
+      number: ({ children }: { children?: React.ReactNode }) => (
+        <ol className="space-y-3 my-8 pl-6 list-none counter-reset-item">{children}</ol>
+      ),
+    },
+    listItem: {
+      bullet: ({ children }: { children?: React.ReactNode }) => (
+        <li className="text-[18px] sm:text-[19px] text-gray-800 leading-[1.8] pl-2 relative before:content-['•'] before:absolute before:left-[-1rem] before:text-blue-600 before:font-bold">
+          {children}
+        </li>
+      ),
+      number: ({ children }: { children?: React.ReactNode }) => (
+        <li className="text-[18px] sm:text-[19px] text-gray-800 leading-[1.8] pl-2 relative counter-increment-item before:content-[counter(item)'.'] before:absolute before:left-[-1.5rem] before:text-blue-600 before:font-bold">
+          {children}
+        </li>
+      ),
+    },
+    marks: {
+      strong: ({ children }: { children?: React.ReactNode }) => (
+        <strong className="font-bold text-gray-900">{children}</strong>
+      ),
+      em: ({ children }: { children?: React.ReactNode }) => (
+        <em className="italic font-serif">{children}</em>
+      ),
+      link: ({ children, value }: { children?: React.ReactNode; value?: any }) => (
+        <a
+          href={value?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 underline decoration-1 underline-offset-2 transition-colors"
+        >
+          {children}
+        </a>
+      ),
+    },
+  };
 
   return (
-    <>
-      {/* Header always renders */}
-      <header className="w-full bg-black backdrop-blur-xl border-b border-black/10 shadow-sm sticky top-0 z-50">
-        <div className="flex items-center justify-between px-4 md:px-6 py-3 sm:py-8 relative">
-          {/* Back Button */}
+    <div className="min-h-screen bg-white">
+      <Head>
+        <title>{`${post.title} | Gramika News`}</title>
+        <meta name="description" content={post.excerpt || post.title} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.excerpt || post.title} />
+        <meta property="og:image" content={post.mainImage} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Head>
+
+      {/* CSS for HTML content formatting */}
+      <style jsx global>{`
+        /* Counter support for numbered lists */
+        .counter-reset-item {
+          counter-reset: item;
+        }
+        .counter-increment-item {
+          counter-increment: item;
+        }
+        .counter-increment-item:before {
+          content: counter(item) '. ';
+        }
+
+        /* Article content styling */
+        .prose h1 {
+          font-size: 2rem !important;
+          font-weight: 900 !important;
+          color: #111827 !important;
+          margin-top: 3rem !important;
+          margin-bottom: 1.5rem !important;
+          line-height: 1.2 !important;
+          border-left: 4px solid #2563eb !important;
+          padding-left: 1.25rem !important;
+        }
+        
+        .prose h2 {
+          font-size: 1.75rem !important;
+          font-weight: 900 !important;
+          color: #111827 !important;
+          margin-top: 2.5rem !important;
+          margin-bottom: 1.25rem !important;
+          line-height: 1.25 !important;
+        }
+        
+        .prose h3 {
+          font-size: 1.5rem !important;
+          font-weight: 700 !important;
+          color: #111827 !important;
+          margin-top: 2rem !important;
+          margin-bottom: 1rem !important;
+          line-height: 1.3 !important;
+        }
+
+        .prose p {
+          font-size: 1.125rem !important;
+          line-height: 1.8 !important;
+          color: #374151 !important;
+          margin-bottom: 1.5rem !important;
+        }
+
+        .prose strong {
+          font-weight: 700 !important;
+          color: #111827 !important;
+        }
+
+        .prose em {
+          font-style: italic !important;
+          font-family: Georgia, serif !important;
+        }
+
+        .prose ul {
+          list-style: none !important;
+          padding-left: 1.5rem !important;
+          margin: 2rem 0 !important;
+        }
+
+        .prose ul li {
+          position: relative !important;
+          font-size: 1.125rem !important;
+          line-height: 1.8 !important;
+          color: #374151 !important;
+          margin-bottom: 0.75rem !important;
+          padding-left: 0.5rem !important;
+        }
+
+        .prose ul li:before {
+          content: '•' !important;
+          position: absolute !important;
+          left: -1rem !important;
+          color: #2563eb !important;
+          font-weight: bold !important;
+        }
+
+        .prose ol {
+          list-style: decimal !important;
+          padding-left: 1.5rem !important;
+          margin: 2rem 0 !important;
+        }
+
+        .prose ol li {
+          font-size: 1.125rem !important;
+          line-height: 1.8 !important;
+          color: #374151 !important;
+          margin-bottom: 0.75rem !important;
+          padding-left: 0.5rem !important;
+        }
+
+        .prose ol li::marker {
+          color: #2563eb !important;
+          font-weight: bold !important;
+        }
+
+        .prose a {
+          color: #2563eb !important;
+          text-decoration: underline !important;
+          text-underline-offset: 2px !important;
+          transition: color 0.2s !important;
+        }
+
+        .prose a:hover {
+          color: #1d4ed8 !important;
+        }
+
+        .prose img {
+          max-width: 100% !important;
+          height: auto !important;
+          border-radius: 0.5rem !important;
+          margin: 3rem 0 !important;
+        }
+
+        .prose blockquote {
+          border-left: 4px solid #111827 !important;
+          background: #f9fafb !important;
+          padding: 1.5rem 2rem !important;
+          margin: 2.5rem 0 !important;
+          font-style: italic !important;
+          font-size: 1.25rem !important;
+          color: #374151 !important;
+        }
+
+        @media (min-width: 640px) {
+          .prose h1 { font-size: 2.5rem !important; }
+          .prose h2 { font-size: 2rem !important; }
+          .prose h3 { font-size: 1.75rem !important; }
+          .prose p { font-size: 1.1875rem !important; }
+        }
+
+        @media (min-width: 1024px) {
+          .prose h1 { font-size: 3rem !important; }
+          .prose h2 { font-size: 2.25rem !important; }
+          .prose h3 { font-size: 1.875rem !important; }
+        }
+      `}</style>
+
+      {/* Reading Progress Bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 origin-left z-50"
+        style={{ scaleX }}
+      />
+
+      {/* Simple Navigation */}
+      <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-40 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 bg-gradient-to-br from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 shadow-md hover:shadow-lg rounded-full hover:rounded-xl active:rounded-md transition-all duration-300 ease-in-out active:scale-95 text-white font-semibold p-2 sm:px-5 sm:py-3"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
           >
-            <FaArrowLeft className="text-lg sm:text-base" />
-            <span className="hidden sm:inline">Back to Home</span>
+            <FaArrowLeft className="text-sm group-hover:-translate-x-0.5 transition-transform" />
+            <span className="text-sm font-medium">Back</span>
           </button>
 
-          {/* Title */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white text-center absolute left-1/2 -translate-x-1/2">
+          <span className="text-2xl font-bold text-gray-900 tracking-tight">
             ഗ്രാമിക
-          </h1>
-        </div>
-      </header>
+          </span>
 
-      {/* Main content */}
-      {loading ? (
-        <div className="bg-[#f8f8f8] w-full flex justify-center items-center min-h-[80vh]">
-          <div className="animate-pulse w-11/12 md:w-2/3 lg:w-1/2 bg-white/10 backdrop-blur-md rounded-xl shadow-lg p-6 space-y-4">
-            <div className="h-64 bg-gray-300/30 rounded-lg"></div>
-            <div className="h-6 w-3/4 bg-gray-300/30 rounded"></div>
-            <div className="h-4 w-full bg-gray-300/20 rounded"></div>
-            <div className="h-4 w-full bg-gray-300/20 rounded"></div>
-            <div className="h-4 w-5/6 bg-gray-300/20 rounded"></div>
-            <div className="mt-4 flex gap-4 items-center">
-              <div className="h-6 w-32 bg-gray-300/20 rounded"></div>
-              <div className="h-6 w-20 bg-gray-300/20 rounded"></div>
-            </div>
+          <div className="relative">
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all"
+            >
+              <FaShareAlt className="text-sm" />
+            </button>
+
+            {showShareMenu && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 flex gap-2">
+                <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-blue-50 rounded text-blue-600 transition-colors">
+                  <FaFacebookF className="text-sm" />
+                </a>
+                <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-sky-50 rounded text-sky-500 transition-colors">
+                  <FaTwitter className="text-sm" />
+                </a>
+                <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-blue-50 rounded text-blue-700 transition-colors">
+                  <FaLinkedinIn className="text-sm" />
+                </a>
+                <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-green-50 rounded text-green-600 transition-colors">
+                  <FaWhatsapp className="text-sm" />
+                </a>
+              </div>
+            )}
           </div>
         </div>
-      ) : post ? (
-        <BlogPost pageId={post.pageId} author={post.author} date={post.date} />
-      ) : (
-        <div className="text-center mt-20 text-gray-700">Post not found.</div>
-      )}
+      </nav>
 
-      {/* Footer always renders */}
-      <Footer />
-    </>
+      {/* Article Header */}
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-20">
+        {/* Category */}
+        {post.category && (
+          <div className="mb-6">
+            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 rounded">
+              {post.category}
+            </span>
+          </div>
+        )}
+
+        {/* Meta Info - Moved to Top */}
+        <div className="flex flex-wrap items-center gap-5 pb-6 mb-6 border-b border-gray-200 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold">
+              {(post.author || "Gramika Team").charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Author</p>
+              <p className="font-semibold text-gray-900">{post.author || "Gramika Team"}</p>
+            </div>
+          </div>
+          <div className="h-10 w-px bg-gray-300"></div>
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Published</p>
+            <p className="font-medium text-gray-900">{formatDate(post.publishedAt)}</p>
+          </div>
+          {readingTime > 0 && (
+            <>
+              <div className="h-10 w-px bg-gray-300"></div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Reading Time</p>
+                <p className="font-medium text-gray-900">{readingTime} min</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Featured Image - Moved to Top */}
+        {post.mainImage && (
+          <figure className="mb-10 -mx-4 sm:mx-0">
+            <div className="relative aspect-video overflow-hidden bg-gray-100">
+              <Image
+                src={post.mainImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </figure>
+        )}
+
+        {/* Title */}
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-6">
+          {post.title}
+        </h1>
+
+        {/* Article Content */}
+        <div className="prose prose-lg max-w-none">
+          {post.excerpt && (() => {
+            try {
+              // If excerpt is a JSON string, parse it
+              const content = (typeof post.excerpt === 'string' && (post.excerpt as string).startsWith('{'))
+                ? JSON.parse(post.excerpt as string)
+                : post.excerpt;
+
+              // If it's still a string (HTML), render it
+              if (typeof content === 'string') {
+                return <div dangerouslySetInnerHTML={{ __html: content }} />;
+              }
+
+              // Otherwise use PortableText
+              return <PortableText value={content} components={portableTextComponents} />;
+            } catch (e) {
+              console.error('Error parsing excerpt:', e);
+              // If parsing fails, treat as HTML string
+              if (typeof post.excerpt === 'string') {
+                return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+              }
+              return null;
+            }
+          })()}
+        </div>
+
+        {/* Share Section */}
+        <div className="mt-16 pt-10 border-t-2 border-gray-900">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-sm font-bold text-gray-900 uppercase tracking-wider">Share Article</p>
+            <div className="flex-1 h-px bg-gray-200 ml-4"></div>
+          </div>
+          <div className="flex gap-3">
+            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
+              <FaFacebookF />
+            </a>
+            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-sky-500 text-white rounded hover:bg-sky-600 transition-colors shadow-sm hover:shadow-md">
+              <FaTwitter />
+            </a>
+            <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-blue-700 text-white rounded hover:bg-blue-800 transition-colors shadow-sm hover:shadow-md">
+              <FaLinkedinIn />
+            </a>
+            <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-green-500 text-white rounded hover:bg-green-600 transition-colors shadow-sm hover:shadow-md">
+              <FaWhatsapp />
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { pageId } = context.params || {};
+  if (!pageId) return { notFound: true };
+
+  const query = `*[_type == "topStory" && slug.current == $slug][0] {
+    _id, title, slug, author, "mainImage": mainImage.asset->url,
+    excerpt, body, publishedAt, featured, category
+  }`;
+
+  try {
+    const post = await sanityClient.fetch(query, { slug: pageId });
+    if (!post) return { notFound: true };
+    return { props: { post } };
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return { notFound: true };
+  }
+};

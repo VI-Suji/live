@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "createdAt": "2025-11-26T18:12:47.422Z",
+  "workspaces": [
+    {
+      "name": "default",
+      "title": "Gramika News",
+      "basePath": "/studio",
+      "projectId": "y4c4atv6",
+      "dataset": "production",
+      "icon": "<style data-styled=\"true\" data-styled-version=\"6.1.19\">.cLsLzf{font-family:Inter,-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,\"Helvetica Neue\",\"Liberation Sans\",Helvetica,Arial,system-ui,sans-serif;font-weight:500;font-size:13px;transform:translateY(1px);}/*!sc*/\ndata-styled.g405[id=\"sc-gzpDuk\"]{content:\"cLsLzf,\"}/*!sc*/\n</style><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" rx=\"2\" fill=\"#8f57ef\"></rect><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" alignment-baseline=\"middle\" fill=\"hsla(262, 83%, 24%, 1)\" class=\"sc-gzpDuk cLsLzf\">GN</text></svg>",
+      "mediaLibrary": {
+        "enabled": false
+      },
+      "schema": "5ec0d84d.create-schema.json",
+      "tools": "475942f1.create-tools.json"
+    }
+  ],
+  "studioVersion": "4.19.0"
+}
