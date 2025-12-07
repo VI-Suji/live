@@ -39,6 +39,11 @@ const compressImage = async (file: File): Promise<Blob> => {
 
             canvas.width = width;
             canvas.height = height;
+
+            // Fill with white background to handle transparency
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+
             ctx.drawImage(img, 0, 0, width, height);
 
             canvas.toBlob((blob) => {
@@ -254,7 +259,7 @@ export default function ObituariesAdmin() {
                                                 )}
                                                 <input
                                                     type="file"
-                                                    accept="image/*"
+                                                    accept="image/png, image/jpeg, image/jpg, image/webp"
                                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     onClick={(e) => { (e.target as any).value = null; }}
                                                     onChange={async (e) => {
