@@ -13,6 +13,7 @@ type Obituary = {
     dateOfDeath: string;
     funeralDetails?: string;
     active: boolean;
+    photo?: string;
 };
 
 export default function ObituariesAdmin() {
@@ -20,6 +21,8 @@ export default function ObituariesAdmin() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingItem, setEditingItem] = useState<Obituary | null>(null);
+    const [previewImage, setPreviewImage] = useState<string>("");
+    const [isUploading, setIsUploading] = useState(false);
 
     const [formData, setFormData] = useState<{
         name: string;
@@ -132,12 +135,9 @@ export default function ObituariesAdmin() {
                     active: true,
                 });
 
-                // Update local state
-                if (method === "POST") {
-                    setObituaries([savedItem, ...obituaries]);
-                } else {
-                    setObituaries(obituaries.map(item => item._id === savedItem._id ? savedItem : item));
-                }
+                setPreviewImage("");
+
+                fetchObituaries();
 
                 alert("✅ Obituary saved successfully!");
             } else {
@@ -173,6 +173,7 @@ export default function ObituariesAdmin() {
                                         funeralDetails: "",
                                         active: true,
                                     });
+                                    setPreviewImage("");
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors"
                             >
@@ -193,10 +194,11 @@ export default function ObituariesAdmin() {
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Photo *</label>
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                                            {(formData.photo || (editingItem as any)?.photo) && (
+
+                                            {previewImage && (
                                                 <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
-                                                        src={formData.photo?.previewUrl || (editingItem as any)?.photo || ''}
+                                                        src={previewImage}
                                                         alt="Preview"
                                                         className="w-full h-full object-cover"
                                                     />
@@ -209,6 +211,10 @@ export default function ObituariesAdmin() {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
 
+                                                    // Immediate preview
+                                                    setPreviewImage(URL.createObjectURL(file));
+                                                    setIsUploading(true);
+
                                                     const data = new FormData();
                                                     data.append("file", file);
 
@@ -219,21 +225,22 @@ export default function ObituariesAdmin() {
                                                         });
                                                         const asset = await res.json();
                                                         if (asset._id) {
-                                                            setFormData({
-                                                                ...formData,
+                                                            setFormData(prev => ({
+                                                                ...prev,
                                                                 photo: {
                                                                     _type: "image",
                                                                     asset: {
                                                                         _type: "reference",
                                                                         _ref: asset._id,
                                                                     },
-                                                                    previewUrl: asset.url, // Store URL for preview
                                                                 } as any,
-                                                            });
+                                                            }));
                                                         }
                                                     } catch (err) {
                                                         console.error("Upload failed", err);
                                                         alert("Image upload failed");
+                                                    } finally {
+                                                        setIsUploading(false);
                                                     }
                                                 }}
                                                 className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 border-2 border-gray-300 rounded-xl"
@@ -304,8 +311,12 @@ export default function ObituariesAdmin() {
                                         <label htmlFor="obituary-active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                                        <button type="submit" className="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
-                                            Save
+                                        <button
+                                            type="submit"
+                                            disabled={isUploading}
+                                            className={`flex-1 text-white py-3 rounded-xl font-bold order-1 sm:order-1 ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-800 hover:bg-gray-900'}`}
+                                        >
+                                            {isUploading ? "Uploading..." : "Save"}
                                         </button>
                                         <button
                                             type="button"
@@ -335,6 +346,7 @@ export default function ObituariesAdmin() {
                                         funeralDetails: item.funeralDetails || "",
                                         active: item.active,
                                     });
+                                    setPreviewImage(item.photo || "");
                                     setShowForm(true);
                                 }}
                             >
@@ -371,6 +383,7 @@ export default function ObituariesAdmin() {
                                                 funeralDetails: item.funeralDetails || "",
                                                 active: item.active,
                                             });
+                                            setPreviewImage(item.photo || "");
                                             setShowForm(true);
                                         }}
                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded"

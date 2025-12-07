@@ -32,6 +32,11 @@ export default {
             rows: 4,
         },
         {
+            name: 'author',
+            title: 'Author',
+            type: 'string',
+        },
+        {
             name: 'publishedAt',
             title: 'Published At',
             type: 'datetime',

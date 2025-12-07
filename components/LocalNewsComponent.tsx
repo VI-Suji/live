@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 type LocalNewsItem = {
     _id: string;
     title: string;
     image: string;
     description?: string;
+    author?: string;
     publishedAt: string;
 };
 
@@ -85,7 +87,7 @@ const LocalNewsItem = ({ news }: { news: LocalNewsItem }) => {
     return (
         <div
             onClick={toggleExpand}
-            className={`group bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 transition-all duration-300 border border-transparent hover:border-gray-100 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start relative ${isExpandable ? 'cursor-pointer hover:shadow-xl' : ''}`}
+            className={`group bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-4 transition-all duration-300 border border-transparent hover:border-gray-100 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start relative ${isExpandable ? 'cursor-pointer hover:shadow-xl' : ''}`}
         >
             <div className="relative h-40 sm:h-40 w-full sm:w-64 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300">
                 <Image
@@ -109,6 +111,14 @@ const LocalNewsItem = ({ news }: { news: LocalNewsItem }) => {
                     )}
                 </div>
 
+                {news.author && (
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md">
+                            By {news.author}
+                        </span>
+                    </div>
+                )}
+
                 <div
                     className="overflow-hidden transition-[max-height] duration-1000 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
                     style={{ maxHeight: contentHeight }}
@@ -128,12 +138,16 @@ const LocalNewsItem = ({ news }: { news: LocalNewsItem }) => {
     );
 };
 
+
+
 const LocalNews = () => {
     const [localNews, setLocalNews] = useState<LocalNewsItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
 
     useEffect(() => {
-        fetch("/api/sanity/localNews")
+        fetch(`/api/sanity/localNews?t=${Date.now()}`)
             .then((res) => res.json())
             .then((data) => {
                 setLocalNews(data);
@@ -144,6 +158,19 @@ const LocalNews = () => {
                 setLoading(false);
             });
     }, []);
+
+    const totalPages = Math.ceil(localNews.length / itemsPerPage);
+    const currentNews = localNews.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            document.getElementById('local-news')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     const renderLoader = () => (
         <div className="flex flex-col gap-6">
@@ -165,18 +192,52 @@ const LocalNews = () => {
     }
 
     return (
-        <div className="w-full mt-8 sm:mt-12">
+        <div id="local-news" className="w-full mt-8 sm:mt-12 border border-gray-200 sm:border-none rounded-3xl p-2 sm:p-0">
             <div className="flex items-center gap-3 mb-6 sm:mb-8">
                 <div className="w-1.5 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
                 <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Local News</h2>
             </div>
 
             {loading ? renderLoader() : (
-                <div className="flex flex-col gap-4 sm:gap-6">
-                    {localNews.map((news) => (
-                        <LocalNewsItem key={news._id} news={news} />
-                    ))}
-                </div>
+                <>
+                    <div className="flex flex-col gap-4 sm:gap-6">
+                        {currentNews.map((news) => (
+                            <LocalNewsItem key={news._id} news={news} />
+                        ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-4 mt-8 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${currentPage === 1
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md"
+                                    }`}
+                            >
+                                <FaChevronLeft size={12} />
+                                <span>Previous</span>
+                            </button>
+
+                            <span className="text-gray-600 font-bold bg-gray-50 px-4 py-2 rounded-lg text-sm">
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${currentPage === totalPages
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md"
+                                    }`}
+                            >
+                                <span>Next</span>
+                                <FaChevronRight size={12} />
+                            </button>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

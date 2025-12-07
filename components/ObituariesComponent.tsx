@@ -48,7 +48,7 @@ const Obituaries = () => {
                             >
 
 
-                                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 grayscale mb-3 group-hover:grayscale-0 transition-all">
+                                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200 mb-3 transition-all">
                                     {person.photo ? (
                                         <Image
                                             src={person.photo}

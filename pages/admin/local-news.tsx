@@ -10,6 +10,7 @@ type LocalNews = {
     title: string;
     image?: string;
     description?: string;
+    author?: string;
     publishedAt?: string;
     order?: number;
     active: boolean;
@@ -20,16 +21,20 @@ export default function LocalNewsAdmin() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editingItem, setEditingItem] = useState<LocalNews | null>(null);
+    const [previewImage, setPreviewImage] = useState<string>("");
+    const [isUploading, setIsUploading] = useState(false);
 
     const [formData, setFormData] = useState<{
         title: string;
         description: string;
+        author: string;
         order: number;
         active: boolean;
         image?: any;
     }>({
         title: "",
         description: "",
+        author: "",
         order: 1,
         active: true,
     });
@@ -128,14 +133,11 @@ export default function LocalNewsAdmin() {
                 alert(editingItem ? "✅ Updated successfully!" : "✅ Created successfully!");
                 setShowForm(false);
                 setEditingItem(null);
-                setFormData({ title: "", description: "", order: 1, active: true });
+                setFormData({ title: "", description: "", author: "", order: 1, active: true });
 
-                // Update local state
-                if (method === "POST") {
-                    setNews([savedItem, ...news]);
-                } else {
-                    setNews(news.map(item => item._id === savedItem._id ? savedItem : item));
-                }
+                setPreviewImage("");
+
+                fetchNews();
             }
         } catch (error) {
             console.error("Error saving:", error);
@@ -159,7 +161,8 @@ export default function LocalNewsAdmin() {
                                 onClick={() => {
                                     setShowForm(true);
                                     setEditingItem(null);
-                                    setFormData({ title: "", description: "", order: news.length + 1, active: true });
+                                    setFormData({ title: "", description: "", author: "", order: news.length + 1, active: true });
+                                    setPreviewImage("");
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-md transition-all hover:scale-105"
                             >
@@ -180,10 +183,10 @@ export default function LocalNewsAdmin() {
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Image *</label>
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                                            {(formData.image || editingItem?.image) && (
+                                            {previewImage && (
                                                 <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
                                                     <img
-                                                        src={typeof formData.image === 'string' ? formData.image : editingItem?.image || ''}
+                                                        src={previewImage}
                                                         alt="Preview"
                                                         className="w-full h-full object-cover"
                                                     />
@@ -196,6 +199,10 @@ export default function LocalNewsAdmin() {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
 
+                                                    // Immediate preview
+                                                    setPreviewImage(URL.createObjectURL(file));
+                                                    setIsUploading(true);
+
                                                     const data = new FormData();
                                                     data.append("file", file);
 
@@ -206,8 +213,8 @@ export default function LocalNewsAdmin() {
                                                         });
                                                         const asset = await res.json();
                                                         if (asset._id) {
-                                                            setFormData({
-                                                                ...formData,
+                                                            setFormData(prev => ({
+                                                                ...prev,
                                                                 image: {
                                                                     _type: "image",
                                                                     asset: {
@@ -215,11 +222,13 @@ export default function LocalNewsAdmin() {
                                                                         _ref: asset._id,
                                                                     },
                                                                 } as any,
-                                                            });
+                                                            }));
                                                         }
                                                     } catch (err) {
                                                         console.error("Upload failed", err);
                                                         alert("Image upload failed");
+                                                    } finally {
+                                                        setIsUploading(false);
                                                     }
                                                 }}
                                                 className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border-2 border-gray-300 rounded-xl"
@@ -236,6 +245,16 @@ export default function LocalNewsAdmin() {
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                                             placeholder="News title"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2 text-gray-900">Author (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.author}
+                                            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                            placeholder="Author name"
                                         />
                                     </div>
                                     <div>
@@ -269,8 +288,12 @@ export default function LocalNewsAdmin() {
                                         <label htmlFor="local-news-active" className="font-bold text-gray-900">Active (Show on Website)</label>
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                                        <button type="submit" className="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold order-1 sm:order-1">
-                                            Save
+                                        <button
+                                            type="submit"
+                                            disabled={isUploading}
+                                            className={`flex-1 text-white py-3 rounded-xl font-bold order-1 sm:order-1 ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600'}`}
+                                        >
+                                            {isUploading ? "Uploading..." : "Save"}
                                         </button>
                                         <button
                                             type="button"
@@ -308,9 +331,11 @@ export default function LocalNewsAdmin() {
                                             setFormData({
                                                 title: item.title,
                                                 description: item.description || "",
+                                                author: item.author || "",
                                                 order: item.order || 1,
                                                 active: item.active ?? true,
                                             });
+                                            setPreviewImage(item.image || "");
                                             setShowForm(true);
                                         }}
                                     >
@@ -347,9 +372,11 @@ export default function LocalNewsAdmin() {
                                                         setFormData({
                                                             title: item.title,
                                                             description: item.description || "",
+                                                            author: item.author || "",
                                                             order: item.order || 1,
                                                             active: item.active ?? true,
                                                         });
+                                                        setPreviewImage(item.image || "");
                                                         setShowForm(true);
                                                     }}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

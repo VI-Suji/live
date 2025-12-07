@@ -15,6 +15,7 @@ export default async function handler(
                 title,
                 "image": image.asset->url,
                 description,
+                author,
                 publishedAt,
                 order,
                 active
@@ -24,6 +25,7 @@ export default async function handler(
                 title,
                 "image": image.asset->url,
                 description,
+                author,
                 publishedAt,
                 order,
                 active
