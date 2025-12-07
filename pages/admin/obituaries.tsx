@@ -218,7 +218,8 @@ export default function ObituariesAdmin() {
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    className="hidden"
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                    onClick={(e) => { (e.target as any).value = null; }}
                                                     onChange={async (e) => {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
