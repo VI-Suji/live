@@ -111,6 +111,11 @@ export default function LocalNewsAdmin() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!editingItem && !formData.image) {
+            alert("Please upload an image");
+            return;
+        }
+
         const payload = {
             ...formData,
             publishedAt: new Date().toISOString(),
@@ -353,6 +358,15 @@ export default function LocalNewsAdmin() {
                                         }}
                                     >
                                         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                            {item.image && (
+                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="flex-1 w-full">
                                                 <h3 className="font-bold text-lg text-gray-900 mb-2 break-words">{item.title}</h3>
                                                 {item.description && (

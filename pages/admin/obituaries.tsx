@@ -193,58 +193,70 @@ export default function ObituariesAdmin() {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Photo *</label>
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                        <div className="w-full">
+                                            <label className="flex flex-col items-center justify-center w-full h-48 sm:h-56 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden group">
+                                                {previewImage ? (
+                                                    <>
+                                                        <img
+                                                            src={previewImage}
+                                                            alt="Preview"
+                                                            className="absolute inset-0 w-full h-full object-cover"
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <span className="text-white font-bold bg-black/50 px-4 py-2 rounded-lg">Change Photo</span>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                                                        <div className="mb-3 p-3 bg-white rounded-full shadow-sm">
+                                                            <FaPlus className="w-6 h-6 text-gray-400" />
+                                                        </div>
+                                                        <p className="mb-1 text-sm text-gray-900 font-bold">Click to upload photo</p>
+                                                        <p className="text-xs text-gray-500">Square or Portrait recommended</p>
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (!file) return;
 
-                                            {previewImage && (
-                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                                                    <img
-                                                        src={previewImage}
-                                                        alt="Preview"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            )}
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={async (e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (!file) return;
+                                                        // Immediate preview
+                                                        setPreviewImage(URL.createObjectURL(file));
+                                                        setIsUploading(true);
 
-                                                    // Immediate preview
-                                                    setPreviewImage(URL.createObjectURL(file));
-                                                    setIsUploading(true);
+                                                        const data = new FormData();
+                                                        data.append("file", file);
 
-                                                    const data = new FormData();
-                                                    data.append("file", file);
-
-                                                    try {
-                                                        const res = await fetch("/api/admin/upload?type=image", {
-                                                            method: "POST",
-                                                            body: data,
-                                                        });
-                                                        const asset = await res.json();
-                                                        if (asset._id) {
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                photo: {
-                                                                    _type: "image",
-                                                                    asset: {
-                                                                        _type: "reference",
-                                                                        _ref: asset._id,
-                                                                    },
-                                                                } as any,
-                                                            }));
+                                                        try {
+                                                            const res = await fetch("/api/admin/upload?type=image", {
+                                                                method: "POST",
+                                                                body: data,
+                                                            });
+                                                            const asset = await res.json();
+                                                            if (asset._id) {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    photo: {
+                                                                        _type: "image",
+                                                                        asset: {
+                                                                            _type: "reference",
+                                                                            _ref: asset._id,
+                                                                        },
+                                                                    } as any,
+                                                                }));
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("Upload failed", err);
+                                                            alert("Image upload failed");
+                                                        } finally {
+                                                            setIsUploading(false);
                                                         }
-                                                    } catch (err) {
-                                                        console.error("Upload failed", err);
-                                                        alert("Image upload failed");
-                                                    } finally {
-                                                        setIsUploading(false);
-                                                    }
-                                                }}
-                                                className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100 border-2 border-gray-300 rounded-xl"
-                                            />
+                                                    }}
+                                                />
+                                            </label>
                                         </div>
                                     </div>
 
