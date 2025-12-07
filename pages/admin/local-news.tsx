@@ -19,8 +19,12 @@ type LocalNews = {
 const compressImage = async (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.src = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
+
         img.onload = () => {
+            // Clean up memory
+            URL.revokeObjectURL(url);
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             if (!ctx) {
@@ -28,9 +32,15 @@ const compressImage = async (file: File): Promise<Blob> => {
                 return;
             }
 
-            const MAX_WIDTH = 1200; // Safe limit for mobile
+            const MAX_WIDTH = 1200;
             let width = img.width;
             let height = img.height;
+
+            // Simple validation
+            if (width === 0 || height === 0) {
+                reject(new Error('Image has 0 dimensions'));
+                return;
+            }
 
             if (width > MAX_WIDTH) {
                 height = Math.round((height * MAX_WIDTH) / width);
@@ -40,9 +50,16 @@ const compressImage = async (file: File): Promise<Blob> => {
             canvas.width = width;
             canvas.height = height;
 
-            // Fill with white background to handle transparency
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
+            // If it's a PNG, we want to preserve transparency, so NO white background fill
+            // If it's NOT a PNG (e.g. JPEG), we fill white just in case transparency exists (e.g. from a converted WEBP)
+            // But if we output PNG, we don't need fill.
+
+            const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+
+            if (outputType === 'image/jpeg') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, width, height);
+            }
 
             ctx.drawImage(img, 0, 0, width, height);
 
@@ -52,9 +69,15 @@ const compressImage = async (file: File): Promise<Blob> => {
                 } else {
                     reject(new Error('Compression failed'));
                 }
-            }, 'image/jpeg', 0.8);
+            }, outputType, 0.85);
         };
-        img.onerror = (err) => reject(err);
+
+        img.onerror = (err) => {
+            URL.revokeObjectURL(url);
+            reject(new Error("Failed to load image for compression"));
+        };
+
+        img.src = url;
     });
 };
 
@@ -267,8 +290,9 @@ export default function LocalNewsAdmin() {
                                                         try {
                                                             // Compress before upload
                                                             const compressedBlob = await compressImage(file);
+                                                            const extension = file.type === 'image/png' ? 'png' : 'jpg';
                                                             const data = new FormData();
-                                                            data.append("file", compressedBlob, "image.jpg");
+                                                            data.append("file", compressedBlob, `image.${extension}`);
 
                                                             const res = await fetch("/api/admin/upload?type=image", {
                                                                 method: "POST",
