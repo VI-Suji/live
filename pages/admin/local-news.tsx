@@ -16,6 +16,43 @@ type LocalNews = {
     active: boolean;
 };
 
+const compressImage = async (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                reject(new Error('Canvas context not available'));
+                return;
+            }
+
+            const MAX_WIDTH = 1200; // Safe limit for mobile
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+                height = Math.round((height * MAX_WIDTH) / width);
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error('Compression failed'));
+                }
+            }, 'image/jpeg', 0.8);
+        };
+        img.onerror = (err) => reject(err);
+    });
+};
+
 export default function LocalNewsAdmin() {
     const [news, setNews] = useState<LocalNews[]>([]);
     const [loading, setLoading] = useState(true);
@@ -218,18 +255,23 @@ export default function LocalNewsAdmin() {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
 
-                                                        // Immediate preview
+                                                        // Immediate preview of original
                                                         setPreviewImage(URL.createObjectURL(file));
                                                         setIsUploading(true);
 
-                                                        const data = new FormData();
-                                                        data.append("file", file);
-
                                                         try {
+                                                            // Compress before upload
+                                                            const compressedBlob = await compressImage(file);
+                                                            const data = new FormData();
+                                                            data.append("file", compressedBlob, "image.jpg");
+
                                                             const res = await fetch("/api/admin/upload?type=image", {
                                                                 method: "POST",
                                                                 body: data,
                                                             });
+
+                                                            if (!res.ok) throw new Error(res.statusText);
+
                                                             const asset = await res.json();
                                                             if (asset._id) {
                                                                 setFormData(prev => ({
@@ -242,10 +284,14 @@ export default function LocalNewsAdmin() {
                                                                         },
                                                                     } as any,
                                                                 }));
+                                                            } else {
+                                                                throw new Error("Invalid asset response");
                                                             }
-                                                        } catch (err) {
+                                                        } catch (err: any) {
                                                             console.error("Upload failed", err);
-                                                            alert("Image upload failed");
+                                                            alert(`Image upload failed: ${err.message || "Unknown error"}`);
+                                                            // Clear preview on failure so user knows to retry
+                                                            setPreviewImage("");
                                                         } finally {
                                                             setIsUploading(false);
                                                         }
