@@ -157,11 +157,11 @@ export default function ObituariesAdmin() {
                 <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-lg">
+                            <div className="flex items-center gap-4 min-w-0">
+                                <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-lg flex-shrink-0">
                                     <FaArrowLeft className="text-gray-600" />
                                 </Link>
-                                <h1 className="text-2xl font-black text-gray-900">Obituaries</h1>
+                                <h1 className="text-xl sm:text-2xl font-black text-gray-900 truncate">Obituaries</h1>
                             </div>
                             <button
                                 onClick={() => {
@@ -177,7 +177,7 @@ export default function ObituariesAdmin() {
                                     });
                                     setPreviewImage("");
                                 }}
-                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors flex-shrink-0"
                             >
                                 <FaPlus />
                                 <span className="hidden sm:inline">Add Obituary</span>
@@ -191,7 +191,7 @@ export default function ObituariesAdmin() {
                     {showForm && (
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                             <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-                                <h2 className="text-2xl font-bold mb-4">{editingItem ? "Edit Obituary" : "Add Obituary"}</h2>
+                                <h2 className="text-2xl text-black font-bold mb-4">{editingItem ? "Edit Obituary" : "Add Obituary"}</h2>
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Photo *</label>

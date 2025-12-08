@@ -177,11 +177,11 @@ export default function AdvertisementsAdmin() {
                 <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-lg">
+                            <div className="flex items-center gap-4 min-w-0">
+                                <Link href="/admin/dashboard" className="p-2 hover:bg-gray-100 rounded-lg flex-shrink-0">
                                     <FaArrowLeft className="text-gray-600" />
                                 </Link>
-                                <h1 className="text-2xl font-black text-gray-900">Advertisements</h1>
+                                <h1 className="text-xl sm:text-2xl font-black text-gray-900 truncate">Advertisements</h1>
                             </div>
                             <button
                                 onClick={() => {
@@ -196,7 +196,7 @@ export default function AdvertisementsAdmin() {
                                         endDate: "",
                                     });
                                 }}
-                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
+                                className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors flex-shrink-0"
                             >
                                 <FaPlus />
                                 <span className="hidden sm:inline">Add Ad</span>
