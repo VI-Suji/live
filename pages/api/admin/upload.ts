@@ -24,7 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const form = new IncomingForm();
+    const form = new IncomingForm({
+        maxFileSize: 50 * 1024 * 1024, // 50MB Limit for large mobile photos
+        keepExtensions: true,
+    });
 
     try {
         const { files } = await new Promise<{ fields: any; files: any }>((resolve, reject) => {

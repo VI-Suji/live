@@ -244,7 +244,7 @@ export default function AdvertisementsAdmin() {
                                                 <label className="block text-xs font-bold text-gray-700 mb-2">Upload Image</label>
                                                 <input
                                                     type="file"
-                                                    accept="image/*"
+                                                    accept="image/png, image/jpeg, image/jpg, image/webp"
                                                     onChange={async (e) => {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;

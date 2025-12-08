@@ -16,70 +16,7 @@ type LocalNews = {
     active: boolean;
 };
 
-const compressImage = async (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
 
-        img.onload = () => {
-            // Clean up memory
-            URL.revokeObjectURL(url);
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                reject(new Error('Canvas context not available'));
-                return;
-            }
-
-            const MAX_WIDTH = 1200;
-            let width = img.width;
-            let height = img.height;
-
-            // Simple validation
-            if (width === 0 || height === 0) {
-                reject(new Error('Image has 0 dimensions'));
-                return;
-            }
-
-            if (width > MAX_WIDTH) {
-                height = Math.round((height * MAX_WIDTH) / width);
-                width = MAX_WIDTH;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            // If it's a PNG, we want to preserve transparency, so NO white background fill
-            // If it's NOT a PNG (e.g. JPEG), we fill white just in case transparency exists (e.g. from a converted WEBP)
-            // But if we output PNG, we don't need fill.
-
-            const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-
-            if (outputType === 'image/jpeg') {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, width, height);
-            }
-
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    resolve(blob);
-                } else {
-                    reject(new Error('Compression failed'));
-                }
-            }, outputType, 0.85);
-        };
-
-        img.onerror = (err) => {
-            URL.revokeObjectURL(url);
-            reject(new Error("Failed to load image for compression"));
-        };
-
-        img.src = url;
-    });
-};
 
 export default function LocalNewsAdmin() {
     const [news, setNews] = useState<LocalNews[]>([]);
@@ -252,81 +189,58 @@ export default function LocalNewsAdmin() {
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Image *</label>
-                                        <div className="w-full">
-                                            <label className="flex flex-col items-center justify-center w-full h-48 sm:h-64 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors relative overflow-hidden group">
-                                                {previewImage ? (
-                                                    <>
-                                                        <img
-                                                            src={previewImage}
-                                                            alt="Preview"
-                                                            className="absolute inset-0 w-full h-full object-cover"
-                                                        />
-                                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <span className="text-white font-bold bg-black/50 px-4 py-2 rounded-lg">Change Image</span>
-                                                        </div>
-                                                    </>
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                                                        <div className="mb-3 p-3 bg-white rounded-full shadow-sm">
-                                                            <FaPlus className="w-6 h-6 text-gray-400" />
-                                                        </div>
-                                                        <p className="mb-1 text-sm text-gray-900 font-bold">Click to upload image</p>
-                                                        <p className="text-xs text-gray-500">SVG, PNG, JPG (MAX. 2MB)</p>
-                                                    </div>
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                    onClick={(e) => { (e.target as any).value = null; }}
-                                                    onChange={async (e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (!file) return;
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                            {previewImage && (
+                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                                                    <img
+                                                        src={previewImage}
+                                                        alt="Preview"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
 
-                                                        // Immediate preview of original
-                                                        setPreviewImage(URL.createObjectURL(file));
-                                                        setIsUploading(true);
+                                                    // Immediate preview
+                                                    setPreviewImage(URL.createObjectURL(file));
+                                                    setIsUploading(true);
 
-                                                        try {
-                                                            // Compress before upload
-                                                            const compressedBlob = await compressImage(file);
-                                                            const extension = file.type === 'image/png' ? 'png' : 'jpg';
-                                                            const data = new FormData();
-                                                            data.append("file", compressedBlob, `image.${extension}`);
+                                                    const data = new FormData();
+                                                    data.append("file", file);
 
-                                                            const res = await fetch("/api/admin/upload?type=image", {
-                                                                method: "POST",
-                                                                body: data,
-                                                            });
-
-                                                            if (!res.ok) throw new Error(res.statusText);
-
-                                                            const asset = await res.json();
-                                                            if (asset._id) {
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    image: {
-                                                                        _type: "image",
-                                                                        asset: {
-                                                                            _type: "reference",
-                                                                            _ref: asset._id,
-                                                                        },
-                                                                    } as any,
-                                                                }));
-                                                            } else {
-                                                                throw new Error("Invalid asset response");
-                                                            }
-                                                        } catch (err: any) {
-                                                            console.error("Upload failed", err);
-                                                            alert(`Image upload failed: ${err.message || "Unknown error"}`);
-                                                            // Clear preview on failure so user knows to retry
-                                                            setPreviewImage("");
-                                                        } finally {
-                                                            setIsUploading(false);
+                                                    try {
+                                                        const res = await fetch("/api/admin/upload?type=image", {
+                                                            method: "POST",
+                                                            body: data,
+                                                        });
+                                                        const asset = await res.json();
+                                                        if (asset._id) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                image: {
+                                                                    _type: "image",
+                                                                    asset: {
+                                                                        _type: "reference",
+                                                                        _ref: asset._id,
+                                                                    },
+                                                                } as any,
+                                                            }));
                                                         }
-                                                    }}
-                                                />
-                                            </label>
+                                                    } catch (err) {
+                                                        console.error("Upload failed", err);
+                                                        alert("Image upload failed");
+                                                        setPreviewImage("");
+                                                    } finally {
+                                                        setIsUploading(false);
+                                                    }
+                                                }}
+                                                className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 border-2 border-gray-300 rounded-xl"
+                                            />
                                         </div>
                                     </div>
 

@@ -262,8 +262,7 @@ export default function TopStoriesAdmin() {
                                             )}
                                             <input
                                                 type="file"
-
-                                                accept="image/*"
+                                                accept="image/png, image/jpeg, image/jpg, image/webp"
                                                 onChange={async (e) => {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
