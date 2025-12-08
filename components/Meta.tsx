@@ -46,7 +46,8 @@ const Meta = ({
             <meta property="twitter:image" content={image} />
 
             {/* Favicon */}
-            <link rel="icon" href="/favicon.ico" />
+            <link rel="icon" href="/gramika.png" type="image/png" />
+            <link rel="apple-touch-icon" href="/gramika.png" />
 
             {/* Search Engine Verification (Optional - add codes later) */}
             {/* <meta name="google-site-verification" content="YOUR_CODE" /> */}

@@ -224,6 +224,9 @@ export default function ObituariesAdmin() {
                                                             method: "POST",
                                                             body: data,
                                                         });
+
+                                                        if (!res.ok) throw new Error("Upload failed");
+
                                                         const asset = await res.json();
                                                         if (asset._id) {
                                                             // Update preview URL to server URL
@@ -241,10 +244,11 @@ export default function ObituariesAdmin() {
                                                         }
                                                     } catch (err) {
                                                         console.error("Upload failed", err);
-                                                        alert("Image upload failed");
+                                                        alert("Image upload failed. Please try again.");
                                                         setPreviewImage("");
                                                     } finally {
                                                         setIsUploading(false);
+                                                        e.target.value = '';
                                                     }
                                                 }}
                                                 className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 border-2 border-gray-300 rounded-xl"

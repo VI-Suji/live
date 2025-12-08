@@ -144,7 +144,7 @@ const LocalNews = () => {
     const [localNews, setLocalNews] = useState<LocalNewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
+    const itemsPerPage = 5;
 
     useEffect(() => {
         fetch(`/api/sanity/localNews?t=${Date.now()}`)
@@ -207,33 +207,44 @@ const LocalNews = () => {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-4 mt-8 pt-4 border-t border-gray-100">
+                        <div className="flex justify-center items-center gap-3 mt-8">
                             <button
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${currentPage === 1
+                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${currentPage === 1
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                                     }`}
                             >
-                                <FaChevronLeft size={12} />
-                                <span>Previous</span>
+                                Previous
                             </button>
 
-                            <span className="text-gray-600 font-bold bg-gray-50 px-4 py-2 rounded-lg text-sm">
-                                Page {currentPage} of {totalPages}
-                            </span>
+                            <div className="flex gap-2">
+                                {Array.from({ length: totalPages }).map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handlePageChange(idx + 1)}
+                                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === idx + 1
+                                            ? "bg-blue-600 text-white shadow-md transform scale-105"
+                                            : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                                            }`}
+                                        aria-label={`Page ${idx + 1}`}
+                                        aria-current={currentPage === idx + 1 ? 'page' : undefined}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                ))}
+                            </div>
 
                             <button
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${currentPage === totalPages
+                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${currentPage === totalPages
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-md"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                                     }`}
                             >
-                                <span>Next</span>
-                                <FaChevronRight size={12} />
+                                Next
                             </button>
                         </div>
                     )}

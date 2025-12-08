@@ -8,6 +8,8 @@ import advertisement from './advertisement';
 import breakingNews from './breakingNews';
 import siteSettings from './siteSettings';
 
+import videoGallery from './videoGallery';
+
 export const schemaTypes = [
     topStory,
     localNews,
@@ -18,4 +20,5 @@ export const schemaTypes = [
     advertisement,
     breakingNews,
     siteSettings,
+    videoGallery,
 ];

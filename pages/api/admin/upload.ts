@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const form = new IncomingForm({
-        maxFileSize: 50 * 1024 * 1024, // 50MB Limit for large mobile photos
+        maxFileSize: 100 * 1024 * 1024, // 100MB Limit for large videos
         keepExtensions: true,
     });
 

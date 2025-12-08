@@ -19,6 +19,7 @@ export default function AdvertisementsAdmin() {
     const [ads, setAds] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [editingItem, setEditingItem] = useState<Advertisement | null>(null);
 
@@ -246,9 +247,11 @@ export default function AdvertisementsAdmin() {
                                                     type="file"
                                                     accept="image/png, image/jpeg, image/jpg, image/webp"
                                                     onChange={async (e) => {
+                                                        // e.preventDefault(); // Inputs don't need preventDefault on change usually
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
 
+                                                        setIsUploading(true);
                                                         const data = new FormData();
                                                         data.append("file", file);
 
@@ -257,6 +260,9 @@ export default function AdvertisementsAdmin() {
                                                                 method: "POST",
                                                                 body: data,
                                                             });
+
+                                                            if (!res.ok) throw new Error("Upload failed");
+
                                                             const asset = await res.json();
                                                             if (asset._id) {
                                                                 setFormData({
@@ -267,14 +273,18 @@ export default function AdvertisementsAdmin() {
                                                                             _type: "reference",
                                                                             _ref: asset._id,
                                                                         },
-                                                                        previewUrl: asset.url, // Explicitly ensure this is set
+                                                                        previewUrl: asset.url,
                                                                     } as any,
                                                                     video: undefined,
                                                                 });
                                                             }
                                                         } catch (err) {
                                                             console.error("Upload failed", err);
-                                                            alert("Image upload failed");
+                                                            alert("Image upload failed. Please try a smaller image.");
+                                                        } finally {
+                                                            setIsUploading(false);
+                                                            // Reset input to allow re-uploading same file if needed
+                                                            e.target.value = '';
                                                         }
                                                     }}
                                                     className="block w-full text-sm text-gray-900 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border-2 border-gray-300 rounded-xl"
@@ -290,6 +300,7 @@ export default function AdvertisementsAdmin() {
                                                         const file = e.target.files?.[0];
                                                         if (!file) return;
 
+                                                        setIsUploading(true);
                                                         const data = new FormData();
                                                         data.append("file", file);
 
@@ -298,6 +309,9 @@ export default function AdvertisementsAdmin() {
                                                                 method: "POST",
                                                                 body: data,
                                                             });
+
+                                                            if (!res.ok) throw new Error("Upload failed");
+
                                                             const asset = await res.json();
                                                             if (asset._id) {
                                                                 setFormData({
@@ -309,13 +323,16 @@ export default function AdvertisementsAdmin() {
                                                                             _ref: asset._id,
                                                                         },
                                                                     } as any,
-                                                                    image: undefined, // Clear image if video is uploaded
+                                                                    image: undefined,
                                                                 });
                                                                 alert("Video uploaded successfully!");
                                                             }
                                                         } catch (err) {
                                                             console.error("Upload failed", err);
-                                                            alert("Video upload failed");
+                                                            alert("Video upload failed. Check the file size (<100MB).");
+                                                        } finally {
+                                                            setIsUploading(false);
+                                                            e.target.value = '';
                                                         }
                                                     }}
                                                     className="block w-full text-sm text-gray-900 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 border-2 border-gray-300 rounded-xl"
@@ -391,10 +408,10 @@ export default function AdvertisementsAdmin() {
                                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                         <button
                                             type="submit"
-                                            disabled={saving}
-                                            className="flex-1 bg-pink-600 text-white py-3 rounded-xl font-bold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-1"
+                                            disabled={saving || isUploading}
+                                            className={`flex-1 text-white py-3 rounded-xl font-bold order-1 sm:order-1 ${saving || isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-pink-600 hover:bg-pink-700'}`}
                                         >
-                                            {saving ? "Saving..." : "Save"}
+                                            {saving ? "Saving..." : isUploading ? "Uploading..." : "Save"}
                                         </button>
                                         <button
                                             type="button"

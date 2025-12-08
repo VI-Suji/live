@@ -5,6 +5,7 @@ import BannerAd from "./BannerAdComponent";
 import DoctorsAvailable from "./DoctorsAvailableComponent";
 import Obituaries from "./ObituariesComponent";
 import LocalNews from "./LocalNewsComponent";
+import VideoGallery from "./VideoGalleryComponent";
 
 interface NewsItem {
   date: string; // "2025-11-15"
@@ -134,13 +135,13 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         <LocalNews />
       </div>
 
-      {/* Banner Ad - Between Local News and Doctors - Mobile Only */}
       {showAds && (
         <div className="w-full lg:hidden">
           <BannerAd />
         </div>
       )}
 
+      <VideoGallery />
       <DoctorsAvailable />
       <Obituaries />
     </div>

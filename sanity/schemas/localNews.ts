@@ -23,7 +23,7 @@ export default {
                     title: 'Alternative Text',
                 },
             ],
-            validation: (Rule: any) => Rule.required(),
+
         },
         {
             name: 'description',

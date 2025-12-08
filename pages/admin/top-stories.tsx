@@ -267,6 +267,7 @@ export default function TopStoriesAdmin() {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
 
+                                                    setIsUploading(true);
                                                     const data = new FormData();
                                                     data.append("file", file);
 
@@ -275,6 +276,9 @@ export default function TopStoriesAdmin() {
                                                             method: "POST",
                                                             body: data,
                                                         });
+
+                                                        if (!res.ok) throw new Error("Upload failed");
+
                                                         const asset = await res.json();
                                                         if (asset._id) {
                                                             setFormData({
@@ -291,7 +295,10 @@ export default function TopStoriesAdmin() {
                                                         }
                                                     } catch (err) {
                                                         console.error("Upload failed", err);
-                                                        alert("Image upload failed");
+                                                        alert("Image upload failed. Please try again.");
+                                                    } finally {
+                                                        setIsUploading(false);
+                                                        e.target.value = '';
                                                     }
                                                 }}
                                                 className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border-2 border-gray-300 rounded-xl"
