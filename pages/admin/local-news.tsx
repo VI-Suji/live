@@ -220,6 +220,8 @@ export default function LocalNewsAdmin() {
                                                         });
                                                         const asset = await res.json();
                                                         if (asset._id) {
+                                                            // Update preview with the server URL which is guaranteed to be displayable
+                                                            setPreviewImage(asset.url);
                                                             setFormData(prev => ({
                                                                 ...prev,
                                                                 image: {

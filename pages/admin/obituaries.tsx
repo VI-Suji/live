@@ -226,6 +226,8 @@ export default function ObituariesAdmin() {
                                                         });
                                                         const asset = await res.json();
                                                         if (asset._id) {
+                                                            // Update preview URL to server URL
+                                                            setPreviewImage(asset.url);
                                                             setFormData(prev => ({
                                                                 ...prev,
                                                                 photo: {

@@ -267,9 +267,9 @@ export default function AdvertisementsAdmin() {
                                                                             _type: "reference",
                                                                             _ref: asset._id,
                                                                         },
-                                                                        previewUrl: asset.url, // Store URL for preview
+                                                                        previewUrl: asset.url, // Explicitly ensure this is set
                                                                     } as any,
-                                                                    video: undefined, // Clear video if image is uploaded
+                                                                    video: undefined,
                                                                 });
                                                             }
                                                         } catch (err) {
