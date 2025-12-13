@@ -38,7 +38,18 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     // Path restriction logic
     useEffect(() => {
         if (accessLevel === 'local') {
-            const allowedPaths = ['/admin/dashboard', '/admin/local-news', '/admin', '/admin/login'];
+            const allowedPaths = [
+                '/admin/dashboard',
+                '/admin/local-news',
+                '/admin/top-stories',
+                '/admin/latest-news',
+                '/admin/breaking-news',
+                '/admin/obituaries',
+                '/admin/doctors',
+                '/admin/video-gallery',
+                '/admin',
+                '/admin/login'
+            ];
             // If user tries to access restricted page, redirect to dashboard or local-news
             // We check if current path starts with /admin but isn't in allowed list
             if (router.pathname.startsWith('/admin') && !allowedPaths.includes(router.pathname)) {

@@ -148,7 +148,17 @@ const DashboardContent = () => {
 
     const filteredContentTypes = contentTypes.filter(type => {
         if (accessLevel === 'full') return true;
-        if (accessLevel === 'local') return type.name === "Local News";
+        if (accessLevel === 'local') {
+            return [
+                "Top Stories",
+                "Local News",
+                "Latest News",
+                "Breaking News",
+                "Obituaries",
+                "Doctors",
+                "Video Gallery"
+            ].includes(type.name);
+        }
         return false;
     });
 
