@@ -15,7 +15,7 @@ const VideoGallery = () => {
     const [videos, setVideos] = useState<VideoItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 4;
+    const itemsPerPage = 2;
 
     useEffect(() => {
         fetch(`/api/sanity/videoGallery?t=${Date.now()}`)
