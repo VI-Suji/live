@@ -49,7 +49,7 @@ const Footer = () => {
                                 <FaYoutube size={18} />
                             </a>
                             <a
-                                href="https://wa.me/918714360034"
+                                href="https://chat.whatsapp.com/Hyue1YLgww0E3DYtgQK97J"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-green-500 hover:scale-110 transition-all duration-300 border border-white/10"
