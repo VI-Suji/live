@@ -207,44 +207,58 @@ const LocalNews = () => {
                     </div>
 
                     {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-3 mt-8">
+                        <div className="flex justify-center items-center gap-2 sm:gap-3 mt-8">
                             <button
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${currentPage === 1
+                                className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === 1
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
                                     }`}
+                                aria-label="Previous page"
                             >
-                                Previous
+                                <FaChevronLeft size={12} />
+                                <span className="text-sm font-bold">Prev</span>
                             </button>
 
                             <div className="flex gap-2">
-                                {Array.from({ length: totalPages }).map((_, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => handlePageChange(idx + 1)}
-                                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === idx + 1
-                                            ? "bg-blue-600 text-white shadow-md transform scale-105"
-                                            : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
-                                            }`}
-                                        aria-label={`Page ${idx + 1}`}
-                                        aria-current={currentPage === idx + 1 ? 'page' : undefined}
-                                    >
-                                        {idx + 1}
-                                    </button>
-                                ))}
+                                {Array.from({ length: totalPages })
+                                    .map((_, idx) => idx + 1)
+                                    .filter((page) => {
+                                        // Show current page, one before, and one after
+                                        return (
+                                            page === currentPage ||
+                                            page === currentPage - 1 ||
+                                            page === currentPage + 1
+                                        );
+                                    })
+                                    .map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === page
+                                                ? "bg-blue-600 text-white shadow-md transform scale-105"
+                                                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                                                }`}
+                                            aria-label={`Page ${page}`}
+                                            aria-current={currentPage === page ? 'page' : undefined}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
                             </div>
 
                             <button
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${currentPage === totalPages
+                                className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === totalPages
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
                                     }`}
+                                aria-label="Next page"
                             >
-                                Next
+                                <span className="text-sm font-bold">Next</span>
+                                <FaChevronRight size={12} />
                             </button>
                         </div>
                     )}
