@@ -110,9 +110,9 @@ const Header: React.FC = () => {
             items.push({ label: "HOME", target: "home" });
         }
 
-        // Show LOCAL NEWS only if content exists
+        // Show NEWS only if content exists
         if (contentAvailability.localNews) {
-            items.push({ label: "LOCAL NEWS", target: "local-news" });
+            items.push({ label: "NEWS", target: "local-news" });
         }
 
         // Show FEATURE STORIES only if content exists AND setting is enabled

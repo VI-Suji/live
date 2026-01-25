@@ -191,7 +191,7 @@ export default function StoryPage({ post }: Props) {
 
         /* Article content styling */
         .prose h1 {
-          font-size: 2rem !important;
+          font-size: 1.5rem !important;
           font-weight: 900 !important;
           color: #111827 !important;
           margin-top: 3rem !important;
@@ -202,7 +202,7 @@ export default function StoryPage({ post }: Props) {
         }
         
         .prose h2 {
-          font-size: 1.75rem !important;
+          font-size: 1.35rem !important;
           font-weight: 900 !important;
           color: #111827 !important;
           margin-top: 2.5rem !important;
@@ -211,7 +211,7 @@ export default function StoryPage({ post }: Props) {
         }
         
         .prose h3 {
-          font-size: 1.5rem !important;
+          font-size: 1.2rem !important;
           font-weight: 700 !important;
           color: #111827 !important;
           margin-top: 2rem !important;
@@ -423,7 +423,7 @@ export default function StoryPage({ post }: Props) {
         )}
 
         {/* Title */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-6">
+        <h1 className="text-2xl sm:text-4xl lg:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-6">
           {post.title}
         </h1>
 
