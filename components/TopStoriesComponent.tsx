@@ -170,11 +170,11 @@ export default function TopStories() {
                                 <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-4">
                                     Featured
                                 </span>
-                                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3 leading-tight line-clamp-3">
+                                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight line-clamp-3">
                                     {post.title}
                                 </h3>
                                 <div
-                                    className="text-gray-300 line-clamp-2 mb-6 text-sm sm:text-base opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 delay-100 [&>p]:mb-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>h1]:font-bold [&>h2]:font-bold [&>strong]:text-white"
+                                    className="text-gray-300 line-clamp-2 mb-6 text-xs sm:text-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 delay-100 [&>p]:mb-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>h1]:font-bold [&>h2]:font-bold [&>strong]:text-white"
                                     dangerouslySetInnerHTML={{ __html: post.excerpt || "മുഴുവൻ വാർത്ത വായിക്കാൻ ക്ലിക്ക് ചെയ്യുക..." }}
                                 />
                                 <div className="flex items-center gap-2 text-white font-semibold text-sm uppercase tracking-wide group-hover:text-red-400 transition-colors">

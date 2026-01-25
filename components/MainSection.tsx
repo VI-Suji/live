@@ -132,7 +132,7 @@ const MainSection: React.FC = () => {
 
                     <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
                                 Feature Stories
                             </h2>
                         </div>
