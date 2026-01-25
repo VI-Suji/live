@@ -115,9 +115,9 @@ const Header: React.FC = () => {
             items.push({ label: "LOCAL NEWS", target: "local-news" });
         }
 
-        // Show TOP STORIES only if content exists AND setting is enabled
+        // Show FEATURE STORIES only if content exists AND setting is enabled
         if (contentAvailability.topStories && siteSettings.topStoriesVisible) {
-            items.push({ label: "TOP STORIES", target: "top-stories" });
+            items.push({ label: "FEATURE STORIES", target: "top-stories" });
         }
 
         // Always show SOCIALS (it has social media links)
@@ -298,16 +298,16 @@ const Header: React.FC = () => {
 
             {/* Scrollable Content Below Fixed Header */}
             <div className="pt-28 sm:pt-32"> {/* Spacer for fixed header - adjusted for proper spacing */}
-                {/* Breaking News Ticker */}
-                <div className="relative z-40 bg-white">
-                    <BreakingNewsTicker />
-                </div>
-
                 {/* Live Date & Time */}
                 <div className="bg-white/95 backdrop-blur-md border-b border-gray-200">
                     <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1 sm:py-2">
                         <LiveDateTime />
                     </div>
+                </div>
+
+                {/* News Ticker */}
+                <div className="relative z-40 bg-white">
+                    <BreakingNewsTicker />
                 </div>
             </div>
 

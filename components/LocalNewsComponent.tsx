@@ -138,29 +138,87 @@ const LocalNewsItem = ({ news }: { news: LocalNewsItem }) => {
     );
 };
 
-
-
 const LocalNews = () => {
-    const [localNews, setLocalNews] = useState<LocalNewsItem[]>([]);
+    const [newsData, setNewsData] = useState<LocalNewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const [activeTab, setActiveTab] = useState<'local' | 'national'>('local');
+    const [itemsPerPage, setItemsPerPage] = useState(4);
 
+    // Dynamic items per page logic
     useEffect(() => {
-        fetch(`/api/sanity/localNews?t=${Date.now()}`)
-            .then((res) => res.json())
-            .then((data) => {
-                setLocalNews(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error fetching local news:", err);
-                setLoading(false);
-            });
+        const calculateItemsPerPage = async () => {
+            try {
+                // Fetch site settings, obituaries, ads, and category existence
+                const [settingsRes, obituariesRes, adOneRes, adTwoRes, entRes, healthRes, sportsRes] = await Promise.all([
+                    fetch("/api/sanity/siteSettings"),
+                    fetch("/api/sanity/obituaries"),
+                    fetch("/api/sanity/advertisement?position=ad-one"),
+                    fetch("/api/sanity/advertisement?position=ad-two"),
+                    fetch("/api/sanity/categoryNews?type=entertainmentNews"),
+                    fetch("/api/sanity/categoryNews?type=healthNews"),
+                    fetch("/api/sanity/categoryNews?type=sportsNews")
+                ]);
+
+                const settingsData = await settingsRes.json();
+                const obituariesData = await obituariesRes.json();
+                const adOneData = await adOneRes.json();
+                const adTwoData = await adTwoRes.json();
+                const entData = await entRes.json();
+                const healthData = await healthRes.json();
+                const sportsData = await sportsRes.json();
+
+                // Check if any category news exists
+                const hasCategoryNews =
+                    (Array.isArray(entData) && entData.length > 0) ||
+                    (Array.isArray(healthData) && healthData.length > 0) ||
+                    (Array.isArray(sportsData) && sportsData.length > 0);
+
+                // Base count is 4 if categories exist, otherwise 3
+                let count = hasCategoryNews ? 3 : 2;
+
+                // Add 1 for each active advertisement
+                if (adOneData && adOneData.active && !adOneData.error) count += 1;
+                if (adTwoData && adTwoData.active && !adTwoData.error) count += 1;
+
+                // Add 1 if obituaries are present
+                if (Array.isArray(obituariesData) && obituariesData.length > 0) count += 1;
+
+                // Add 1 if Hero section is hidden
+                if (settingsData && settingsData.heroSectionVisible === false) count += 1;
+
+                setItemsPerPage(count);
+            } catch (error) {
+                console.error("Error calculating items per page:", error);
+                setItemsPerPage(4); // Fallback
+            }
+        };
+
+        calculateItemsPerPage();
+        // Refresh every 5 minutes
+        const interval = setInterval(calculateItemsPerPage, 5 * 60 * 1000);
+        return () => clearInterval(interval);
     }, []);
 
-    const totalPages = Math.ceil(localNews.length / itemsPerPage);
-    const currentNews = localNews.slice(
+    useEffect(() => {
+        setLoading(true);
+        const endpoint = activeTab === 'local' ? '/api/sanity/localNews' : '/api/sanity/nationalNews';
+
+        fetch(`${endpoint}?t=${Date.now()}`)
+            .then((res) => res.json())
+            .then((data) => {
+                setNewsData(data);
+                setLoading(false);
+                setCurrentPage(1); // Reset to first page when switching tabs
+            })
+            .catch((err) => {
+                console.error(`Error fetching ${activeTab} news:`, err);
+                setLoading(false);
+            });
+    }, [activeTab]);
+
+    const totalPages = Math.ceil(newsData.length / itemsPerPage);
+    const currentNews = newsData.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
@@ -187,80 +245,107 @@ const LocalNews = () => {
         </div>
     );
 
-    if (!loading && localNews.length === 0) {
-        return null;
-    }
-
     return (
         <div id="local-news" className="w-full mt-8 sm:mt-12 border border-gray-200 sm:border-none rounded-3xl p-2 sm:p-0">
-            <div className="flex items-center gap-3 mb-6 sm:mb-8">
-                <div className="w-1.5 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
-                <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Local News</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
+                    <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                        {activeTab === 'local' ? 'Local News' : 'National News'}
+                    </h2>
+                </div>
+
+                {/* Toggle Swiper/Tab */}
+                <div className="flex bg-gray-100 p-1 rounded-xl sm:rounded-2xl w-fit">
+                    <button
+                        onClick={() => setActiveTab('local')}
+                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm font-bold transition-all ${activeTab === 'local'
+                            ? "bg-white text-blue-600 shadow-sm"
+                            : "text-gray-500 hover:text-gray-700"
+                            }`}
+                    >
+                        Local
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('national')}
+                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm font-bold transition-all ${activeTab === 'national'
+                            ? "bg-white text-blue-600 shadow-sm"
+                            : "text-gray-500 hover:text-gray-700"
+                            }`}
+                    >
+                        National
+                    </button>
+                </div>
             </div>
 
             {loading ? renderLoader() : (
                 <>
-                    <div className="flex flex-col gap-4 sm:gap-6">
-                        {currentNews.map((news) => (
-                            <LocalNewsItem key={news._id} news={news} />
-                        ))}
-                    </div>
-
-                    {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-2 sm:gap-3 mt-8">
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === 1
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                                    }`}
-                                aria-label="Previous page"
-                            >
-                                <FaChevronLeft size={12} />
-                                <span className="text-sm font-bold">Prev</span>
-                            </button>
-
-                            <div className="flex gap-2">
-                                {Array.from({ length: totalPages })
-                                    .map((_, idx) => idx + 1)
-                                    .filter((page) => {
-                                        // Show current page, one before, and one after
-                                        return (
-                                            page === currentPage ||
-                                            page === currentPage - 1 ||
-                                            page === currentPage + 1
-                                        );
-                                    })
-                                    .map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => handlePageChange(page)}
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === page
-                                                ? "bg-blue-600 text-white shadow-md transform scale-105"
-                                                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
-                                                }`}
-                                            aria-label={`Page ${page}`}
-                                            aria-current={currentPage === page ? 'page' : undefined}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
+                    {newsData.length === 0 ? (
+                        <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
+                            <p className="text-gray-500 font-medium">No {activeTab} news available at the moment.</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex flex-col gap-4 sm:gap-6">
+                                {currentNews.map((news) => (
+                                    <LocalNewsItem key={news._id} news={news} />
+                                ))}
                             </div>
 
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === totalPages
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                                    }`}
-                                aria-label="Next page"
-                            >
-                                <span className="text-sm font-bold">Next</span>
-                                <FaChevronRight size={12} />
-                            </button>
-                        </div>
+                            {totalPages > 1 && (
+                                <div className="flex justify-center items-center gap-2 sm:gap-3 mt-8">
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === 1
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                                            }`}
+                                        aria-label="Previous page"
+                                    >
+                                        <FaChevronLeft size={12} />
+                                        <span className="text-sm font-bold">Prev</span>
+                                    </button>
+
+                                    <div className="flex gap-2">
+                                        {Array.from({ length: totalPages })
+                                            .map((_, idx) => idx + 1)
+                                            .filter((page) => {
+                                                return (
+                                                    page === currentPage ||
+                                                    page === currentPage - 1 ||
+                                                    page === currentPage + 1
+                                                );
+                                            })
+                                            .map((page) => (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => handlePageChange(page)}
+                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === page
+                                                        ? "bg-blue-600 text-white shadow-md transform scale-105"
+                                                        : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                                                        }`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === totalPages
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
+                                            }`}
+                                        aria-label="Next page"
+                                    >
+                                        <span className="text-sm font-bold">Next</span>
+                                        <FaChevronRight size={12} />
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </>
             )}

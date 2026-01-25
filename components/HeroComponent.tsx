@@ -1,16 +1,19 @@
 import React from "react";
-import { FiArrowRight } from "react-icons/fi";
+import { socialItems } from "./SocialsComponent";
+import LiveNow from "./LiveComponent";
+import { FaArrowRight } from "react-icons/fa";
 
 interface Props {
     onReadMore: () => void;
+    showLive: boolean;
 }
 
-const Hero: React.FC<Props> = ({ onReadMore }) => {
+const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
     const [heroData, setHeroData] = React.useState({
         greeting: "GRAMIKA",
         welcomeMessage: "സ്വാഗതം ഗ്രാമികയിലേക്ക്",
         tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
-        description: "ഗ്രാമീണതയുടെ ഹൃദയതാളമായ ഗ്രാമിക ന്യൂസ് ചാനല്‍ അതിന്റെ വെബ്സൈറ്റ് കൂടി ആരംഭിച്ചിരിക്കുകയാണ്. നാടിന്റെ കുതിപ്പിനും കിതപ്പിനുമൊപ്പം എന്നും കൈകോര്‍ത്തിട്ടുള്ള ഗ്രാമികയുടെ വെബ്സൈറ്റിനെയും നിങ്ങള്‍ രണ്ടുകൈയും നീട്ടി സ്വീകരിക്കുമെന്ന് ഞങ്ങള്‍ക്ക് ആത്മവിശ്വാസമുണ്ട്. നിങ്ങളുടെ വിശ്വാസവും ഞങ്ങളുടെ അര്‍പ്പണബോധവും തോളോടു തോള്‍ ചേർന്ന് ഇനുയുള്ള നാളുകള്‍ . വാര്‍ത്തകള്‍ എത്രയുംപെട്ടെന്നു നിങ്ങളുടെ വിരല്‍ത്തുമ്പിലെത്തിക്കാന്‍ ഞങ്ങള്‍ പ്രതിജ്ഞാബദ്ധമാണ്. വിശ്വസ്തയോടെ ഗ്രാമിക ന്യൂസ് ടീം",
+        description: "ഗ്രാമീണതയുടെ ഹൃദയതാളമായ ഗ്രാമിക ന്യൂസ് ചാനൽ അതിന്റെ വെബ്സൈറ്റ് കൂടി ആരംഭിച്ചിരിക്കുകയാണ്. വാര്‍ത്തകള്‍ എത്രയുംപെട്ടെന്നു നിങ്ങളുടെ വിരല്‍ത്തുമ്പിലെത്തിക്കാന്‍ ഞങ്ങള്‍ പ്രതിജ്ഞാബദ്ധമാണ്.",
         ctaButtonText: "View Stories"
     });
 
@@ -39,33 +42,83 @@ const Hero: React.FC<Props> = ({ onReadMore }) => {
     }, []);
 
     return (
-        <div className="flex flex-col gap-6 sm:gap-8 w-full py-4 sm:py-8">
-            {/* Text Content */}
-            <div className="space-y-4 sm:space-y-6">
-                <h2 className="text-3xl sm:text-5xl lg:text-7xl font-black text-gray-900 leading-none tracking-tighter sm:mt-0">
-                    {heroData.greeting}
-                </h2>
-                <div className="space-y-3 sm:space-y-4">
-                    <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-2xl font-medium">
-                        {heroData.welcomeMessage} <br className="hidden sm:block" />
-                        <span className="text-gray-900 font-bold">{heroData.tagline}</span>
-                    </p>
-                    <p className="text-base sm:text-lg text-gray-500 leading-relaxed max-w-xl">
-                        {heroData.description}
-                    </p>
+        <div className="w-full bg-white rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl shadow-blue-100/30 border border-gray-100 overflow-hidden">
+            <div className="flex flex-col lg:flex-row items-stretch">
+                {/* Main Content Area */}
+                <div className={`flex-1 p-8 sm:p-12 lg:p-14 flex flex-col gap-8 ${!showLive ? 'lg:pr-14 justify-center' : ''}`}>
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <h1 className="text-5xl sm:text-7xl font-black text-gray-900 leading-[0.9] tracking-tighter">
+                                {heroData.greeting}
+                            </h1>
+                            <p className="text-xl sm:text-2xl text-gray-600 font-bold leading-tight">
+                                {heroData.welcomeMessage}
+                            </p>
+                            <p className="text-gray-900 font-bold text-lg">
+                                {heroData.tagline}
+                            </p>
+                        </div>
+
+                        <p className="text-gray-500 text-sm sm:text-base max-w-xl leading-relaxed">
+                            {heroData.description}
+                        </p>
+                    </div>
+
+                    {/* LARGE LIVE SECTION (Instead of View Stories Button) */}
+                    {showLive ? (
+                        <div className="w-full relative group">
+                            <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10 border-4 border-white aspect-video bg-gray-900 group-hover:shadow-3xl transition-all duration-500">
+                                <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
+
+                                {/* Overlay Pulse */}
+                                <div className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
+                                    <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.8)]"></div>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Live Now</span>
+                                </div>
+                            </div>
+
+                            {/* Decorative element behind player */}
+                            <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-[2.5rem] -z-10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                            <button
+                                onClick={onReadMore}
+                                className="group flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold text-base shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto"
+                            >
+                                {heroData.ctaButtonText}
+                                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    )}
+
                 </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 pt-2 sm:pt-4">
-                <button
-                    onClick={onReadMore}
-                    className="group flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gray-900 text-white rounded-2xl font-bold text-sm sm:text-base shadow-xl hover:bg-black hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto"
-                >
-                    {heroData.ctaButtonText}
-                    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </button>
-
+                {/* Socials Sidebar (Integrated into Hero) */}
+                <div className="lg:w-[320px] bg-gray-50/50 border-t lg:border-t-0 lg:border-l border-gray-100 p-6 lg:p-10 flex flex-col gap-4 lg:gap-6 justify-center">
+                    <div className="grid grid-cols-4 lg:grid-cols-1 gap-3 lg:gap-4">
+                        {socialItems.map((social) => (
+                            <a
+                                key={social.id}
+                                href={social.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex flex-col lg:flex-row items-center gap-2 lg:gap-4 bg-white p-2.5 lg:p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all duration-300"
+                            >
+                                <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gradient-to-br ${social.gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+                                    <div className="text-sm lg:text-xl">
+                                        {social.icon}
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0 hidden lg:block">
+                                    <h4 className="font-bold text-gray-900 text-sm">{social.title}</h4>
+                                    <p className="text-[10px] text-gray-400 font-medium truncate">{social.subtitle}</p>
+                                </div>
+                                <FaArrowRight className="text-gray-300 text-xs group-hover:text-blue-500 transition-colors hidden lg:block" />
+                            </a>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );

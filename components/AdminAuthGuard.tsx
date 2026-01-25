@@ -41,6 +41,10 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
             const allowedPaths = [
                 '/admin/dashboard',
                 '/admin/local-news',
+                '/admin/national-news',
+                '/admin/entertainment-news',
+                '/admin/health-news',
+                '/admin/sports-news',
                 '/admin/top-stories',
                 '/admin/latest-news',
                 '/admin/breaking-news',

@@ -9,6 +9,10 @@ import breakingNews from './breakingNews';
 import siteSettings from './siteSettings';
 
 import videoGallery from './videoGallery';
+import nationalNews from './nationalNews';
+import entertainmentNews from './entertainmentNews';
+import healthNews from './healthNews';
+import sportsNews from './sportsNews';
 
 export const schemaTypes = [
     topStory,
@@ -21,4 +25,8 @@ export const schemaTypes = [
     breakingNews,
     siteSettings,
     videoGallery,
+    nationalNews,
+    entertainmentNews,
+    healthNews,
+    sportsNews,
 ];

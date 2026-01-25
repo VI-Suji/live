@@ -4,7 +4,6 @@ import React, { useRef, useState, useEffect } from "react";
 import Hero from "./HeroComponent";
 import Sidebar from "./SideBarComponent";
 import Socials from "./SocialsComponent";
-import LiveNow from "./LiveComponent";
 import TopStories from "./TopStoriesComponent";
 import Footer from "./FooterComponent";
 import LocalNews from "./LocalNewsComponent";
@@ -19,6 +18,7 @@ const MainSection: React.FC = () => {
         latestNewsVisible: true,
         topStoriesVisible: true,
     });
+    const [hasActiveBanner, setHasActiveBanner] = useState(false);
     const [hasActiveTopStories, setHasActiveTopStories] = useState(true);
 
     useEffect(() => {
@@ -43,6 +43,22 @@ const MainSection: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        // Check if there is an active banner ad
+        const checkBanner = () => {
+            fetch(`/api/sanity/advertisement?position=banner&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(data => {
+                    setHasActiveBanner(data && data.active && !data.error);
+                })
+                .catch(() => setHasActiveBanner(false));
+        };
+
+        checkBanner();
+        const interval = setInterval(checkBanner, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
         // Check if there are any active top stories
         const checkTopStories = () => {
             fetch('/api/sanity/topStories')
@@ -63,47 +79,39 @@ const MainSection: React.FC = () => {
     };
 
     return (
-        <main className="w-full min-h-screen">{/* No padding - seamless flow from header sections */}
+        <main className="w-full min-h-screen">
             {/* Hero Section - Light with subtle gradient */}
             <section
                 className="relative bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden"
             >
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 lg:py-16 flex flex-col lg:flex-row items-start justify-center gap-6 sm:gap-8">
-                    <div className="flex flex-col gap-8 sm:gap-10 w-full lg:w-[65%]">
-                        <div id="home" className="flex flex-col gap-8 sm:gap-10">
-                            {siteSettings.heroSectionVisible && (
-                                <Hero onReadMore={handleScrollToTopStories} />
-                            )}
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 lg:py-16">
+                    <div className="flex flex-col lg:flex-row items-start justify-center gap-6 sm:gap-10">
+                        <div className="flex flex-col gap-8 sm:gap-10 w-full lg:w-[65%]">
+                            <div id="home" className="flex flex-col gap-8 sm:gap-10">
+                                {siteSettings.heroSectionVisible && (
+                                    <Hero
+                                        onReadMore={handleScrollToTopStories}
+                                        showLive={siteSettings.liveStreamVisible}
+                                    />
+                                )}
+                            </div>
 
-                            {/* Live Section with Card Style */}
-                            {siteSettings.liveStreamVisible && (
-                                <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 border border-gray-100">
-                                    <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                                        <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
-                                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-gray-900">
-                                            Live Now
-                                        </h2>
-                                    </div>
-                                    <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
-                                </div>
-                            )}
+                            {/* Local News Section - Desktop Only */}
+                            <section
+                                id="local-news-desktop"
+                                className="hidden lg:block transition-all duration-500"
+                            >
+                                <LocalNews />
+                            </section>
                         </div>
 
-                        {/* Local News Section - Desktop Only */}
-                        <section
-                            id="local-news-desktop"
-                            className="hidden lg:block"
-                        >
-                            <LocalNews />
-                        </section>
+                        <Sidebar siteSettings={siteSettings} />
                     </div>
-
-                    <Sidebar siteSettings={siteSettings} />
                 </div>
             </section>
 
             {/* Banner Ad Section - Full width, pushes down sidebar content - Desktop Only */}
-            {siteSettings.advertisementsVisible && (
+            {siteSettings.advertisementsVisible && hasActiveBanner && (
                 <section className="hidden lg:block bg-gradient-to-br from-gray-50 via-white to-blue-50 py-6 sm:py-8">
                     <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
                         <BannerAd />
@@ -124,8 +132,8 @@ const MainSection: React.FC = () => {
 
                     <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                                Top Stories
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+                                Feature Stories
                             </h2>
                         </div>
                         <TopStories />
@@ -133,10 +141,13 @@ const MainSection: React.FC = () => {
                 </section>
             )}
 
-            {/* Socials Section - Colorful gradient */}
+
+
+            {/* Socials Section */}
             <section id="socials" className="relative bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8 sm:py-12">
                 <Socials />
             </section>
+
             <section className="bg-white">
                 <Footer />
             </section>

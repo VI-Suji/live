@@ -11,8 +11,8 @@ export default function LiveNow({ channelId }: LiveNowProps) {
     const embedSrc = `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=0`;
 
     return (
-        <div id="live-section" className="w-full max-w-3xl mx-auto">
-            <div className="relative rounded-3xl overflow-hidden shadow-xl bg-black border border-gray-200 aspect-video group">
+        <div id="live-section" className="w-full h-full">
+            <div className="relative w-full h-full overflow-hidden bg-black aspect-video group">
 
 
                 {/* Fallback & Iframe */}

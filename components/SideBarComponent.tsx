@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdOne from "./AdFirstComponent";
 import AdTwo from "./AdSecondComponent";
 import BannerAd from "./BannerAdComponent";
-import DoctorsAvailable from "./DoctorsAvailableComponent";
+import CategoryNews from "./CategoryNewsComponent";
 import Obituaries from "./ObituariesComponent";
 import LocalNews from "./LocalNewsComponent";
 import VideoGallery from "./VideoGalleryComponent";
@@ -24,6 +24,14 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
   const [news, setNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Expandable state
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(true);
+  const [isExpandable, setIsExpandable] = useState(false);
+  const [contentHeight, setContentHeight] = useState('4.5rem');
+  const contentRef = useRef<HTMLParagraphElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     fetch("/api/sanity/latestNews")
       .then((res) => res.json())
@@ -36,16 +44,69 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Measurement effect
+  useEffect(() => {
+    if (!news) return;
+
+    const timer = setTimeout(() => {
+      if (contentRef.current) {
+        const lineHeight = parseFloat(getComputedStyle(contentRef.current).lineHeight);
+        const scrollHeight = contentRef.current.scrollHeight;
+
+        // Check if content is more than ~3 lines (using 4.5rem / 1.5rem lineHeight)
+        const threshold = lineHeight * 3.2;
+        const hasOverflow = scrollHeight > threshold;
+
+        setIsExpandable(hasOverflow);
+        if (!hasOverflow) {
+          setIsClamped(false);
+          setContentHeight('none');
+        } else {
+          setIsClamped(true);
+          setContentHeight('4.5rem');
+        }
+      }
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [news, loading]);
+
+  const toggleExpand = () => {
+    if (!isExpandable) return;
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    if (!isExpanded) {
+      setContentHeight('4.5rem');
+      setIsClamped(false);
+      requestAnimationFrame(() => {
+        if (contentRef.current) {
+          const fullHeight = contentRef.current.scrollHeight;
+          setContentHeight(`${fullHeight}px`);
+          setIsExpanded(true);
+        }
+      });
+    } else {
+      setIsExpanded(false);
+      setContentHeight('4.5rem');
+    }
+  };
+
+  const handleTransitionEnd = (e: React.TransitionEvent) => {
+    if (e.propertyName === 'max-height' && !isExpanded) {
+      setIsClamped(true);
+    }
+  };
+
   // Loader component
   const renderLoader = () => (
     <div className="flex flex-col justify-start w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-6 gap-6 animate-pulse">
-      {/* Header */}
       <div className="w-full flex justify-between items-center border-b border-gray-100 pb-6">
         <div className="h-8 bg-gray-200 rounded-lg w-1/3"></div>
         <div className="h-3 w-3 bg-red-200 rounded-full"></div>
       </div>
-
-      {/* Content placeholders */}
       <div className="w-full flex flex-col gap-4">
         <div className="flex gap-4">
           <div className="w-16 h-16 bg-gray-200 rounded-2xl flex-shrink-0"></div>
@@ -72,7 +133,6 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
     }
   }
 
-  // Default to true if settings aren't provided yet
   const showAds = siteSettings?.advertisementsVisible ?? true;
   const showNews = siteSettings?.latestNewsVisible ?? true;
 
@@ -80,17 +140,27 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
     <div className="flex flex-col items-center justify-start w-full lg:w-[35%] h-full gap-8 mt-8 lg:mt-0">
       {showAds && <AdOne />}
 
-
-
-      {/* Latest News Widget - Now Second */}
+      {/* Latest News Widget */}
       {showNews && (
-        <div className="w-full bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden sticky top-24 z-30">
+        <div
+          onClick={toggleExpand}
+          className={`w-full bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden sticky top-24 z-30 transition-all duration-300 ${isExpandable ? 'cursor-pointer hover:shadow-2xl' : ''}`}
+        >
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
             <h3 className="font-black text-xl text-gray-900">Latest News</h3>
-            <span className="flex h-3 w-3 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-            </span>
+            <div className="flex items-center gap-4">
+              {isExpandable && (
+                <div className={`text-gray-400 transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isExpanded ? 'rotate-180' : ''}`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              )}
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            </div>
           </div>
 
           {loading ? (
@@ -98,23 +168,33 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
           ) : news ? (
             <div className="p-6 flex flex-col gap-6">
               <div className="flex flex-col md:flex-row items-start gap-4">
-                {/* Mobile Date - Full Width */}
+                {/* Mobile Date */}
                 <div className="md:hidden w-1/2 self-end bg-blue-50/50 rounded-xl px-4 py-2 text-blue-600 font-bold text-center text-sm uppercase tracking-wide">
                   {day} {month} {year}
                 </div>
 
-                {/* Desktop Date - Box */}
+                {/* Desktop Date */}
                 <div className="hidden md:flex flex-shrink-0 flex-col items-center justify-center w-16 h-16 bg-blue-50 rounded-2xl text-blue-600">
                   <span className="text-xl font-black">{day}</span>
                   <span className="text-xs font-bold uppercase">{month}</span>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2">
+
+                <div className="flex-1 w-full">
+                  <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2 group-hover:text-blue-600 transition-colors">
                     {news.heading}
                   </h4>
-                  <p className="text-gray-500 text-sm leading-relaxed">
-                    {news.content}
-                  </p>
+                  <div
+                    className="overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+                    style={{ maxHeight: contentHeight }}
+                    onTransitionEnd={handleTransitionEnd}
+                  >
+                    <p
+                      ref={contentRef}
+                      className={`text-gray-500 text-sm leading-relaxed ${isClamped ? 'line-clamp-3' : 'whitespace-pre-line'}`}
+                    >
+                      {news.content}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -126,11 +206,9 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         </div>
       )}
 
-
-
       {showAds && <AdTwo />}
 
-      {/* Local News Widget - Mobile Only (Swapped with Latest News) */}
+      {/* Local News Widget - Mobile Only */}
       <div id="local-news-mobile" className="w-full lg:hidden">
         <LocalNews />
       </div>
@@ -141,8 +219,8 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         </div>
       )}
 
+      <CategoryNews />
       <VideoGallery />
-      <DoctorsAvailable />
       <Obituaries />
     </div>
   );

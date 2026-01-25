@@ -20,7 +20,7 @@ import {
 
 const contentTypes = [
     {
-        name: "Top Stories",
+        name: "Feature Stories",
         icon: FaNewspaper,
         href: "/admin/top-stories",
         description: "Manage main news articles",
@@ -32,6 +32,13 @@ const contentTypes = [
         href: "/admin/local-news",
         description: "Manage local community news",
         color: "from-green-500 to-green-600",
+    },
+    {
+        name: "National News",
+        icon: FaMapMarkerAlt,
+        href: "/admin/national-news",
+        description: "Manage national news stories",
+        color: "from-indigo-500 to-indigo-600",
     },
     {
         name: "Latest News",
@@ -62,11 +69,25 @@ const contentTypes = [
         color: "from-red-500 to-red-600",
     },
     {
-        name: "Doctors",
+        name: "Entertainment",
+        icon: FaPlay,
+        href: "/admin/entertainment-news",
+        description: "Manage entertainment news",
+        color: "from-purple-500 to-purple-600",
+    },
+    {
+        name: "Health",
         icon: FaUserMd,
-        href: "/admin/doctors",
-        description: "Manage doctor listings",
-        color: "from-blue-500 to-blue-600",
+        href: "/admin/health-news",
+        description: "Manage health news",
+        color: "from-red-500 to-red-600",
+    },
+    {
+        name: "Sports",
+        icon: FaBolt,
+        href: "/admin/sports-news",
+        description: "Manage sports news",
+        color: "from-orange-500 to-orange-600",
     },
     {
         name: "Obituaries",
@@ -98,7 +119,10 @@ const DashboardContent = () => {
     const [stats, setStats] = useState({
         topStories: 0,
         localNews: 0,
-        doctors: 0,
+        nationalNews: 0,
+        entertainmentNews: 0,
+        healthNews: 0,
+        sportsNews: 0,
         advertisements: 0,
         loading: true
     });
@@ -110,7 +134,10 @@ const DashboardContent = () => {
             setStats({
                 topStories: 0,
                 localNews: 0,
-                doctors: 0,
+                nationalNews: 0,
+                entertainmentNews: 0,
+                healthNews: 0,
+                sportsNews: 0,
                 advertisements: 0,
                 loading: false
             });
@@ -119,24 +146,49 @@ const DashboardContent = () => {
 
     const fetchStats = async () => {
         try {
-            const [topStoriesRes, localNewsRes, doctorsRes, adsRes] = await Promise.all([
+            const [
+                topStoriesRes,
+                localNewsRes,
+                nationalNewsRes,
+                entNewsRes,
+                healthNewsRes,
+                sportsNewsRes,
+                adsRes
+            ] = await Promise.all([
                 fetch('/api/sanity/topStories'),
                 fetch('/api/sanity/localNews'),
-                fetch('/api/sanity/doctors'),
+                fetch('/api/sanity/nationalNews'),
+                fetch('/api/sanity/categoryNews?type=entertainmentNews'),
+                fetch('/api/sanity/categoryNews?type=healthNews'),
+                fetch('/api/sanity/categoryNews?type=sportsNews'),
                 fetch('/api/admin/advertisements')
             ]);
 
-            const [topStories, localNews, doctors, ads] = await Promise.all([
+            const [
+                topStories,
+                localNews,
+                nationalNews,
+                entNews,
+                healthNews,
+                sportsNews,
+                ads
+            ] = await Promise.all([
                 topStoriesRes.json(),
                 localNewsRes.json(),
-                doctorsRes.json(),
+                nationalNewsRes.json(),
+                entNewsRes.json(),
+                healthNewsRes.json(),
+                sportsNewsRes.json(),
                 adsRes.json()
             ]);
 
             setStats({
                 topStories: Array.isArray(topStories) ? topStories.length : 0,
                 localNews: Array.isArray(localNews) ? localNews.length : 0,
-                doctors: Array.isArray(doctors) ? doctors.length : 0,
+                nationalNews: Array.isArray(nationalNews) ? nationalNews.length : 0,
+                entertainmentNews: Array.isArray(entNews) ? entNews.length : 0,
+                healthNews: Array.isArray(healthNews) ? healthNews.length : 0,
+                sportsNews: Array.isArray(sportsNews) ? sportsNews.length : 0,
                 advertisements: Array.isArray(ads) ? ads.filter((a: any) => a.active).length : 0,
                 loading: false
             });
@@ -150,12 +202,11 @@ const DashboardContent = () => {
         if (accessLevel === 'full') return true;
         if (accessLevel === 'local') {
             return [
-                "Top Stories",
+                "Feature Stories",
                 "Local News",
-                "Latest News",
-                "Breaking News",
-                "Obituaries",
-                "Doctors",
+                "Entertainment",
+                "Health",
+                "Sports",
                 "Video Gallery"
             ].includes(type.name);
         }
@@ -202,7 +253,7 @@ const DashboardContent = () => {
                         Welcome back! 👋
                     </h2>
                     <p className="text-base sm:text-lg text-gray-600">
-                        {accessLevel === 'local' ? 'Manage local news content' : 'Manage all your website content from here'}
+                        {accessLevel === 'local' ? 'Manage local & national news content' : 'Manage all your website content from here'}
                     </p>
                 </div>
 
@@ -250,9 +301,9 @@ const DashboardContent = () => {
 
                 {/* Stats Section */}
                 {accessLevel === 'full' && (
-                    <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                         <div className="bg-white rounded-2xl p-6 border border-gray-100">
-                            <p className="text-sm text-gray-600 mb-1">Total Stories</p>
+                            <p className="text-sm text-gray-600 mb-1">Feature Stories</p>
                             <p className="text-3xl font-black text-gray-900">
                                 {stats.loading ? '...' : stats.topStories}
                             </p>
@@ -264,9 +315,27 @@ const DashboardContent = () => {
                             </p>
                         </div>
                         <div className="bg-white rounded-2xl p-6 border border-gray-100">
-                            <p className="text-sm text-gray-600 mb-1">Active Doctors</p>
+                            <p className="text-sm text-gray-600 mb-1">National News</p>
                             <p className="text-3xl font-black text-gray-900">
-                                {stats.loading ? '...' : stats.doctors}
+                                {stats.loading ? '...' : stats.nationalNews}
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                            <p className="text-sm text-gray-600 mb-1">Entertainment</p>
+                            <p className="text-3xl font-black text-gray-900">
+                                {stats.loading ? '...' : stats.entertainmentNews}
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                            <p className="text-sm text-gray-600 mb-1">Health News</p>
+                            <p className="text-3xl font-black text-gray-900">
+                                {stats.loading ? '...' : stats.healthNews}
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                            <p className="text-sm text-gray-600 mb-1">Sports News</p>
+                            <p className="text-3xl font-black text-gray-900">
+                                {stats.loading ? '...' : stats.sportsNews}
                             </p>
                         </div>
                         <div className="bg-white rounded-2xl p-6 border border-gray-100">

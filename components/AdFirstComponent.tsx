@@ -30,16 +30,7 @@ export default function AdOne() {
     }, []);
 
     if (!ad || !ad.active) {
-        return (
-            <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
-                <Image
-                    src="/gramika.png"
-                    alt="Gramika"
-                    fill
-                    className="object-cover"
-                />
-            </div>
-        );
+        return null; // Hide if no ad is active
     }
 
     return (

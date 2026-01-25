@@ -3,7 +3,7 @@
 import React from "react";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp, FaArrowRight } from "react-icons/fa";
 
-const socialItems = [
+export const socialItems = [
   {
     id: 1,
     title: "YouTube",

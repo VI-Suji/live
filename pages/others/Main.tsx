@@ -75,7 +75,10 @@ const MainArea: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
                         >
-                            <HeroComponent onReadMore={handleScrollToTopStories} />
+                            <HeroComponent
+                                onReadMore={handleScrollToTopStories}
+                                showLive={siteSettings.liveStreamVisible}
+                            />
                         </motion.div>
                     )}
 
