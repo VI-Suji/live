@@ -6,11 +6,13 @@ import CategoryNews from "./CategoryNewsComponent";
 import Obituaries from "./ObituariesComponent";
 import LocalNews from "./LocalNewsComponent";
 import VideoGallery from "./VideoGalleryComponent";
+import Image from "next/image";
 
 interface NewsItem {
   date: string; // "2025-11-15"
   heading: string;
   content: string;
+  image?: string;
 }
 
 interface SidebarProps {
@@ -167,6 +169,18 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
             renderLoader()
           ) : news ? (
             <div className="p-6 flex flex-col gap-6">
+              {/* Optional Large Image */}
+              {news.image && (
+                <div className="w-full relative h-48 rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+                  <Image
+                    src={news.image}
+                    alt={news.heading}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
               <div className="flex flex-col md:flex-row items-start gap-4">
                 {/* Mobile Date */}
                 <div className="md:hidden w-1/2 self-end bg-blue-50/50 rounded-xl px-4 py-2 text-blue-600 font-bold text-center text-sm uppercase tracking-wide">
@@ -184,7 +198,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
                     {news.heading}
                   </h4>
                   <div
-                    className="overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+                    className={`overflow-hidden transition-[max-height] duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]`}
                     style={{ maxHeight: contentHeight }}
                     onTransitionEnd={handleTransitionEnd}
                   >

@@ -11,7 +11,8 @@ export default async function handler(
       heading,
       content,
       date,
-      active
+      active,
+      "image": image.asset->url
     }`;
 
         const latestNews = await sanityClient.fetch(query);

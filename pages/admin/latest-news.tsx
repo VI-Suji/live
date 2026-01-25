@@ -10,12 +10,14 @@ type LatestNews = {
     content: string;
     date: string;
     active: boolean;
+    image?: string;
 };
 
 export default function LatestNewsAdmin() {
     const [news, setNews] = useState<LatestNews | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const [formData, setFormData] = useState<{
@@ -23,6 +25,7 @@ export default function LatestNewsAdmin() {
         content: string;
         date: string;
         active: boolean;
+        image?: any;
     }>({
         heading: "",
         content: "",
@@ -40,7 +43,6 @@ export default function LatestNewsAdmin() {
             if (!res.ok) {
                 console.log('No latest news found yet');
                 setNews(null);
-                // Keep default formData for new entry
                 setFormData({
                     heading: "",
                     content: "",
@@ -59,6 +61,7 @@ export default function LatestNewsAdmin() {
                     content: data.content || "",
                     date: data.date || new Date().toISOString().split('T')[0],
                     active: data.active ?? true,
+                    image: data.image || null,
                 });
             } else {
                 setNews(null);
@@ -77,16 +80,74 @@ export default function LatestNewsAdmin() {
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        const data = new FormData();
+        data.append("file", file);
+
+        try {
+            const res = await fetch("/api/admin/upload?type=image", {
+                method: "POST",
+                body: data,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+
+            const asset = await res.json();
+            if (asset._id) {
+                setFormData({
+                    ...formData,
+                    image: {
+                        _type: "image",
+                        asset: {
+                            _type: "reference",
+                            _ref: asset._id,
+                        },
+                        previewUrl: asset.url
+                    } as any,
+                });
+            }
+        } catch (err) {
+            console.error("Upload failed", err);
+            alert("Image upload failed. Please try again.");
+        } finally {
+            setIsUploading(false);
+            e.target.value = '';
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isUploading) {
+            alert("Please wait for the image to finish uploading.");
+            return;
+        }
+
         setSaving(true);
         setMessage(null);
+
+        // Prepare payload - if image is just a URL string (from fetch), don't send it in update 
+        // to avoid overwriting the complex sanity object with a string unless it's new
+        const { image, ...rest } = formData;
+        const payload = { ...rest };
+
+        // Only include image if it's a new upload object
+        if (image && typeof image === 'object' && image._type === 'image') {
+            (payload as any).image = {
+                _type: 'image',
+                asset: image.asset
+            };
+        }
 
         try {
             const res = await fetch("/api/admin/latest-news", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(payload),
             });
 
             const responseData = await res.json();
@@ -111,7 +172,7 @@ export default function LatestNewsAdmin() {
         <AdminAuthGuard>
             <AdminLayout
                 title="Latest News Widget"
-                description="Manage the sidebar news widget"
+                description="Manage the sidebar news widget with image"
                 maxWidth="2xl"
             >
                 {message && (
@@ -127,6 +188,34 @@ export default function LatestNewsAdmin() {
                         <LoadingSpinner />
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-bold mb-2 text-gray-900">
+                                    Widget Image (Optional)
+                                </label>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                    {(formData.image) && (
+                                        <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 bg-gray-50 flex items-center justify-center">
+                                            <img
+                                                src={formData.image?.previewUrl || (typeof formData.image === 'string' ? formData.image : '')}
+                                                alt="Preview"
+                                                className="max-w-full max-h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex-1 w-full">
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/jpg, image/webp"
+                                            onChange={handleImageUpload}
+                                            className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border-2 border-gray-300 rounded-xl"
+                                        />
+                                        <p className="mt-2 text-xs text-gray-500">
+                                            {isUploading ? "Uploading..." : "Click to upload news image"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <FormInput
                                 label="Heading"
                                 required
@@ -171,9 +260,9 @@ export default function LatestNewsAdmin() {
                                 variant="primary"
                                 size="lg"
                                 fullWidth
-                                disabled={saving}
+                                disabled={saving || isUploading}
                             >
-                                {saving ? "Saving..." : "Save Changes"}
+                                {saving ? "Saving..." : (isUploading ? "Waiting for upload..." : "Save Changes")}
                             </Button>
                         </form>
                     )}
