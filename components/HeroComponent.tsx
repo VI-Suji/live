@@ -70,7 +70,6 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
                         <div className="space-y-3 lg:space-y-4">
                             <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black text-gray-900 leading-[0.9] tracking-tighter drop-shadow-sm">
                                 {heroData.greeting}
-                                <span className="text-blue-600">.</span>
                             </h1>
 
                             {!showLive && (
