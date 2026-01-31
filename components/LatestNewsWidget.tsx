@@ -70,7 +70,7 @@ const LatestNewsWidget: React.FC = () => {
             <div className="w-full flex flex-col gap-2 order-4 md:order-none">
                 <hr className="border-black/20 my-1" />
                 <p className="text-gray-700 text-md sm:text-lg leading-relaxed p-10">
-                    {news.content}
+                    {news.content.trim()}
                 </p>
             </div>
         </div>

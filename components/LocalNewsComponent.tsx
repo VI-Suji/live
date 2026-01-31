@@ -74,7 +74,7 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
 
                 {news.description && (
                     <p className="text-sm sm:text-base text-gray-500 line-clamp-2 leading-relaxed">
-                        {news.description}
+                        {news.description.trim()}
                     </p>
                 )}
 
@@ -382,10 +382,11 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
                             <p className="text-gray-700 text-lg sm:text-xl leading-[1.8] whitespace-pre-line font-medium pb-12">
                                 {(() => {
                                     if (!news.description) return null;
-                                    const colonIndex = news.description.indexOf(':');
+                                    const trimmedDesc = news.description.trim();
+                                    const colonIndex = trimmedDesc.indexOf(':');
                                     if (colonIndex !== -1) {
-                                        const prefix = news.description.substring(0, colonIndex + 1);
-                                        const rest = news.description.substring(colonIndex + 1);
+                                        const prefix = trimmedDesc.substring(0, colonIndex + 1);
+                                        const rest = trimmedDesc.substring(colonIndex + 1);
                                         return (
                                             <>
                                                 <span className="font-black text-gray-950 mr-1">{prefix}</span>
@@ -393,7 +394,7 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
                                             </>
                                         );
                                     }
-                                    return news.description;
+                                    return trimmedDesc;
                                 })()}
                             </p>
                         </div>
