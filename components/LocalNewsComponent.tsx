@@ -495,14 +495,14 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 text-gray-200">
+                                {/* <div className="flex items-center gap-4 text-gray-200">
                                     <div className="h-[1px] w-12 bg-gray-100"></div>
                                     <div className="flex items-center gap-2">
                                         <kbd className="px-1.5 py-0.5 rounded border border-gray-200 bg-white text-[9px] font-black text-gray-400">ESC</kbd>
                                         <span className="text-[9px] font-black uppercase tracking-widest">to close</span>
                                     </div>
                                     <div className="h-[1px] w-12 bg-gray-100"></div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
