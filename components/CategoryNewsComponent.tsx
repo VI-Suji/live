@@ -376,6 +376,114 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: CategoryNewsItemDa
                                 })()}
                             </p>
                         </div>
+
+                        {/* Article Footer Navigation & Share */}
+                        <div className="mt-12 pt-8 border-t border-gray-100 pb-16">
+                            <div className="flex flex-col items-center gap-8">
+                                <div className="w-full flex flex-col sm:flex-row items-center gap-6 sm:gap-4">
+                                    {/* Navigation Row - Full width on mobile, separate items on desktop */}
+                                    <div className="w-full flex items-center justify-between sm:contents order-2 sm:order-none">
+                                        {/* Prev Hint */}
+                                        <div className="sm:flex-1">
+                                            <button
+                                                onClick={onPrev}
+                                                disabled={!onPrev}
+                                                className="group flex flex-col items-start gap-1.5 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-left w-fit"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <motion.div
+                                                        animate={{ x: [0, -4, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 2 }}
+                                                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
+                                                    >
+                                                        <FaChevronLeft size={10} />
+                                                    </motion.div>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 sm:hidden">Swipe</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 hidden sm:block whitespace-nowrap">Click Left Arrow</span>
+                                                </div>
+                                                <span className="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-tighter ml-1 sm:ml-0">Previous</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Next Hint (Mobile Only Position) */}
+                                        <div className="sm:hidden">
+                                            <button
+                                                onClick={onNext}
+                                                disabled={!onNext}
+                                                className="group flex flex-col items-end gap-1.5 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-right w-fit"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Swipe</span>
+                                                    <motion.div
+                                                        animate={{ x: [0, 4, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 2 }}
+                                                        className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
+                                                    >
+                                                        <FaChevronRight size={10} />
+                                                    </motion.div>
+                                                </div>
+                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mr-1">Next</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Share Center - Stacked on mobile, middle on desktop */}
+                                    <div className="w-full sm:w-auto order-1 sm:order-none">
+                                        <div className="flex flex-col items-center gap-3 sm:gap-4 px-6 sm:px-8 py-3 sm:py-4 bg-gray-50/50 rounded-[2rem] border border-gray-100">
+                                            <p className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Share Report</p>
+                                            <div className="flex items-center gap-2 sm:gap-3">
+                                                <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer"
+                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
+                                                    <FaWhatsapp size={18} className="group-hover:scale-110 transition-transform" />
+                                                </a>
+                                                <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer"
+                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#1877F2] hover:bg-[#1877F2] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
+                                                    <FaFacebookF size={18} className="group-hover:scale-110 transition-transform" />
+                                                </a>
+                                                <a href={shareLinks.instagram} target="_blank" rel="noopener noreferrer"
+                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#E4405F] hover:bg-[#E4405F] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
+                                                    <FaInstagram size={18} className="group-hover:scale-110 transition-transform" />
+                                                </a>
+                                                <button onClick={copyToClipboard}
+                                                    className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl transition-all shadow-sm border group ${copied ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 hover:bg-blue-600 hover:text-white border-gray-100'}`}>
+                                                    {copied ? <FaCheck size={16} /> : <FaLink size={16} className="group-hover:scale-110 transition-transform" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Next Hint (Desktop Position) */}
+                                    <div className="hidden sm:flex flex-1 justify-end">
+                                        <button
+                                            onClick={onNext}
+                                            disabled={!onNext}
+                                            className="group flex flex-col items-end gap-2 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-right w-fit"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Click Right Arrow</span>
+                                                <motion.div
+                                                    animate={{ x: [0, 4, 0] }}
+                                                    transition={{ repeat: Infinity, duration: 2 }}
+                                                    className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
+                                                >
+                                                    <FaChevronRight size={10} />
+                                                </motion.div>
+                                            </div>
+                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Next Story</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-gray-200">
+                                    <div className="h-[1px] w-12 bg-gray-100"></div>
+                                    <div className="flex items-center gap-2">
+                                        <kbd className="px-1.5 py-0.5 rounded border border-gray-200 bg-white text-[9px] font-black text-gray-400">ESC</kbd>
+                                        <span className="text-[9px] font-black uppercase tracking-widest">to close</span>
+                                    </div>
+                                    <div className="h-[1px] w-12 bg-gray-100"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </motion.div>
