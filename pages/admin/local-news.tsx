@@ -8,6 +8,7 @@ import { FaArrowLeft, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 type LocalNews = {
     _id: string;
     title: string;
+    scrollTitle?: string;
     image?: string;
     description?: string;
     author?: string;
@@ -28,6 +29,7 @@ export default function LocalNewsAdmin() {
 
     const [formData, setFormData] = useState<{
         title: string;
+        scrollTitle: string;
         description: string;
         author: string;
         order: number;
@@ -35,6 +37,7 @@ export default function LocalNewsAdmin() {
         image?: any;
     }>({
         title: "",
+        scrollTitle: "",
         description: "",
         author: "",
         order: 1,
@@ -137,7 +140,7 @@ export default function LocalNewsAdmin() {
                 alert(editingItem ? "✅ Updated successfully!" : "✅ Created successfully!");
                 setShowForm(false);
                 setEditingItem(null);
-                setFormData({ title: "", description: "", author: "", order: 1, active: true });
+                setFormData({ title: "", scrollTitle: "", description: "", author: "", order: 1, active: true });
 
                 setPreviewImage("");
 
@@ -165,7 +168,7 @@ export default function LocalNewsAdmin() {
                                 onClick={() => {
                                     setShowForm(true);
                                     setEditingItem(null);
-                                    setFormData({ title: "", description: "", author: "", order: news.length + 1, active: true });
+                                    setFormData({ title: "", scrollTitle: "", description: "", author: "", order: news.length + 1, active: true });
                                     setPreviewImage("");
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-md transition-all hover:scale-105 flex-shrink-0"
@@ -259,6 +262,16 @@ export default function LocalNewsAdmin() {
                                         />
                                     </div>
                                     <div>
+                                        <label className="block text-sm font-bold mb-2 text-gray-900">Scroll Title (Optional)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.scrollTitle}
+                                            onChange={(e) => setFormData({ ...formData, scrollTitle: e.target.value })}
+                                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                            placeholder="Text for marquee (defaults to title)"
+                                        />
+                                    </div>
+                                    <div>
                                         <label className="block text-sm font-bold mb-2 text-gray-900">Author (Optional)</label>
                                         <input
                                             type="text"
@@ -341,6 +354,7 @@ export default function LocalNewsAdmin() {
                                             setEditingItem(item);
                                             setFormData({
                                                 title: item.title,
+                                                scrollTitle: item.scrollTitle || "",
                                                 description: item.description || "",
                                                 author: item.author || "",
                                                 order: item.order || 1,
@@ -391,6 +405,7 @@ export default function LocalNewsAdmin() {
                                                         setEditingItem(item);
                                                         setFormData({
                                                             title: item.title,
+                                                            scrollTitle: item.scrollTitle || "",
                                                             description: item.description || "",
                                                             author: item.author || "",
                                                             order: item.order || 1,

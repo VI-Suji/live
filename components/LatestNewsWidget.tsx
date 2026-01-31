@@ -67,9 +67,9 @@ const LatestNewsWidget: React.FC = () => {
             </div>
 
             {/* Content Section */}
-            <div className="w-full flex flex-col gap-2 order-3 md:order-none">
+            <div className="w-full flex flex-col gap-2 order-4 md:order-none">
                 <hr className="border-black/20 my-1" />
-                <p className="text-gray-700 text-md sm:text-lg leading-relaxed p-2">
+                <p className="text-gray-700 text-md sm:text-lg leading-relaxed p-10">
                     {news.content}
                 </p>
             </div>

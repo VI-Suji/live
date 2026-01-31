@@ -484,13 +484,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { pageId } = context.params || {};
   if (!pageId) return { notFound: true };
 
-  const query = `*[_type == "topStory" && slug.current == $slug][0] {
-    _id, title, slug, author, "mainImage": mainImage.asset->url,
-    excerpt, body, publishedAt, featured, category
+  // No longer extracting ID from end as IDs were removed for professional look.
+  // We match top stories by their dedicated slug, and local/national by title slug.
+  const query = `*[(_type == "topStory" || _type == "localNews" || _type == "nationalNews") && (slug.current == $pageId || title match $pageId)][0] {
+    _id, 
+    _type,
+    title, 
+    slug, 
+    author, 
+    "mainImage": coalesce(mainImage.asset->url, image.asset->url),
+    "excerpt": coalesce(excerpt, description), 
+    body, 
+    publishedAt, 
+    featured, 
+    category
   }`;
 
   try {
-    const post = await sanityClient.fetch(query, { slug: pageId });
+    const post = await sanityClient.fetch(query, { pageId });
     if (!post) return { notFound: true };
     return { props: { post } };
   } catch (error) {

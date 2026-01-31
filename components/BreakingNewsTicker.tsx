@@ -4,6 +4,7 @@ import { FaBolt, FaNewspaper } from "react-icons/fa";
 type NewsItem = {
     _id: string;
     title: string;
+    scrollTitle?: string;
     link?: string;
     isBreaking?: boolean;
 };
@@ -72,10 +73,28 @@ export default function BreakingNewsTicker() {
                                 {/* Duplicate the news items for seamless loop */}
                                 {[...displayNews, ...displayNews, ...displayNews].map((item, index) => (
                                     <React.Fragment key={`${item._id}-${index}`}>
-                                        <span className="inline-flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm">
+                                        <button
+                                            disabled={!!item.isBreaking}
+                                            onClick={() => {
+                                                if (item.isBreaking) return;
+
+                                                const slug = (item.title || "")
+                                                    .toLowerCase()
+                                                    .trim()
+                                                    .replace(/[^\u0D00-\u0D7F\w\s-]/g, '')
+                                                    .replace(/\s+/g, '-')
+                                                    .replace(/-+/g, '-')
+                                                    .substring(0, 60);
+
+                                                window.history.pushState(null, '', `/news/${slug}`);
+                                                window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
+                                            }}
+                                            className={`inline-flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm text-left transition-colors
+                                                ${!item.isBreaking ? 'cursor-pointer hover:text-yellow-200' : 'cursor-default'}`}
+                                        >
                                             <span className={`inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 ${isBreaking ? 'bg-yellow-300' : 'bg-blue-200'} rounded-full`}></span>
-                                            {item.title}
-                                        </span>
+                                            {item.scrollTitle && item.scrollTitle.trim() !== "" ? item.scrollTitle : item.title}
+                                        </button>
                                     </React.Fragment>
                                 ))}
                             </div>

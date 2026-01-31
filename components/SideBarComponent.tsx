@@ -139,14 +139,14 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
   const showNews = siteSettings?.latestNewsVisible ?? true;
 
   return (
-    <div className="flex flex-col items-center justify-start w-full lg:w-[35%] h-full gap-8 mt-8 lg:mt-0">
+    <div className="flex flex-col items-start justify-start w-full lg:w-[35%] flex-shrink-0 gap-6">
       {showAds && <AdOne />}
 
       {/* Latest News Widget */}
       {showNews && (
         <div
           onClick={toggleExpand}
-          className={`w-full bg-white rounded-3xl shadow-xl shadow-gray-100/50 border border-gray-100 overflow-hidden sticky top-24 z-30 transition-all duration-300 ${isExpandable ? 'cursor-pointer hover:shadow-2xl' : ''}`}
+          className={`w-full bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100/20 border border-gray-100 overflow-hidden sticky top-12 z-30 transition-all duration-300 ${isExpandable ? 'cursor-pointer hover:shadow-3xl hover:shadow-blue-900/5' : ''}`}
         >
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
             <h3 className="font-black text-xl text-gray-900">Latest News</h3>
@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
                   <span className="text-xs font-bold uppercase">{month}</span>
                 </div>
 
-                <div className="flex-1 w-full">
+                <div className="flex-1 w-full mb-4">
                   <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2 group-hover:text-blue-600 transition-colors">
                     {news.heading}
                   </h4>
@@ -204,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
                   >
                     <p
                       ref={contentRef}
-                      className={`text-gray-500 text-sm leading-relaxed ${isClamped ? 'line-clamp-3' : 'whitespace-pre-line'}`}
+                      className={`text-gray-500 text-sm leading-relaxed ${isClamped ? 'line-clamp-4' : 'whitespace-pre-line'}`}
                     >
                       {news.content}
                     </p>

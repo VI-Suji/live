@@ -10,6 +10,12 @@ export default {
             validation: (Rule: any) => Rule.required(),
         },
         {
+            name: 'scrollTitle',
+            title: 'Scroll Title',
+            type: 'string',
+            description: 'Custom text to show in the marquee. If empty, the main title will be used.'
+        },
+        {
             name: 'image',
             title: 'Image',
             type: 'image',

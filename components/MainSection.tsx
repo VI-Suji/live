@@ -84,7 +84,7 @@ const MainSection: React.FC = () => {
             <section
                 className="relative bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden"
             >
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-12 lg:py-16">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-8 lg:py-12">
                     <div className="flex flex-col lg:flex-row items-start justify-center gap-6 sm:gap-10">
                         <div className="flex flex-col gap-8 sm:gap-10 w-full lg:w-[65%]">
                             <div id="home" className="flex flex-col gap-8 sm:gap-10">

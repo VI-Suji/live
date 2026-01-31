@@ -13,6 +13,7 @@ export default async function handler(
             ? `*[_type == "localNews"] | order(order asc, publishedAt desc) {
                 _id,
                 title,
+                scrollTitle,
                 "image": image.asset->url,
                 description,
                 author,
@@ -23,6 +24,7 @@ export default async function handler(
             : `*[_type == "localNews" && active == true] | order(order asc, publishedAt desc) {
                 _id,
                 title,
+                scrollTitle,
                 "image": image.asset->url,
                 description,
                 author,
