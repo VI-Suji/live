@@ -404,7 +404,7 @@ const CategoryNewsComponent = () => {
 
             if (path.startsWith('/news/')) {
                 const currentSlug = path.replace('/news/', '');
-                let index = newsData.findIndex(item => slugify(item.title) === currentSlug);
+                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
 
                 if (index !== -1) {
                     const page = Math.floor(index / itemsPerPage) + 1;
@@ -437,7 +437,7 @@ const CategoryNewsComponent = () => {
             // Legacy hash support
             if (hash.startsWith('#news/')) {
                 const currentSlug = hash.replace('#news/', '');
-                let index = newsData.findIndex(item => slugify(item.title) === currentSlug);
+                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
                 if (index !== -1) setSelectedNews(newsData[index]);
                 return;
             }

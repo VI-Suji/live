@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 
 const Footer = () => {
@@ -87,8 +88,8 @@ const Footer = () => {
                         © 2025 Gramika Limited. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-sm text-gray-500">
-                        <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</a>
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</Link>
                     </div>
                 </div>
             </div>

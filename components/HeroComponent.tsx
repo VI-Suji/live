@@ -46,7 +46,6 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gray-100" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2000&auto=format&fit=crop"
                     alt="Background"
