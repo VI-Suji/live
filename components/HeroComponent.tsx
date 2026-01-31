@@ -11,10 +11,7 @@ interface Props {
 const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
     const [heroData, setHeroData] = React.useState({
         greeting: "GRAMIKA NEWS",
-        welcomeMessage: "സ്വാഗതം ഗ്രാമികയിലേക്ക്",
-        tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
-        description: "ഗ്രാമീണതയുടെ ഹൃദയതാളമായ ഗ്രാമിക ന്യൂസ് ചാനൽ അതിന്റെ വെബ്സൈറ്റ് കൂടി ആരംഭിച്ചിരിക്കുകയാണ്. വാര്‍ത്തകള്‍ എത്രയുംപെട്ടെന്നു നിങ്ങളുടെ വിരല്‍ത്തുമ്പിലെത്തിക്കാന്‍ ഞങ്ങള്‍ പ്രതിജ്ഞാബദ്ധമാണ്.",
-        ctaButtonText: "View Stories"
+        tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം."
     });
 
     React.useEffect(() => {
@@ -25,11 +22,8 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
                     const data = await res.json();
                     if (data && !data.error) {
                         setHeroData({
-                            greeting: (data.greeting === "GRAMIKA" ? "GRAMIKA NEWS" : data.greeting) || "GRAMIKA NEWS",
-                            welcomeMessage: data.welcomeMessage || "ഗ്രാമിക ചാനലിലേക് നിങ്ങൾക് ഹൃദയം നിറഞ്ഞ സ്വാഗതം!",
-                            tagline: data.tagline || "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം.",
-                            description: data.description || "നമ്മുടെ നാട്ടിൻപുറങ്ങളുടെ നന്മയും നിഷ്‌കളങ്കതയും അടയാളപ്പെടുത്തുന്ന നിങ്ങളുടെ വിശ്വസനീയ വാർത്താ സ്രോതസ്സ്.",
-                            ctaButtonText: data.ctaButtonText || "View Stories"
+                            greeting: data.greeting || "ഗ്രാമിക",
+                            tagline: data.tagline || "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം."
                         });
                     }
                 }
@@ -62,10 +56,7 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
                 {/* Main Content Area */}
                 <div className={`flex-1 p-6 sm:p-12 lg:p-16 flex flex-col gap-6 lg:gap-8 justify-center ${!showLive ? 'lg:pr-14' : ''}`}>
                     <div className="space-y-4 lg:space-y-6 max-w-2xl">
-                        {/* <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50/80 backdrop-blur-sm border border-blue-100 rounded-full w-fit">
-                            <span className="w-2 h-2 rounded-full bg-blue-600" />
-                            <span className="text-[10px] font-bold text-blue-900 uppercase tracking-widest">{heroData.welcomeMessage}</span>
-                        </div> */}
+
 
                         <div className="space-y-3 lg:space-y-4">
                             <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black text-gray-900 leading-[0.9] tracking-tighter drop-shadow-sm">
@@ -117,7 +108,7 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
                                 onClick={onReadMore}
                                 className="group flex items-center justify-center gap-3 px-8 py-3.5 lg:py-4 bg-gray-900 text-white rounded-2xl font-bold text-base shadow-xl hover:bg-blue-600 hover:shadow-blue-600/30 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto"
                             >
-                                {heroData.ctaButtonText}
+                                View Stories
                                 <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>

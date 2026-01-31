@@ -7,10 +7,7 @@ import AdminLayout, { AdminCard, FormInput, FormTextarea, Button, LoadingSpinner
 type HeroSection = {
     _id: string;
     greeting?: string;
-    welcomeMessage?: string;
     tagline?: string;
-    description?: string;
-    ctaButtonText?: string;
 };
 
 export default function HeroSectionAdmin() {
@@ -21,10 +18,7 @@ export default function HeroSectionAdmin() {
 
     const [formData, setFormData] = useState({
         greeting: "",
-        welcomeMessage: "",
         tagline: "",
-        description: "",
-        ctaButtonText: "",
     });
 
     useEffect(() => {
@@ -44,10 +38,7 @@ export default function HeroSectionAdmin() {
                 setHero(data);
                 setFormData({
                     greeting: data.greeting || "",
-                    welcomeMessage: data.welcomeMessage || "",
                     tagline: data.tagline || "",
-                    description: data.description || "",
-                    ctaButtonText: data.ctaButtonText || "",
                 });
             }
         } catch (error) {
@@ -75,10 +66,7 @@ export default function HeroSectionAdmin() {
                 setHero(responseData);
                 setFormData({
                     greeting: responseData.greeting || "",
-                    welcomeMessage: responseData.welcomeMessage || "",
                     tagline: responseData.tagline || "",
-                    description: responseData.description || "",
-                    ctaButtonText: responseData.ctaButtonText || "",
                 });
                 setMessage({ type: 'success', text: '✅ Hero section updated successfully!' });
                 setTimeout(() => setMessage(null), 3000);
@@ -116,25 +104,14 @@ export default function HeroSectionAdmin() {
                         <LoadingSpinner />
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormInput
-                                    label="Greeting"
-                                    optional
-                                    type="text"
-                                    value={formData.greeting}
-                                    onChange={(e) => setFormData({ ...formData, greeting: e.target.value })}
-                                    placeholder="e.g. നമസ്കാരം,"
-                                />
-                                <FormInput
-                                    label="Welcome Message"
-                                    optional
-                                    type="text"
-                                    value={formData.welcomeMessage}
-                                    onChange={(e) => setFormData({ ...formData, welcomeMessage: e.target.value })}
-                                    placeholder="e.g. Welcome to Gramika"
-                                />
-                            </div>
-
+                            <FormInput
+                                label="Greeting"
+                                optional
+                                type="text"
+                                value={formData.greeting}
+                                onChange={(e) => setFormData({ ...formData, greeting: e.target.value })}
+                                placeholder="e.g. നമസ്കാരം,"
+                            />
                             <FormInput
                                 label="Tagline"
                                 optional
@@ -142,24 +119,6 @@ export default function HeroSectionAdmin() {
                                 value={formData.tagline}
                                 onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                                 placeholder="e.g. ഗ്രാമീണതയുടെ ഹൃദയതാളം"
-                            />
-
-                            <FormTextarea
-                                label="Description"
-                                optional
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                rows={4}
-                                placeholder="Brief description of your website..."
-                            />
-
-                            <FormInput
-                                label="CTA Button Text"
-                                optional
-                                type="text"
-                                value={formData.ctaButtonText}
-                                onChange={(e) => setFormData({ ...formData, ctaButtonText: e.target.value })}
-                                placeholder="e.g. Explore Stories"
                             />
 
 

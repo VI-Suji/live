@@ -9,11 +9,7 @@ export default async function handler(
         const query = `*[_type == "heroSection"][0] {
       _id,
       greeting,
-      welcomeMessage,
-      tagline,
-      description,
-      ctaButtonText,
-      secondaryButtonText
+      tagline
     }`;
 
         const heroContent = await sanityClient.fetch(query);
