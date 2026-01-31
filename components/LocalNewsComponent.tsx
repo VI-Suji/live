@@ -39,7 +39,7 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
         checkHash();
         window.addEventListener('hashchange', checkHash);
         return () => window.removeEventListener('hashchange', checkHash);
-    }, [news._id, onOpen]);
+    }, [news, onOpen]);
 
     return (
         <div
@@ -498,7 +498,7 @@ const LocalNews = () => {
                 const currentSlug = path.replace('/news/', '');
 
                 // 1. Try finding in current newsData
-                let index = newsData.findIndex(item => slugify(item.title) === currentSlug);
+                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
 
                 if (index !== -1) {
                     const page = Math.floor(index / itemsPerPage) + 1;
@@ -534,7 +534,7 @@ const LocalNews = () => {
             // Handle legacy slash-hashes (backward compatibility)
             if (hash.startsWith('#news/')) {
                 const currentSlug = hash.replace('#news/', '');
-                let index = newsData.findIndex(item => slugify(item.title) === currentSlug);
+                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
                 if (index !== -1) {
                     setSelectedNews(newsData[index]);
                 }
