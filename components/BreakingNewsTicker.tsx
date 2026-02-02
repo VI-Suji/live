@@ -114,7 +114,7 @@ export default function BreakingNewsTicker() {
                 }
 
                 .animate-scroll-left {
-                    animation: scroll-left 30s linear infinite;
+                    animation: scroll-left 50s linear infinite;
                 }
 
                 .animate-scroll-left:hover {

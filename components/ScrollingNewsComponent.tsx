@@ -18,7 +18,7 @@ const ScrollingNews = () => {
                 <div className="bg-red-700 px-4 py-1 font-bold text-xs sm:text-sm uppercase tracking-wider z-10 shadow-md">
                     Breaking News
                 </div>
-                <Marquee gradient={false} speed={40} className="flex-1">
+                <Marquee gradient={false} speed={25} className="flex-1">
                     {NEWS_UPDATES.map((news, index) => (
                         <span key={index} className="mx-8 text-sm sm:text-base font-medium">
                             {news} •
