@@ -21,7 +21,7 @@ export default async function handler(
                 order,
                 active
               }`
-            : `*[_type == "localNews" && active == true] | order(order asc, publishedAt desc) {
+            : `*[_type == "localNews" && active == true] | order(order asc, publishedAt desc) [0..49] {
                 _id,
                 title,
                 scrollTitle,

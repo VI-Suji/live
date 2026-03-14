@@ -26,7 +26,6 @@ export default {
             name: 'active',
             title: 'Active',
             type: 'boolean',
-            description: 'Only one latest news should be active at a time',
             initialValue: true,
         },
         {

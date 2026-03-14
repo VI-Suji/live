@@ -110,6 +110,9 @@ export default function TopStoriesAdmin() {
             if (!res.ok) {
                 throw new Error("Failed to update status");
             }
+
+            // Re-fetch to reflect any auto-deactivated items (50-cap enforcement)
+            await fetchStories();
         } catch (error) {
             console.error("Error updating status:", error);
             // Revert on error
@@ -457,80 +460,144 @@ export default function TopStoriesAdmin() {
                             </button>
                         </div>
                     ) : (
-                        <div className="grid gap-4">
-                            {stories.map((story) => (
-                                <div
-                                    key={story._id}
-                                    className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
-                                    onClick={() => handleEdit(story)}
-                                >
-                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                                        <div className="flex-1 w-full">
-                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 break-words">
-                                                    {story.title}
-                                                </h3>
-                                                {story.featured && (
-                                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded flex-shrink-0">
-                                                        FEATURED
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-gray-600 text-sm mb-3 line-clamp-2 break-words">
-                                                {story.excerpt ? story.excerpt.replace(/<[^>]+>/g, '') : "No excerpt"}
-                                            </p>
-                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs sm:text-sm text-gray-500">
-                                                <span>By {story.author || "Unknown"}</span>
-                                                <span className="hidden sm:inline">•</span>
-                                                <span>{story.category || "Uncategorized"}</span>
-                                                {story.publishedAt && (
-                                                    <>
-                                                        <span className="hidden sm:inline">•</span>
-                                                        <span>
-                                                            {new Date(story.publishedAt).toLocaleDateString()}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                            <p className="text-xs mt-2">
-                                                <span className={`px-2 py-1 rounded ${story.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                    {story.active ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
-                                            {/* Active Toggle */}
-                                            <button
-                                                onClick={() => handleToggleActive(story)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${story.active ? 'bg-green-500' : 'bg-gray-500'}`}
-                                                title={story.active ? "Deactivate" : "Activate"}
-                                            >
-                                                <span
-                                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${story.active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                />
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleEdit(story)}
-                                                className="flex-1 sm:flex-none px-4 py-2 sm:p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center gap-2"
-                                                title="Edit"
-                                            >
-                                                <FaEdit />
-                                                <span className="sm:hidden text-sm font-medium">Edit</span>
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(story._id)}
-                                                className="flex-1 sm:flex-none px-4 py-2 sm:p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors flex items-center justify-center gap-2"
-                                                title="Delete"
-                                            >
-                                                <FaTrash />
-                                                <span className="sm:hidden text-sm font-medium">Delete</span>
-                                            </button>
-                                        </div>
+                    <div className="space-y-8">
+                        {/* Active Stories Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-blue-50/30">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-black text-blue-900 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                                            Active Stories ({stories.filter(s => s.active).length}/50)
+                                        </h2>
+                                        <p className="text-xs text-blue-700 font-medium">Max 50 active — oldest auto-deactivates when limit is reached</p>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : stories.filter(s => s.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <div className="text-gray-300 mb-2 font-black text-4xl">0</div>
+                                    <p className="text-sm text-gray-500 font-bold italic">No active stories.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {stories.filter(s => s.active).map((story, index) => (
+                                        <div
+                                            key={story._id}
+                                            className="p-4 sm:p-6 hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                                            onClick={() => handleEdit(story)}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="flex-1 w-full">
+                                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                        <span className="text-[10px] font-black bg-gray-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-gray-500">#{index + 1}</span>
+                                                        <h3 className="font-black text-lg text-gray-900 break-words group-hover:text-blue-700 transition-colors">
+                                                            {story.title}
+                                                        </h3>
+                                                        {story.featured && (
+                                                            <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-black rounded uppercase tracking-wider flex-shrink-0 animate-bounce">
+                                                                FEATURED
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-gray-500 text-xs line-clamp-2 mb-3 break-words leading-relaxed">
+                                                        {story.excerpt ? story.excerpt.replace(/<[^>]+>/g, '') : "No excerpt"}
+                                                    </p>
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-tight">
+                                                        <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-600">By {story.author || "Unknown"}</span>
+                                                        <span className="bg-blue-50 px-2 py-0.5 rounded text-blue-600 font-black">{story.category || "Uncategorized"}</span>
+                                                        {story.publishedAt && (
+                                                            <span className="text-gray-400">
+                                                                {new Date(story.publishedAt).toLocaleDateString()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(story)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                        title="Deactivate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleEdit(story)}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaEdit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(story._id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
+
+                        {/* Inactive Stories Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+                                <div>
+                                    <h2 className="text-lg font-black text-gray-600">
+                                        Inactive Stories ({stories.filter(s => !s.active).length})
+                                    </h2>
+                                    <p className="text-xs text-gray-500 font-medium">Hidden from the website</p>
+                                </div>
+                            </div>
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : stories.filter(s => !s.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <p className="text-sm text-gray-400 font-bold italic">No inactive stories.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100 bg-gray-50/20">
+                                    {stories.filter(s => !s.active).map((story) => (
+                                        <div
+                                            key={story._id}
+                                            className="p-4 sm:p-6 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer group"
+                                            onClick={() => handleEdit(story)}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="flex-1 w-full">
+                                                    <h3 className="font-bold text-sm text-gray-600 mb-1 break-words">{story.title}</h3>
+                                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-tight">
+                                                        {story.category || "Uncategorized"} • {story.author || "Unknown"}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(story)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-gray-300 focus:outline-none"
+                                                        title="Activate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(story._id)}
+                                                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                     )}
                 </main>
             </div>

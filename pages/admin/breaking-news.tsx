@@ -101,6 +101,9 @@ export default function BreakingNewsAdmin() {
             if (!res.ok) {
                 throw new Error("Failed to update status");
             }
+
+            // Re-fetch to reflect any auto-deactivated items (20-cap enforcement)
+            await fetchNews();
         } catch (error) {
             console.error("Error updating status:", error);
             // Revert on error
@@ -374,113 +377,156 @@ export default function BreakingNewsAdmin() {
                         </div>
                     )}
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-6 border-b border-gray-200">
-                            <h2 className="text-lg font-bold text-gray-900">
-                                All Breaking News ({newsList.filter(n => n.active).length} active)
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1">All active breaking news will be shown on the website</p>
-                        </div>
+                    <div className="space-y-8">
+                        {/* Active Breaking News Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-red-50/30">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-black text-red-900 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                                            Active Breaking News ({newsList.filter(n => n.active).length}/20)
+                                        </h2>
+                                        <p className="text-xs text-red-700 font-medium">Max 20 active — oldest auto-deactivates when limit is reached</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                        {loading ? (
-                            <div className="p-8 text-center text-gray-500">Loading...</div>
-                        ) : newsList.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">No breaking news yet. Click &quot;Add Breaking News&quot; to create one.</div>
-                        ) : (
-                            <div className="divide-y divide-gray-200">
-                                {newsList.map((news) => (
-                                    <div
-                                        key={news._id}
-                                        className="p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                                        onClick={() => {
-                                            setEditingItem(news);
-                                            setFormData({
-                                                title: news.title,
-                                                link: news.link || "",
-                                                active: news.active,
-                                                priority: news.priority,
-                                                startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
-                                                expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
-                                            });
-                                            setShowForm(true);
-                                        }}
-                                    >
-                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                                            <div className="flex-1 w-full">
-                                                <div className="flex flex-wrap items-center gap-3 mb-2">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${news.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                        {news.active ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
-                                                        Priority {news.priority}
-                                                    </span>
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : newsList.filter(n => n.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <div className="text-gray-300 mb-2 font-black text-4xl">0</div>
+                                    <p className="text-sm text-gray-500 font-bold italic">No active breaking news.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {newsList.filter(n => n.active).map((news) => (
+                                        <div
+                                            key={news._id}
+                                            className="p-4 sm:p-6 hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(news);
+                                                setFormData({
+                                                    title: news.title,
+                                                    link: news.link || "",
+                                                    active: news.active,
+                                                    priority: news.priority,
+                                                    startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
+                                                    expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
+                                                });
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="flex-1 w-full">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-black rounded uppercase tracking-wider">
+                                                            Priority {news.priority}
+                                                        </span>
+                                                        {news.startDate && (
+                                                            <span className="text-[10px] text-gray-400 font-bold uppercase truncate">
+                                                                From: {new Date(news.startDate).toLocaleString()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <h3 className="font-black text-base text-gray-900 mb-1 break-words group-hover:text-red-700 transition-colors">{news.title}</h3>
+                                                    {news.link && (
+                                                        <p className="text-blue-600 text-[10px] font-medium truncate mb-2">{news.link}</p>
+                                                    )}
                                                 </div>
-                                                <h3 className="font-bold text-lg text-gray-900 mb-2 break-words">{news.title}</h3>
-                                                {news.link && (
-                                                    <a
-                                                        href={news.link}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-sm text-blue-600 hover:underline block mb-2 break-all"
-                                                        onClick={(e) => e.stopPropagation()}
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(news)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-green-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                        title="Deactivate"
                                                     >
-                                                        {news.link}
-                                                    </a>
-                                                )}
-                                                {news.startDate && (
-                                                    <p className="text-xs text-gray-500">
-                                                        Starts: {new Date(news.startDate).toLocaleString()}
-                                                    </p>
-                                                )}
-                                                {news.expiryDate && (
-                                                    <p className="text-xs text-gray-500">
-                                                        Expires: {new Date(news.expiryDate).toLocaleString()}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
-                                                {/* Active Toggle */}
-                                                <button
-                                                    onClick={() => handleToggleActive(news)}
-                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${news.active ? 'bg-green-500' : 'bg-gray-500'}`}
-                                                    title={news.active ? "Deactivate" : "Activate"}
-                                                >
-                                                    <span
-                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${news.active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                    />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingItem(news);
-                                                        setFormData({
-                                                            title: news.title,
-                                                            link: news.link || "",
-                                                            active: news.active,
-                                                            priority: news.priority,
-                                                            startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
-                                                            expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
-                                                        });
-                                                        setShowForm(true);
-                                                    }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                    title="Edit"
-                                                >
-                                                    <FaEdit size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(news._id)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                    title="Delete"
-                                                >
-                                                    <FaTrash size={18} />
-                                                </button>
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {/* Edit logic */}}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaEdit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(news._id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={16} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Inactive Breaking News Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+                                <div>
+                                    <h2 className="text-lg font-black text-gray-600">
+                                        Inactive Breaking News ({newsList.filter(n => !n.active).length})
+                                    </h2>
+                                    <p className="text-xs text-gray-500 font-medium">Hidden from the ticker</p>
+                                </div>
                             </div>
-                        )}
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : newsList.filter(n => !n.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <p className="text-sm text-gray-400 font-bold italic">No inactive entries.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100 bg-gray-50/20">
+                                    {newsList.filter(n => !n.active).map((news) => (
+                                        <div
+                                            key={news._id}
+                                            className="p-4 sm:p-6 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(news);
+                                                setFormData({
+                                                    title: news.title,
+                                                    link: news.link || "",
+                                                    active: news.active,
+                                                    priority: news.priority,
+                                                    startDate: news.startDate ? new Date(news.startDate).toISOString().slice(0, 16) : "",
+                                                    expiryDate: news.expiryDate ? new Date(news.expiryDate).toISOString().slice(0, 16) : "",
+                                                });
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="flex-1 w-full">
+                                                    <h3 className="font-bold text-sm text-gray-600 mb-1 break-words">{news.title}</h3>
+                                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-tight">
+                                                        Priority {news.priority}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(news)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-gray-300 focus:outline-none"
+                                                        title="Activate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(news._id)}
+                                                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </main>
             </div>

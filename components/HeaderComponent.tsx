@@ -120,17 +120,29 @@ const Header: React.FC = () => {
             items.push({ label: "FEATURE STORIES", target: "top-stories" });
         }
 
-        // Always show SOCIALS (it has social media links)
+        // Show SOCIALS (it has social media links)
         items.push({ label: "SOCIALS", target: "socials" });
+
+        // Always show ABOUT
+        items.push({ label: "ABOUT", target: "/about" });
 
         setMenuItems(items);
     }, [siteSettings, contentAvailability]);
 
-    // Handle scroll effect
+    // Handle scroll effect and initial section
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
         };
+
+        // Set initial active section based on path
+        const currentPath = window.location.pathname;
+        if (currentPath === '/about' || currentPath === '/about/') {
+            setActiveSection('/about');
+        } else if (currentPath === '/' || currentPath === '') {
+            setActiveSection('home');
+        }
+
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -138,6 +150,15 @@ const Header: React.FC = () => {
     // Scroll Spy Logic
     useEffect(() => {
         const handleScrollSpy = () => {
+            const currentPath = window.location.pathname;
+            // Only run scroll spy on the home page
+            if (currentPath !== '/' && currentPath !== '') {
+                if (currentPath === '/about' || currentPath === '/about/') {
+                    setActiveSection('/about');
+                }
+                return;
+            }
+
             const scrollPosition = window.scrollY + 150; // Offset for header height
 
             // Create a copy of menu items and reverse it to check from bottom up
@@ -184,8 +205,27 @@ const Header: React.FC = () => {
         return () => window.removeEventListener("scroll", handleScrollSpy);
     }, [menuItems]);
 
-    // Smooth scroll handler
+    // Smooth scroll or redirect handler
     const scrollToSection = (targetId: string) => {
+        if (targetId.startsWith('/')) {
+            window.location.href = targetId;
+            return;
+        }
+
+        // If we're not on the home page and try to navigate to a home section
+        if (window.location.pathname !== '/' && window.location.pathname !== '') {
+            window.location.href = `/#${targetId}`;
+            return;
+        }
+
+        // Handle clicking Home while already on Home (scroll to top)
+        if (targetId === 'home') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setActiveSection('home');
+            setMobileMenuOpen(false);
+            return;
+        }
+
         let actualTargetId = targetId;
 
         // Handle responsive Local News section

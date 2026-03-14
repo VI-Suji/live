@@ -184,7 +184,7 @@ export function Button({
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-    const baseClasses = 'font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantClasses = {
         primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-200',

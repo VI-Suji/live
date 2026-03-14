@@ -16,50 +16,57 @@ export default async function handler(
     }
 
     const { method } = req;
+    const MAX_ACTIVE = 2; // Latest news only shows 2
+
+    const checkActiveLimit = async (ignoreId?: string) => {
+        let query = `count(*[_type == "latestNews" && active == true])`;
+        if (ignoreId) {
+            query = `count(*[_type == "latestNews" && active == true && _id != "${ignoreId}"])`;
+        }
+        return await sanityClient.fetch(query);
+    };
 
     try {
         switch (method) {
             case 'POST':
-                // Check if a latestNews document already exists
-                const existing = await sanityClient.fetch(`*[_type == "latestNews"][0]`);
-
-                if (existing) {
-                    // Update existing document
-                    console.log('Updating existing latest news:', existing._id);
-                    console.log('Update data:', req.body);
-                    const updatedDoc = await sanityClient
-                        .patch(existing._id)
-                        .set(req.body)
-                        .commit();
-                    console.log('Updated successfully:', updatedDoc);
-                    return res.status(200).json(updatedDoc);
-                } else {
-                    // Create new document
-                    console.log('Creating new latest news with data:', req.body);
-                    const newDoc = await sanityClient.create({
-                        _type: 'latestNews',
-                        ...req.body,
-                    });
-                    console.log('Created successfully:', newDoc);
-                    return res.status(201).json(newDoc);
+                if (req.body.active !== false) {
+                    const count = await checkActiveLimit();
+                    if (count >= MAX_ACTIVE) {
+                        return res.status(400).json({ error: 'Maximum 2 active items allowed. Please deactivate an existing item first.' });
+                    }
                 }
+                
+                const newDoc = await sanityClient.create({
+                    _type: 'latestNews',
+                    ...req.body,
+                });
+                return res.status(201).json(newDoc);
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
                 if (!_id) {
                     return res.status(400).json({ error: 'Missing _id for update' });
                 }
-                console.log('Patching latest news:', _id);
-                console.log('Update data:', updates);
+
+                if (updates.active === true) {
+                    const count = await checkActiveLimit(_id);
+                    if (count >= MAX_ACTIVE) {
+                        return res.status(400).json({ error: 'Maximum 2 active items allowed. Please deactivate an existing item first.' });
+                    }
+                }
+
                 const updatedDoc = await sanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
-                console.log('Patched successfully:', updatedDoc);
+
                 return res.status(200).json(updatedDoc);
 
             case 'DELETE':
                 const { id } = req.query;
+                if (!id) {
+                    return res.status(400).json({ error: 'Missing id for delete' });
+                }
                 await sanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });
 
@@ -69,12 +76,9 @@ export default async function handler(
         }
     } catch (error: any) {
         console.error('API Error:', error);
-        console.error('Error details:', error.message);
-        console.error('Error response:', error.response?.body);
         return res.status(500).json({
             error: 'Internal server error',
-            message: error.message,
-            details: error.response?.body
+            message: error.message
         });
     }
 }

@@ -18,27 +18,71 @@ export default async function handler(
 
     const { method } = req;
 
+    const MAX_ACTIVE = 50;
+
+    const enforceActiveCap = async (protectId: string): Promise<string[]> => {
+        const activeItems: { _id: string }[] = await sanityClient.fetch(
+            `*[_type == "topStory" && active == true] | order(publishedAt desc) { _id }`
+        );
+
+        const deactivatedIds: string[] = [];
+        if (activeItems.length > MAX_ACTIVE) {
+            const itemsToDeactivate = activeItems.slice(MAX_ACTIVE);
+            for (const item of itemsToDeactivate) {
+                if (item._id === protectId) continue;
+                await sanityClient.patch(item._id).set({ active: false }).commit();
+                deactivatedIds.push(item._id);
+            }
+
+            if (deactivatedIds.length < itemsToDeactivate.length) {
+                for (let i = MAX_ACTIVE - 1; i >= 0; i--) {
+                    if (activeItems[i]._id !== protectId) {
+                        await sanityClient.patch(activeItems[i]._id).set({ active: false }).commit();
+                        deactivatedIds.push(activeItems[i]._id);
+                        break;
+                    }
+                }
+            }
+        }
+        return deactivatedIds;
+    };
+
     try {
         switch (method) {
             case 'POST':
-                // Create new top story
+                const bottomItem = await sanityClient.fetch(
+                    `*[_type == "topStory"] | order(order asc) [0] { order }`
+                );
+                const nextOrder = (bottomItem?.order ?? 0) - 1;
+
                 const newStory = await sanityClient.create({
                     _type: 'topStory',
                     ...req.body,
+                    order: nextOrder,
+                    publishedAt: req.body.publishedAt || new Date().toISOString(),
                 });
-                return res.status(201).json(newStory);
+
+                let postDeactivated: string[] = [];
+                if (req.body.active !== false) {
+                    postDeactivated = await enforceActiveCap(newStory._id);
+                }
+                return res.status(201).json({ ...newStory, _deactivatedIds: postDeactivated });
 
             case 'PATCH':
-                // Update existing story
                 const { _id, ...updates } = req.body;
+
                 const updatedStory = await sanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
-                return res.status(200).json(updatedStory);
+
+                let patchDeactivated: string[] = [];
+                if (updates.active === true) {
+                    patchDeactivated = await enforceActiveCap(_id);
+                }
+                return res.status(200).json({ ...updatedStory, _deactivatedIds: patchDeactivated });
 
             case 'DELETE':
-                // Delete story
                 const { id } = req.query;
                 await sanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });

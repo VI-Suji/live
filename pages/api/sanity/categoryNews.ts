@@ -24,7 +24,7 @@ export default async function handler(
                 order,
                 active
               }`
-            : `*[_type == "${type}" && active == true] | order(order asc, publishedAt desc) {
+            : `*[_type == "${type}" && active == true] | order(order asc, publishedAt desc) [0..49] {
                 _id,
                 title,
                 "image": image.asset->url,

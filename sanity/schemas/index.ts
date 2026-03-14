@@ -13,6 +13,7 @@ import nationalNews from './nationalNews';
 import entertainmentNews from './entertainmentNews';
 import healthNews from './healthNews';
 import sportsNews from './sportsNews';
+import aboutUs from './aboutUs';
 
 export const schemaTypes = [
     topStory,
@@ -29,4 +30,5 @@ export const schemaTypes = [
     entertainmentNews,
     healthNews,
     sportsNews,
+    aboutUs,
 ];

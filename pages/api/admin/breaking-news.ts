@@ -16,6 +16,35 @@ export default async function handler(
     }
 
     const { method } = req;
+    const MAX_ACTIVE = 20;
+
+    const enforceActiveCap = async (protectId: string): Promise<string[]> => {
+        // Breaking news is ordered by priority asc then createdAt desc
+        const activeItems: { _id: string }[] = await sanityClient.fetch(
+            `*[_type == "breakingNews" && active == true] | order(priority asc, _createdAt desc) { _id }`
+        );
+
+        const deactivatedIds: string[] = [];
+        if (activeItems.length > MAX_ACTIVE) {
+            const itemsToDeactivate = activeItems.slice(MAX_ACTIVE);
+            for (const item of itemsToDeactivate) {
+                if (item._id === protectId) continue;
+                await sanityClient.patch(item._id).set({ active: false }).commit();
+                deactivatedIds.push(item._id);
+            }
+
+            if (deactivatedIds.length < itemsToDeactivate.length) {
+                for (let i = MAX_ACTIVE - 1; i >= 0; i--) {
+                    if (activeItems[i]._id !== protectId) {
+                        await sanityClient.patch(activeItems[i]._id).set({ active: false }).commit();
+                        deactivatedIds.push(activeItems[i]._id);
+                        break;
+                    }
+                }
+            }
+        }
+        return deactivatedIds;
+    };
 
     try {
         switch (method) {
@@ -34,27 +63,33 @@ export default async function handler(
                 return res.status(200).json(allNews);
 
             case 'POST':
-                console.log('Creating new breaking news with data:', req.body);
                 const newDoc = await sanityClient.create({
                     _type: 'breakingNews',
                     ...req.body,
                 });
-                console.log('Created successfully:', newDoc);
-                return res.status(201).json(newDoc);
+                
+                let postDeactivated: string[] = [];
+                if (req.body.active !== false) {
+                    postDeactivated = await enforceActiveCap(newDoc._id);
+                }
+                return res.status(201).json({ ...newDoc, _deactivatedIds: postDeactivated });
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
                 if (!_id) {
                     return res.status(400).json({ error: 'Missing _id for update' });
                 }
-                console.log('Patching breaking news:', _id);
-                console.log('Update data:', updates);
+
                 const updatedDoc = await sanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
-                console.log('Patched successfully:', updatedDoc);
-                return res.status(200).json(updatedDoc);
+
+                let patchDeactivated: string[] = [];
+                if (updates.active === true || updates.priority !== undefined) {
+                    patchDeactivated = await enforceActiveCap(_id);
+                }
+                return res.status(200).json({ ...updatedDoc, _deactivatedIds: patchDeactivated });
 
             case 'DELETE':
                 const { id } = req.query;
@@ -67,12 +102,9 @@ export default async function handler(
         }
     } catch (error: any) {
         console.error('API Error:', error);
-        console.error('Error details:', error.message);
-        console.error('Error response:', error.response?.body);
         return res.status(500).json({
             error: 'Internal server error',
-            message: error.message,
-            details: error.response?.body
+            message: error.message
         });
     }
 }

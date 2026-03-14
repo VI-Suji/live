@@ -96,6 +96,9 @@ export default function ObituariesAdmin() {
             if (!res.ok) {
                 throw new Error("Failed to update status");
             }
+
+            // Re-fetch to reflect any auto-deactivated items (50-cap enforcement)
+            await fetchObituaries();
         } catch (error) {
             console.error("Error updating status:", error);
             // Revert on error
@@ -339,76 +342,159 @@ export default function ObituariesAdmin() {
                         </div>
                     )}
 
-                    <div className="grid gap-4">
-                        {obituaries.map((item) => (
-                            <div
-                                key={item._id}
-                                className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center cursor-pointer hover:bg-gray-50 transition-colors gap-4"
-                                onClick={() => {
-                                    setEditingItem(item);
-                                    setFormData({
-                                        name: item.name,
-                                        age: item.age?.toString() || "",
-                                        place: item.place || "",
-                                        dateOfDeath: item.dateOfDeath,
-                                        funeralDetails: item.funeralDetails || "",
-                                        active: item.active,
-                                    });
-                                    setPreviewImage(item.photo || "");
-                                    setShowForm(true);
-                                }}
-                            >
-                                <div className="flex-1 w-full">
-                                    <h3 className="font-bold text-lg text-gray-900 break-words">{item.name}</h3>
-                                    <p className="text-gray-700 font-medium break-words">{item.place} • {item.age} years</p>
-                                    <p className="text-sm text-gray-600 break-words">Died: {new Date(item.dateOfDeath).toLocaleDateString()}</p>
-                                    <p className="text-xs mt-2">
-                                        <span className={`px-2 py-1 rounded ${item.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                            {item.active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
-                                    {/* Active Toggle */}
-                                    <button
-                                        onClick={() => handleToggleActive(item)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 ${item.active ? 'bg-green-500' : 'bg-gray-500'}`}
-                                        title={item.active ? "Deactivate" : "Activate"}
-                                    >
-                                        <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${item.active ? 'translate-x-6' : 'translate-x-1'}`}
-                                        />
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setEditingItem(item);
-                                            setFormData({
-                                                name: item.name,
-                                                age: item.age?.toString() || "",
-                                                place: item.place || "",
-                                                dateOfDeath: item.dateOfDeath,
-                                                funeralDetails: item.funeralDetails || "",
-                                                active: item.active,
-                                            });
-                                            setPreviewImage(item.photo || "");
-                                            setShowForm(true);
-                                        }}
-                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                                        title="Edit"
-                                    >
-                                        <FaEdit />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(item._id)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded"
-                                        title="Delete"
-                                    >
-                                        <FaTrash />
-                                    </button>
+                    <div className="space-y-8">
+                        {/* Active Obituaries Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-slate-50/50">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span>
+                                            Active Obituaries ({obituaries.filter(o => o.active).length}/50)
+                                        </h2>
+                                        <p className="text-xs text-slate-600 font-medium">Max 50 active — oldest auto-deactivates when limit is reached</p>
+                                    </div>
                                 </div>
                             </div>
-                        ))}
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : obituaries.filter(o => o.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <div className="text-gray-300 mb-2 font-black text-4xl">0</div>
+                                    <p className="text-sm text-gray-500 font-bold italic">No active obituaries.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {obituaries.filter(o => o.active).map((item, index) => (
+                                        <div
+                                            key={item._id}
+                                            className="p-4 sm:p-6 hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(item);
+                                                setFormData({
+                                                    name: item.name,
+                                                    age: item.age?.toString() || "",
+                                                    place: item.place || "",
+                                                    dateOfDeath: item.dateOfDeath,
+                                                    funeralDetails: item.funeralDetails || "",
+                                                    active: item.active,
+                                                });
+                                                setPreviewImage(item.photo || "");
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                {item.photo && (
+                                                    <div className="relative w-full sm:w-16 h-32 sm:h-16 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                                                        <img
+                                                            src={item.photo}
+                                                            alt={item.name}
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 w-full text-black">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] font-black bg-gray-100 px-2 py-0.5 rounded uppercase tracking-wider text-gray-500">#{index + 1}</span>
+                                                    </div>
+                                                    <h3 className="font-black text-base text-slate-900 mb-1 break-words group-hover:text-blue-700 transition-colors">{item.name}</h3>
+                                                    <p className="text-slate-600 text-xs font-bold">{item.place} • {item.age} years</p>
+                                                    <p className="text-slate-400 text-xs font-medium">Died: {new Date(item.dateOfDeath).toLocaleDateString()}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-green-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                                                        title="Deactivate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {/* Edit logic */}}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaEdit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(item._id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={16} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Inactive Obituaries Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+                                <div>
+                                    <h2 className="text-lg font-black text-gray-600">
+                                        Inactive Obituaries ({obituaries.filter(o => !o.active).length})
+                                    </h2>
+                                    <p className="text-xs text-gray-500 font-medium">Hidden from the website</p>
+                                </div>
+                            </div>
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : obituaries.filter(o => !o.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <p className="text-sm text-gray-400 font-bold italic">No inactive entries.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100 bg-gray-50/20">
+                                    {obituaries.filter(o => !o.active).map((item) => (
+                                        <div
+                                            key={item._id}
+                                            className="p-4 sm:p-6 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(item);
+                                                setFormData({
+                                                    name: item.name,
+                                                    age: item.age?.toString() || "",
+                                                    place: item.place || "",
+                                                    dateOfDeath: item.dateOfDeath,
+                                                    funeralDetails: item.funeralDetails || "",
+                                                    active: item.active,
+                                                });
+                                                setPreviewImage(item.photo || "");
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                <div className="flex-1 w-full">
+                                                    <h3 className="font-bold text-sm text-gray-600 mb-1 break-words">{item.name}</h3>
+                                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-tight">
+                                                        {item.place} • Died: {new Date(item.dateOfDeath).toLocaleDateString()}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-gray-300 focus:outline-none"
+                                                        title="Activate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(item._id)}
+                                                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </main>
             </div>

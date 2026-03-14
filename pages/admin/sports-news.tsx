@@ -101,6 +101,9 @@ export default function SportsNewsAdmin() {
             if (!res.ok) {
                 throw new Error("Failed to update status");
             }
+
+            // Re-fetch to reflect any auto-deactivated items (20-cap enforcement)
+            await fetchNews();
         } catch (error) {
             console.error("Error updating status:", error);
             setNews(news.map(n => n._id === item._id ? item : n));
@@ -309,100 +312,165 @@ export default function SportsNewsAdmin() {
                         </div>
                     )}
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-6 border-b border-gray-200">
-                            <h2 className="text-lg font-bold text-gray-900">
-                                All {TITLE} ({news.length} items)
-                            </h2>
-                            <p className="text-sm text-gray-600 mt-1">Manage your {TITLE.toLowerCase()} items</p>
-                        </div>
+                    <div className="space-y-8">
+                        {/* Active News Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-orange-50/30">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-black text-rose-900 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+                                            Active {TITLE} ({news.filter(n => n.active).length}/20)
+                                        </h2>
+                                        <p className="text-xs text-rose-700 font-medium">Max 20 active — oldest auto-deactivates when limit is reached</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                        {loading ? (
-                            <div className="p-8 text-center text-gray-500">Loading...</div>
-                        ) : news.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">No news yet. Click &quot;Add News&quot; to create one.</div>
-                        ) : (
-                            <div className="divide-y divide-gray-200">
-                                {news.map((item) => (
-                                    <div
-                                        key={item._id}
-                                        className="p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                                        onClick={() => {
-                                            setEditingItem(item);
-                                            setFormData({
-                                                title: item.title,
-                                                description: item.description || "",
-                                                author: item.author || "",
-                                                order: item.order || 1,
-                                                active: item.active ?? true,
-                                            });
-                                            setPreviewImage(item.image || "");
-                                            setShowForm(true);
-                                        }}
-                                    >
-                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                                            {item.image && (
-                                                <div className="relative w-full sm:w-24 h-48 sm:h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                                                    <img
-                                                        src={item.image}
-                                                        alt={item.title}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                            )}
-                                            <div className="flex-1 w-full">
-                                                <h3 className="font-bold text-lg text-gray-900 mb-2 break-words">{item.title}</h3>
-                                                {item.description && (
-                                                    <p className="text-gray-600 text-sm mb-2 break-words">{item.description}</p>
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : news.filter(n => n.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <div className="text-gray-300 mb-2 font-black text-4xl">0</div>
+                                    <p className="text-sm text-gray-500 font-bold italic">No active items.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {news.filter(n => n.active).map((item, index) => (
+                                        <div
+                                            key={item._id}
+                                            className="p-4 sm:p-6 hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(item);
+                                                setFormData({
+                                                    title: item.title,
+                                                    description: item.description || "",
+                                                    author: item.author || "",
+                                                    order: item.order || 1,
+                                                    active: item.active ?? true,
+                                                });
+                                                setPreviewImage(item.image || "");
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                {item.image && (
+                                                    <div className="relative w-full sm:w-20 h-40 sm:h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0 shadow-sm">
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.title}
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        />
+                                                    </div>
                                                 )}
-                                                <div className="text-xs text-gray-500">
-                                                    <span>Order: {item.order}</span>
+                                                <div className="flex-1 w-full">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-[10px] font-black bg-gray-100 px-2 py-0.5 rounded uppercase tracking-wider text-gray-500">#{index + 1}</span>
+                                                    </div>
+                                                    <h3 className="font-black text-base text-gray-900 mb-1 break-words group-hover:text-orange-700 transition-colors">{item.title}</h3>
+                                                    {item.description && (
+                                                        <p className="text-gray-500 text-xs line-clamp-2 mb-2 break-words leading-relaxed">{item.description}</p>
+                                                    )}
                                                 </div>
-                                                <p className="text-xs mt-2">
-                                                    <span className={`px-2 py-1 rounded ${item.active ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                        {item.active ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
-                                                <button
-                                                    onClick={() => handleToggleActive(item)}
-                                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${item.active ? 'bg-orange-500' : 'bg-gray-500'}`}
-                                                >
-                                                    <span
-                                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${item.active ? 'translate-x-6' : 'translate-x-1'}`}
-                                                    />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingItem(item);
-                                                        setFormData({
-                                                            title: item.title,
-                                                            description: item.description || "",
-                                                            author: item.author || "",
-                                                            order: item.order || 1,
-                                                            active: item.active ?? true,
-                                                        });
-                                                        setPreviewImage(item.image || "");
-                                                        setShowForm(true);
-                                                    }}
-                                                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                                >
-                                                    <FaEdit size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(item._id)}
-                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                >
-                                                    <FaTrash size={18} />
-                                                </button>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                                                        title="Deactivate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {/* Edit logic */}}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaEdit size={16} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(item._id)}
+                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={16} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Inactive News Section */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="p-6 border-b border-gray-200 bg-gray-50/50">
+                                <div>
+                                    <h2 className="text-lg font-black text-gray-600">
+                                        Inactive {TITLE} ({news.filter(n => !n.active).length})
+                                    </h2>
+                                    <p className="text-xs text-gray-500 font-medium">Hidden from the website</p>
+                                </div>
                             </div>
-                        )}
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">Loading...</div>
+                            ) : news.filter(n => !n.active).length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <p className="text-sm text-gray-400 font-bold italic">No inactive entries.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100 bg-gray-50/20">
+                                    {news.filter(n => !n.active).map((item) => (
+                                        <div
+                                            key={item._id}
+                                            className="p-4 sm:p-6 opacity-75 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 transition-all cursor-pointer group"
+                                            onClick={() => {
+                                                setEditingItem(item);
+                                                setFormData({
+                                                    title: item.title,
+                                                    description: item.description || "",
+                                                    author: item.author || "",
+                                                    order: item.order || 1,
+                                                    active: item.active ?? true,
+                                                });
+                                                setPreviewImage(item.image || "");
+                                                setShowForm(true);
+                                            }}
+                                        >
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                {item.image && (
+                                                    <div className="relative w-full sm:w-16 h-32 sm:h-16 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 filter contrast-75">
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 w-full">
+                                                    <h3 className="font-bold text-sm text-gray-600 mb-1 break-words">{item.title}</h3>
+                                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-tight">Inactive</div>
+                                                </div>
+                                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50" onClick={(e) => e.stopPropagation()}>
+                                                    <button
+                                                        onClick={() => handleToggleActive(item)}
+                                                        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-gray-300 focus:outline-none"
+                                                        title="Activate"
+                                                    >
+                                                        <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(item._id)}
+                                                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                    >
+                                                        <FaTrash size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </main>
             </div>

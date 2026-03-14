@@ -23,7 +23,7 @@ export default async function handler(
                 category,
                 active
               }`
-            : `*[_type == "topStory" && active == true] | order(publishedAt desc) {
+            : `*[_type == "topStory" && active == true] | order(publishedAt desc) [0..49] {
                 _id,
                 title,
                 slug,

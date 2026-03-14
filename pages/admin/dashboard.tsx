@@ -104,6 +104,13 @@ const contentTypes = [
         color: "from-pink-500 to-pink-600",
     },
     {
+        name: "About Us",
+        icon: FaUserMd,
+        href: "/admin/about-us",
+        description: "Manage leadership team",
+        color: "from-blue-600 to-indigo-700",
+    },
+    {
         name: "Site Settings",
         icon: FaHome,
         href: "/admin/site-settings",
