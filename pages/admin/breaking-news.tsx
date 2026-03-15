@@ -102,7 +102,7 @@ export default function BreakingNewsAdmin() {
                 throw new Error("Failed to update status");
             }
 
-            // Re-fetch to reflect any auto-deactivated items (20-cap enforcement)
+            // Re-fetch to reflect any auto-deactivated items (10-cap enforcement)
             await fetchNews();
         } catch (error) {
             console.error("Error updating status:", error);
@@ -385,9 +385,9 @@ export default function BreakingNewsAdmin() {
                                     <div>
                                         <h2 className="text-lg font-black text-red-900 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                            Active Breaking News ({newsList.filter(n => n.active).length}/20)
+                                            Active Breaking News ({newsList.filter(n => n.active).length}/10)
                                         </h2>
-                                        <p className="text-xs text-red-700 font-medium">Max 20 active — oldest auto-deactivates when limit is reached</p>
+                                        <p className="text-xs text-red-700 font-medium">Max 10 active — oldest auto-deactivates when limit is reached</p>
                                     </div>
                                 </div>
                             </div>

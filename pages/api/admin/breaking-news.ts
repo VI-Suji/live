@@ -16,7 +16,7 @@ export default async function handler(
     }
 
     const { method } = req;
-    const MAX_ACTIVE = 20;
+    const MAX_ACTIVE = 10;
 
     const enforceActiveCap = async (protectId: string): Promise<string[]> => {
         // Breaking news is ordered by priority asc then createdAt desc

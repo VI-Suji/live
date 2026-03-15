@@ -82,6 +82,9 @@ export default function LatestNewsAdmin() {
 
     const handleToggleActive = async (item: LatestNews) => {
         const updatedItem = { ...item, active: !item.active };
+        if (updatedItem.active) {
+            updatedItem.date = new Date().toISOString().split('T')[0];
+        }
         setNews(news.map(n => n._id === item._id ? updatedItem : n));
 
         try {
@@ -316,7 +319,7 @@ export default function LatestNewsAdmin() {
                                             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                                             Active Latest News ({news.filter(n => n.active).length}/2)
                                         </h2>
-                                        <p className="text-xs text-blue-700 font-medium">Max 2 active. You must disable an active news before adding a new one.</p>
+                                        <p className="text-xs text-blue-700 font-medium">Max 2 active. Items auto-disable after their date passes.</p>
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +377,7 @@ export default function LatestNewsAdmin() {
                                                         <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-6" />
                                                     </button>
                                                     <button
-                                                        onClick={() => {/* Edit logic */}}
+                                                        onClick={() => {/* Edit logic */ }}
                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                     >
                                                         <FaEdit size={16} />

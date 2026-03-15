@@ -53,6 +53,8 @@ export default async function handler(
                     if (count >= MAX_ACTIVE) {
                         return res.status(400).json({ error: 'Maximum 2 active items allowed. Please deactivate an existing item first.' });
                     }
+                    // Auto-update the date to today when activating
+                    updates.date = new Date().toISOString().split('T')[0];
                 }
 
                 const updatedDoc = await sanityClient

@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         </div>
       )}
 
-      <CategoryNews />
+      <CategoryNews latestNewsVisible={showNews} />
       <VideoGallery />
       <Obituaries />
     </div>

@@ -350,9 +350,9 @@ export default function ObituariesAdmin() {
                                     <div>
                                         <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span>
-                                            Active Obituaries ({obituaries.filter(o => o.active).length}/50)
+                                            Active Obituaries ({obituaries.filter(o => o.active).length}/20)
                                         </h2>
-                                        <p className="text-xs text-slate-600 font-medium">Max 50 active — oldest auto-deactivates when limit is reached</p>
+                                        <p className="text-xs text-slate-600 font-medium">Max 20 active — oldest auto-deactivates when limit is reached</p>
                                     </div>
                                 </div>
                             </div>

@@ -16,8 +16,7 @@ export default async function handler(
     }
 
     const { method } = req;
-
-    const MAX_ACTIVE = 50;
+    const MAX_ACTIVE = 20;
 
     const enforceActiveCap = async (protectId: string): Promise<string[]> => {
         const activeItems: { _id: string }[] = await sanityClient.fetch(

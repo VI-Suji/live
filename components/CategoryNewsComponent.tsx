@@ -492,13 +492,42 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: CategoryNewsItemDa
     );
 };
 
-const CategoryNewsComponent = () => {
+const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible?: boolean }) => {
     const [newsData, setNewsData] = useState<CategoryNewsItemData[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [activeTab, setActiveTab] = useState<'entertainmentNews' | 'healthNews' | 'sportsNews'>('entertainmentNews');
     const [selectedNews, setSelectedNews] = useState<CategoryNewsItemData | null>(null);
-    const itemsPerPage = 2;
+    const [itemsPerPage, setItemsPerPage] = useState(2);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    useEffect(() => {
+        if (!latestNewsVisible) {
+            setItemsPerPage(6);
+            return;
+        }
+
+        // Fetch to check if latest news exists in order to adjust grid layout
+        fetch(`/api/sanity/latestNews?t=${Date.now()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error || (Array.isArray(data) && data.length === 0)) {
+                    setItemsPerPage(6);
+                } else {
+                    setItemsPerPage(2);
+                }
+            })
+            .catch(() => setItemsPerPage(6));
+    }, [latestNewsVisible]);
 
     useEffect(() => {
         const handleGlobalUrl = async () => {
@@ -516,7 +545,7 @@ const CategoryNewsComponent = () => {
                 const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
 
                 if (index !== -1) {
-                    const page = Math.floor(index / itemsPerPage) + 1;
+                    const page = Math.floor(index / (isMobile ? 2 : itemsPerPage)) + 1;
                     if (page !== currentPage) {
                         setCurrentPage(page);
                     }
@@ -580,10 +609,11 @@ const CategoryNewsComponent = () => {
             });
     }, [activeTab]);
 
-    const totalPages = Math.ceil(newsData.length / itemsPerPage);
+    const effectiveItemsPerPage = isMobile ? 2 : itemsPerPage;
+    const totalPages = Math.ceil(newsData.length / effectiveItemsPerPage);
     const currentNews = newsData.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        (currentPage - 1) * effectiveItemsPerPage,
+        currentPage * effectiveItemsPerPage
     );
 
     const handlePageChange = (newPage: number) => {
