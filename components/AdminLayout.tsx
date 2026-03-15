@@ -32,7 +32,7 @@ export default function AdminLayout({
     }[maxWidth];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen bg-[#f8fafc]">
             {/* Header */}
             <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -47,9 +47,9 @@ export default function AdminLayout({
                                 </Link>
                             )}
                             <div>
-                                <h1 className="text-2xl font-black text-gray-900">{title}</h1>
+                                <h1 className="text-2xl font-black text-slate-950 tracking-tight">{title}</h1>
                                 {description && (
-                                    <p className="text-sm text-gray-600 mt-0.5">{description}</p>
+                                    <p className="text-sm text-slate-500 font-medium mt-0.5">{description}</p>
                                 )}
                             </div>
                         </div>
@@ -93,8 +93,8 @@ export function SectionHeader({
     return (
         <div className="flex items-center justify-between mb-6">
             <div>
-                <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-                {subtitle && <p className="text-sm text-gray-600 mt-1">{subtitle}</p>}
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">{title}</h2>
+                {subtitle && <p className="text-sm text-slate-500 font-medium mt-1">{subtitle}</p>}
             </div>
             {action && <div>{action}</div>}
         </div>
@@ -118,20 +118,20 @@ export function FormInput({
 } & React.InputHTMLAttributes<HTMLInputElement>) {
     return (
         <div>
-            <label className="block text-sm font-bold mb-2 text-gray-900">
+            <label className="block text-[11px] font-black mb-2 text-slate-400 uppercase tracking-widest">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
-                {optional && <span className="text-gray-500 font-normal ml-1">(Optional)</span>}
+                {optional && <span className="text-slate-400 font-normal ml-1 lowercase">(optional)</span>}
             </label>
             <input
                 {...props}
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-900 focus:ring-2 transition-colors ${error
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                className={`w-full px-4 py-3 border border-slate-200 bg-white rounded-xl text-slate-900 font-medium placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all ${error
+                        ? 'border-red-300 focus:ring-red-50'
+                        : 'border-slate-200'
                     } ${props.className || ''}`}
             />
-            {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-            {helpText && !error && <p className="text-sm text-gray-500 mt-1">{helpText}</p>}
+            {error && <p className="text-xs text-red-600 font-bold mt-1.5">{error}</p>}
+            {helpText && !error && <p className="text-xs text-slate-400 font-medium mt-1.5">{helpText}</p>}
         </div>
     );
 }
@@ -153,20 +153,20 @@ export function FormTextarea({
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     return (
         <div>
-            <label className="block text-sm font-bold mb-2 text-gray-900">
+            <label className="block text-[11px] font-black mb-2 text-slate-400 uppercase tracking-widest">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
-                {optional && <span className="text-gray-500 font-normal ml-1">(Optional)</span>}
+                {optional && <span className="text-slate-400 font-normal ml-1 lowercase">(optional)</span>}
             </label>
             <textarea
                 {...props}
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-900 focus:ring-2 transition-colors ${error
-                        ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                className={`w-full px-4 py-3 border border-slate-200 bg-white rounded-xl text-slate-900 font-medium placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all ${error
+                        ? 'border-red-300 focus:ring-red-50'
+                        : 'border-slate-200'
                     } ${props.className || ''}`}
             />
-            {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-            {helpText && !error && <p className="text-sm text-gray-500 mt-1">{helpText}</p>}
+            {error && <p className="text-xs text-red-600 font-bold mt-1.5">{error}</p>}
+            {helpText && !error && <p className="text-xs text-slate-400 font-medium mt-1.5">{helpText}</p>}
         </div>
     );
 }

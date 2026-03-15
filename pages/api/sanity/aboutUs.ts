@@ -11,6 +11,7 @@ export default async function handler(
         // Site-facing query: just return the URL strings
         // Admin-facing query (raw=true): return the full image structure with resolved URL for preview
         const query = `*[_type == "aboutUs"][0] {
+            description,
             md {
                 name,
                 designation,

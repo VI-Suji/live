@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import AdminAuthGuard from "../../components/AdminAuthGuard";
-import AdminLayout, { AdminCard, FormInput, Button, LoadingSpinner, Alert } from "../../components/AdminLayout";
+import AdminLayout, { AdminCard, FormInput, FormTextarea, Button, LoadingSpinner, Alert } from "../../components/AdminLayout";
 import { FiSave, FiPlus, FiTrash2 } from "react-icons/fi";
 
 export default function AboutUsAdmin() {
@@ -12,6 +12,7 @@ export default function AboutUsAdmin() {
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
     const [aboutData, setAboutData] = useState<any>({
+        description: "",
         md: { name: "", designation: "", area: "", phone: "" },
         executiveDirectors: [],
         directors: []
@@ -24,6 +25,7 @@ export default function AboutUsAdmin() {
                 const data = await res.json();
                 if (data && !data.error) {
                     setAboutData({
+                        description: data.description || "",
                         md: data.md || { name: "", designation: "", area: "", phone: "" },
                         executiveDirectors: Array.isArray(data.executiveDirectors) ? data.executiveDirectors : [],
                         directors: Array.isArray(data.directors) ? data.directors : []
@@ -221,22 +223,13 @@ export default function AboutUsAdmin() {
                     className="py-2 px-3 text-xs"
                 />
 
-                <div className="grid grid-cols-2 gap-3">
-                    <FormInput
-                        label="Designation"
-                        required
-                        value={person.designation || ""}
-                        onChange={(e) => onChange('designation', e.target.value)}
-                        className="py-2 px-3 text-xs"
-                    />
-                    <FormInput
-                        label="Phone"
-                        required
-                        value={person.phone || ""}
-                        onChange={(e) => onChange('phone', e.target.value)}
-                        className="py-2 px-3 text-xs"
-                    />
-                </div>
+                <FormInput
+                    label="Phone"
+                    required
+                    value={person.phone || ""}
+                    onChange={(e) => onChange('phone', e.target.value)}
+                    className="py-2 px-3 text-xs"
+                />
             </div>
         </div>
     );
@@ -248,17 +241,63 @@ export default function AboutUsAdmin() {
 
                 <form onSubmit={handleSubmit} className="space-y-10 pb-28">
                     <section>
-                        <h2 className="text-2xl font-black text-gray-900 border-l-4 border-blue-600 pl-4 mb-8">Managing Director</h2>
+                        <h2 className="text-2xl font-black text-slate-950 border-l-4 border-slate-900 pl-4 mb-8">Page Settings</h2>
+                        <AdminCard className="p-6 shadow-lg border-t-4 border-slate-900">
+                            <FormTextarea
+                                label="Header Description"
+                                placeholder="Enter the subtitle text for the About Us page..."
+                                value={aboutData.description}
+                                onChange={(e) => setAboutData({ ...aboutData, description: e.target.value })}
+                                helpText="This text appears below the 'About Us' title on the main page."
+                                rows={4}
+                            />
+                        </AdminCard>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-black text-slate-950 border-l-4 border-blue-600 pl-4 mb-8">Managing Director</h2>
                         <div className="max-w-xs mx-auto">
                             <AdminCard className="p-6 border-t-4 border-blue-600 shadow-lg">
-                                {renderPersonFields(aboutData.md, handleMdChange, (e) => handleImageUpload(e, { isMd: true }), 'md')}
+                                {renderPersonFields(
+                                    aboutData.md,
+                                    handleMdChange,
+                                    (e) => handleImageUpload(e, { isMd: true }),
+                                    'md',
+                                    true,
+                                    async () => {
+                                        if (confirm('Clear all MD details? This will also save the change.')) {
+                                            const clearedMd = { name: '', designation: '', area: '', phone: '', image: null };
+                                            const newData = { ...aboutData, md: clearedMd };
+                                            setAboutData(newData);
+                                            setSaving(true);
+                                            try {
+                                                const payload = JSON.parse(JSON.stringify(newData));
+                                                payload._type = 'aboutUs';
+                                                const res = await fetch("/api/admin/about-us", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify(payload),
+                                                });
+                                                if (res.ok) {
+                                                    setMessage({ type: 'success', text: '✅ MD cleared and saved!' });
+                                                } else {
+                                                    setMessage({ type: 'error', text: '❌ Failed to save after clearing.' });
+                                                }
+                                            } catch {
+                                                setMessage({ type: 'error', text: '❌ Network error.' });
+                                            } finally {
+                                                setSaving(false);
+                                            }
+                                        }
+                                    }
+                                )}
                             </AdminCard>
                         </div>
                     </section>
 
                     <section>
                         <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
-                            <h2 className="text-2xl font-black text-gray-900 border-l-4 border-indigo-500 pl-3">Executive Directors</h2>
+                            <h2 className="text-2xl font-black text-slate-950 border-l-4 border-indigo-500 pl-3">Executive Directors</h2>
                             <button
                                 type="button"
                                 onClick={() => addItem('executiveDirectors')}
@@ -285,7 +324,7 @@ export default function AboutUsAdmin() {
 
                     <section>
                         <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
-                            <h2 className="text-2xl font-black text-gray-900 border-l-4 border-purple-500 pl-3">Directors</h2>
+                            <h2 className="text-2xl font-black text-slate-950 border-l-4 border-purple-500 pl-3">Directors</h2>
                             <button
                                 type="button"
                                 onClick={() => addItem('directors')}

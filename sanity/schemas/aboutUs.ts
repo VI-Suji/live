@@ -4,6 +4,13 @@ export default {
     type: 'document',
     fields: [
         {
+            name: 'description',
+            title: 'Page Description',
+            type: 'text',
+            rows: 3,
+            description: 'The subtitle text displayed in the header of the About Us page.'
+        },
+        {
             name: 'md',
             title: 'Managing Director',
             type: 'object',
