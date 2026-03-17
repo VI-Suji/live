@@ -170,7 +170,7 @@ export default function TopStories() {
                                 <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-4">
                                     Featured
                                 </span>
-                                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 leading-tight line-clamp-3">
+                                <h3 className="text-lg sm:text-xl font-bold text-white mb-3 leading-tight line-clamp-3">
                                     {post.title}
                                 </h3>
                                 <div

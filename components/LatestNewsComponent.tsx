@@ -168,6 +168,16 @@ const LatestNewsComponent: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (allNews.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentPage((prev) => (prev + 1) % allNews.length);
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [allNews.length, currentPage]);
+
   if (loading) return (
     <div className="flex flex-col justify-start w-full bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-6 gap-6 animate-pulse">
       <div className="w-full flex justify-between items-center border-b border-gray-100 pb-6">
@@ -191,11 +201,30 @@ const LatestNewsComponent: React.FC = () => {
   
   const newsToDisplay = allNews[currentPage];
 
+  const handleDragEnd = (event: any, info: any) => {
+    const threshold = 50;
+    if (info.offset.x < -threshold) {
+      // Swiped left, show next
+      setCurrentPage((prev) => (prev + 1) % allNews.length);
+    } else if (info.offset.x > threshold) {
+      // Swiped right, show previous
+      setCurrentPage((prev) => (prev - 1 + allNews.length) % allNews.length);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full relative">
       <div className="relative overflow-hidden min-h-[400px]">
         <AnimatePresence mode="wait">
-          <NewsItemCard key={newsToDisplay._id} news={newsToDisplay} />
+          <motion.div
+            key={newsToDisplay._id}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={handleDragEnd}
+            className="cursor-grab active:cursor-grabbing"
+          >
+            <NewsItemCard news={newsToDisplay} />
+          </motion.div>
         </AnimatePresence>
       </div>
       

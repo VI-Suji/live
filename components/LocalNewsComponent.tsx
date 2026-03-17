@@ -762,7 +762,22 @@ const LocalNews = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="flex flex-col gap-4 sm:gap-6">
+                            <motion.div 
+                                className="flex flex-col gap-4 sm:gap-6"
+                                drag="x"
+                                dragConstraints={{ left: 0, right: 0 }}
+                                onDragEnd={(event, info) => {
+                                    if (window.innerWidth >= 640) return; // Only for mobile
+                                    const threshold = 50;
+                                    if (info.offset.x < -threshold) {
+                                        // Swipe left -> next page
+                                        handlePageChange(currentPage + 1);
+                                    } else if (info.offset.x > threshold) {
+                                        // Swipe right -> prev page
+                                        handlePageChange(currentPage - 1);
+                                    }
+                                }}
+                            >
                                 {currentNews.map((news) => (
                                     <LocalNewsItem
                                         key={news._id}
@@ -774,7 +789,7 @@ const LocalNews = () => {
                                         }}
                                     />
                                 ))}
-                            </div>
+                            </motion.div>
 
                             <AnimatePresence>
                                 {selectedNews && (
