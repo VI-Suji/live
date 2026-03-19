@@ -13,7 +13,7 @@ export default function AboutUsAdmin() {
 
     const [aboutData, setAboutData] = useState<any>({
         description: "",
-        md: { name: "", designation: "", area: "", phone: "" },
+        md: { name: "", designation: "", area: "", showArea: true, phone: "" },
         executiveDirectors: [],
         directors: []
     });
@@ -26,7 +26,7 @@ export default function AboutUsAdmin() {
                 if (data && !data.error) {
                     setAboutData({
                         description: data.description || "",
-                        md: data.md || { name: "", designation: "", area: "", phone: "" },
+                        md: data.md || { name: "", designation: "", area: "", showArea: true, phone: "" },
                         executiveDirectors: Array.isArray(data.executiveDirectors) ? data.executiveDirectors : [],
                         directors: Array.isArray(data.directors) ? data.directors : []
                     });
@@ -63,7 +63,7 @@ export default function AboutUsAdmin() {
     const addItem = (arrayKey: string) => {
         setAboutData((prev: any) => ({
             ...prev,
-            [arrayKey]: [...(prev[arrayKey] || []), { name: "", designation: "", area: "", phone: "" }]
+            [arrayKey]: [...(prev[arrayKey] || []), { name: "", designation: "", area: "", showArea: true, phone: "" }]
         }));
     };
 
@@ -215,13 +215,30 @@ export default function AboutUsAdmin() {
                     className="py-2 px-3 text-xs"
                 />
 
-                <FormInput
-                    label="Area"
-                    required
-                    value={person.area || ""}
-                    onChange={(e) => onChange('area', e.target.value)}
-                    className="py-2 px-3 text-xs"
-                />
+                <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-bold text-gray-700">Area Visibility</label>
+                        <button
+                            type="button"
+                            onClick={() => onChange('showArea', person.showArea === false)}
+                            className="relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                            style={{ backgroundColor: (person.showArea !== false) ? '#22c55e' : '#e2e8f0' }}
+                        >
+                            <span
+                                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                    (person.showArea !== false) ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                            />
+                        </button>
+                    </div>
+                    <FormInput
+                        label=""
+                        placeholder="Area/Location..."
+                        value={person.area || ""}
+                        onChange={(e) => onChange('area', e.target.value)}
+                        className="py-2 px-3 text-xs"
+                    />
+                </div>
 
                 <FormInput
                     label="Phone"
@@ -230,6 +247,7 @@ export default function AboutUsAdmin() {
                     onChange={(e) => onChange('phone', e.target.value)}
                     className="py-2 px-3 text-xs"
                 />
+
             </div>
         </div>
     );
@@ -266,7 +284,7 @@ export default function AboutUsAdmin() {
                                     true,
                                     async () => {
                                         if (confirm('Clear all MD details? This will also save the change.')) {
-                                            const clearedMd = { name: '', designation: '', area: '', phone: '', image: null };
+                                            const clearedMd = { name: '', designation: '', area: '', showArea: true, phone: '', image: null };
                                             const newData = { ...aboutData, md: clearedMd };
                                             setAboutData(newData);
                                             setSaving(true);

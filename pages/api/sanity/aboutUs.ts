@@ -16,6 +16,7 @@ export default async function handler(
                 name,
                 designation,
                 area,
+                showArea,
                 phone,
                 "image": select(
                     "${raw}" == "true" => {
@@ -30,6 +31,7 @@ export default async function handler(
                 name,
                 designation,
                 area,
+                showArea,
                 phone,
                 "image": select(
                     "${raw}" == "true" => {
@@ -44,6 +46,7 @@ export default async function handler(
                 name,
                 designation,
                 area,
+                showArea,
                 phone,
                 "image": select(
                     "${raw}" == "true" => {

@@ -49,7 +49,7 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
                 ${isHighlighted ? 'border-blue-500 shadow-2xl ring-4 ring-blue-100 scale-[1.02]' : 'border-transparent hover:border-gray-100 shadow-sm hover:shadow-xl'} 
                 flex flex-col sm:flex-row gap-4 sm:gap-6`}
         >
-            <div className="relative h-40 sm:h-40 w-full sm:w-64 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+            <div className="relative h-40 sm:h-40 w-full sm:w-48 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                 <Image
                     src={news.image || "/gramika.png"}
                     alt={news.title}

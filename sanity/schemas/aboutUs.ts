@@ -18,6 +18,7 @@ export default {
                 { name: 'name', title: 'Name', type: 'string' },
                 { name: 'designation', title: 'Designation', type: 'string' },
                 { name: 'area', title: 'Area', type: 'string' },
+                { name: 'showArea', title: 'Show Area on Page', type: 'boolean', initialValue: true },
                 { name: 'phone', title: 'Phone', type: 'string' },
                 { name: 'image', title: 'Photo', type: 'image', options: { hotspot: true } },
             ]
@@ -32,6 +33,7 @@ export default {
                     { name: 'name', title: 'Name', type: 'string' },
                     { name: 'designation', title: 'Designation', type: 'string' },
                     { name: 'area', title: 'Area', type: 'string' },
+                    { name: 'showArea', title: 'Show Area on Page', type: 'boolean', initialValue: true },
                     { name: 'phone', title: 'Phone', type: 'string' },
                     { name: 'image', title: 'Photo', type: 'image', options: { hotspot: true } },
                 ]
@@ -47,6 +49,7 @@ export default {
                     { name: 'name', title: 'Name', type: 'string' },
                     { name: 'designation', title: 'Designation', type: 'string' },
                     { name: 'area', title: 'Area', type: 'string' },
+                    { name: 'showArea', title: 'Show Area on Page', type: 'boolean', initialValue: true },
                     { name: 'phone', title: 'Phone', type: 'string' },
                     { name: 'image', title: 'Photo', type: 'image', options: { hotspot: true } },
                 ]

@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaYoutube, FaWhatsapp, FaEnvelope, FaPhone, FaMapMarkerAlt } from "react-icons/fa";
 
 const Footer = () => {
+    const [tagline, setTagline] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetch("/api/sanity/aboutUs")
+            .then(res => res.json())
+            .then(data => {
+                if (data && !data.error && data.description) setTagline(data.description);
+            })
+            .catch(() => {});
+    }, []);
     return (
         <footer className="w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,7 +21,7 @@ const Footer = () => {
                     {/* Brand Column */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-3">
-                            <div className="relative w-12 h-12">
+                            <div className="relative w-10 h-10">
                                 <Image
                                     src="/gramika.png"
                                     alt="Gramika Logo"
@@ -21,9 +31,11 @@ const Footer = () => {
                             </div>
                             <h2 className="text-3xl font-black tracking-tight">ഗ്രാമിക</h2>
                         </div>
-                        <p className="text-gray-400 leading-relaxed text-sm max-w-md">
-                            ഗ്രാമീണതയുടെ ഹൃദയതാളം. സത്യസന്ധമായ വാർത്തകളും വിശേഷങ്ങളും നിങ്ങളുടെ വിരൽത്തുമ്പിൽ.
-                        </p>
+                        {tagline && (
+                            <p className="text-gray-400 leading-relaxed text-sm max-w-md">
+                                {tagline}
+                            </p>
+                        )}
                         <div className="flex gap-3">
                             <a
                                 href="https://www.facebook.com/GRAMIKATV/"

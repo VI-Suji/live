@@ -11,6 +11,7 @@ interface Person {
   name: string;
   designation: string;
   area: string;
+  showArea?: boolean;
   phone: string;
   image: string;
 }
@@ -42,61 +43,62 @@ const AboutUsPage: React.FC = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="relative overflow-hidden rounded-3xl shadow-2xl max-w-4xl mx-auto border border-white/10 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950"
+      className="relative overflow-hidden rounded-3xl shadow-2xl max-w-4xl mx-auto border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/30"
     >
       <div className="flex flex-col sm:flex-row">
-        {/* Photo */}
-        <div className="relative h-72 sm:h-auto sm:w-2/5 shrink-0 overflow-hidden">
-          {person.image ? (
-            <Image
-              src={person.image}
-              alt={person.name}
-              fill
-              className="object-cover object-top"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-800 to-indigo-900 flex items-center justify-center">
-              <span className="text-white/20 font-black text-7xl uppercase">{person.name?.[0] || "?"}</span>
+        {/* Photo Section */}
+        <div className="relative h-64 sm:h-auto sm:w-[28%] shrink-0 flex items-center justify-center p-6 sm:p-8 bg-slate-100/50 border-r border-slate-100">
+          <div className="relative w-40 h-40 sm:w-48 sm:h-48 group/img">
+            {/* Soft shadow ring */}
+            <div className="absolute -inset-2 bg-blue-100/40 rounded-full blur-xl opacity-0 group-hover/img:opacity-100 transition-opacity" />
+            
+            <div className="relative w-full h-full rounded-full border-4 border-white shadow-2xl overflow-hidden ring-1 ring-slate-200">
+              {person.image ? (
+                <Image
+                  src={person.image}
+                  alt={person.name}
+                  fill
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+                  <span className="text-slate-400 font-black text-7xl uppercase">{person.name?.[0] || "?"}</span>
+                </div>
+              )}
             </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent sm:bg-gradient-to-r sm:from-transparent sm:to-slate-900/60" />
-          {/* Name overlay on mobile only */}
-          <div className="absolute bottom-0 left-0 right-0 p-5 sm:hidden">
-            <h3 className="text-3xl font-black text-white leading-tight drop-shadow-lg uppercase tracking-tight">{person.name}</h3>
           </div>
         </div>
-
+ 
         {/* Content */}
         <div className="p-6 sm:p-12 flex flex-col justify-center flex-1 relative z-10">
           {/* Decorative glow */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Name — hidden on mobile */}
-          <div className="hidden sm:block mb-5">
-            <h3 className="text-4xl md:text-5xl font-black text-white leading-tight uppercase tracking-tight">{person.name}</h3>
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+ 
+          {/* Name */}
+          <div className="mb-5">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-tight uppercase tracking-tight">{person.name}</h3>
           </div>
-
+ 
           {/* Area badge */}
-          {person.area && (
+          {person.area && person.showArea !== false && (
             <div className="mb-6">
-              <span className="inline-block bg-blue-500/20 border border-blue-400/30 text-[13px] font-black px-5 py-2 rounded-full uppercase tracking-wider text-blue-200">
+              <span className="inline-block bg-blue-600/5 border border-blue-600/10 text-[13px] font-black px-5 py-2 rounded-full uppercase tracking-wider text-blue-600 shadow-sm">
                 {person.area}
               </span>
             </div>
           )}
-
+ 
           {/* Divider */}
-          <div className="w-12 h-0.5 bg-blue-500 rounded-full mb-5 hidden sm:block" />
-
+          <div className="w-12 h-1 bg-blue-600 rounded-full mb-6 hidden sm:block" />
+ 
           <div>
-            {/* <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-2">Direct Contact</p> */}
             <a
               href={`tel:${person.phone}`}
-              className="inline-flex items-center gap-2.5 text-2xl sm:text-3xl font-black text-blue-400 hover:text-blue-300 transition-colors"
+              className="inline-flex items-center gap-2.5 text-2xl sm:text-3xl font-black text-slate-900 hover:text-blue-600 transition-colors"
             >
-              <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center shrink-0">
-                <FaPhone size={16} className="text-blue-400" />
+              <div className="w-10 h-10 bg-blue-50 border border-blue-100 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:rotate-12 transition-transform">
+                <FaPhone size={16} className="text-blue-600" />
               </div>
               {person.phone}
             </a>
@@ -155,22 +157,30 @@ const AboutUsPage: React.FC = () => {
         {/* Decorative background glow */}
         <div className={`absolute -bottom-10 -right-10 w-40 h-40 ${theme.glow} rounded-full blur-3xl pointer-events-none`} />
 
-        {/* Photo */}
-        <div className="relative w-32 sm:w-full sm:h-64 shrink-0 overflow-hidden">
-          {person.image ? (
-            <Image
-              src={person.image}
-              alt={person.name}
-              fill
-              className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
-            />
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${theme.placeholder} flex items-center justify-center`}>
-              <span className={`font-black text-5xl uppercase ${theme.placeholderText}`}>{person.name?.[0] || "?"}</span>
+        {/* Photo Header */}
+        <div className={`relative h-40 sm:h-48 shrink-0 flex items-center justify-center bg-gradient-to-br ${theme.placeholder} overflow-hidden`}>
+          {/* Background pattern */}
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black/20 via-transparent to-transparent" />
+          
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32 group/img">
+            {/* Soft shadow ring */}
+            <div className="absolute -inset-1 bg-black/5 rounded-full blur-sm" />
+            
+            <div className={`relative w-full h-full rounded-full border-4 border-white shadow-xl overflow-hidden`}>
+              {person.image ? (
+                <Image
+                  src={person.image}
+                  alt={person.name}
+                  fill
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <div className={`w-full h-full bg-gradient-to-br ${theme.placeholder} flex items-center justify-center`}>
+                  <span className={`font-black text-5xl uppercase ${theme.placeholderText}`}>{person.name?.[0] || "?"}</span>
+                </div>
+              )}
             </div>
-          )}
-          {/* Soft vignette overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent mix-blend-multiply" />
+          </div>
         </div>
 
         {/* Content */}
@@ -179,7 +189,7 @@ const AboutUsPage: React.FC = () => {
             <h3 className={`text-base sm:text-xl font-black ${theme.name} leading-tight uppercase tracking-tight line-clamp-2 transition-colors group-hover:text-${theme.accent}-600`}>
               {person.name}
             </h3>
-            {person.area && (
+            {person.area && person.showArea !== false && (
               <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black ${theme.area} ${theme.areaBg} backdrop-blur-sm border ${theme.border} border-opacity-30 uppercase tracking-widest`}>
                 {person.area}
               </span>
@@ -233,9 +243,14 @@ const AboutUsPage: React.FC = () => {
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-4 tracking-tighter">About Us</h1>
           <div className="h-1 w-16 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto rounded-full mb-6" />
-          <p className="text-xl sm:text-2xl text-slate-400 max-w-xl mx-auto font-medium leading-relaxed">
-            {data?.description || "Meet the leadership team driving our vision forward with expertise and dedication."}
-          </p>
+          {data?.description && (
+            <div className="max-w-4xl mx-auto mt-8 relative">
+              <div className="absolute inset-0 bg-blue-500/5 blur-3xl pointer-events-none" />
+              <p className="text-lg sm:text-xl text-slate-300 font-medium leading-[1.8] whitespace-pre-line relative z-10 drop-shadow-md">
+                {data.description}
+              </p>
+            </div>
+          )}
         </motion.div>
       </div>
 
