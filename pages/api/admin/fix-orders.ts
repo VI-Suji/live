@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -21,13 +21,13 @@ export default async function handler(
 
     try {
         // Fetch all local news items with negative order
-        const items = await sanityClient.fetch(
+        const items = await adminSanityClient.fetch(
             `*[_type == "localNews" && order < 0] { _id, order }`
         );
 
         const fixed: string[] = [];
         for (const item of items) {
-            await sanityClient.patch(item._id).set({ order: Math.abs(item.order) }).commit();
+            await adminSanityClient.patch(item._id).set({ order: Math.abs(item.order) }).commit();
             fixed.push(item._id);
         }
 

@@ -30,12 +30,8 @@ export default async function handler(
         const itemsToDeactivate = latestNewsList.filter((n: any) => n.active && n.date < todayStr);
         
         if (itemsToDeactivate.length > 0) {
-            Promise.all(
-                itemsToDeactivate.map((item: any) => 
-                    sanityClient.patch(item._id).set({ active: false }).commit()
-                )
-            ).catch(err => console.error("Failed to auto-deactivate expired latest news:", err));
-            
+            // We no longer attempt to mutate the DB here to avoid API quota limits.
+            // Items are just disabled for the client response.
             itemsToDeactivate.forEach((item: any) => {
                 item.active = false;
             });

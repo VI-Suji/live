@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { IncomingForm } from 'formidable';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import fs from 'fs';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const fileStream = fs.createReadStream(uploadedFile.filepath);
         const type = req.query.type === 'file' ? 'file' : 'image';
 
-        const asset = await sanityClient.assets.upload(type, fileStream, {
+        const asset = await adminSanityClient.assets.upload(type, fileStream, {
             filename: uploadedFile.originalFilename || 'upload',
         });
 

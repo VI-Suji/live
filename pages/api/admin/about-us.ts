@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -33,18 +33,18 @@ export default async function handler(
         console.log('Processed API Save for aboutUs:', JSON.stringify(payload, null, 2));
 
         // Check if an aboutUs document already exists
-        const existing = await sanityClient.fetch(`*[_type == "aboutUs"][0]`);
+        const existing = await adminSanityClient.fetch(`*[_type == "aboutUs"][0]`);
 
         if (existing) {
             console.log('Updating existing aboutUs document:', existing._id);
-            const updatedDoc = await sanityClient
+            const updatedDoc = await adminSanityClient
                 .patch(existing._id)
                 .set(payload)
                 .commit();
             return res.status(200).json(updatedDoc);
         } else {
             console.log('Creating new aboutUs document');
-            const newDoc = await sanityClient.create(payload);
+            const newDoc = await adminSanityClient.create(payload);
             return res.status(201).json(newDoc);
         }
     } catch (error: any) {

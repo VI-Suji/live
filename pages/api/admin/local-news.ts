@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -22,7 +22,7 @@ export default async function handler(
     // Helper: enforce 50-active cap — deactivate oldest items beyond the limit
     // protectId: the item that was just created/activated and must NEVER be deactivated
     const enforceActiveCap = async (protectId: string): Promise<string[]> => {
-        const activeItems: { _id: string }[] = await sanityClient.fetch(
+        const activeItems: { _id: string }[] = await adminSanityClient.fetch(
             `*[_type == "localNews" && active == true] | order(publishedAt desc) { _id }`
         );
 
@@ -33,7 +33,7 @@ export default async function handler(
             for (const item of itemsToDeactivate) {
                 // Never deactivate the item that was just created/activated
                 if (item._id === protectId) continue;
-                await sanityClient.patch(item._id).set({ active: false }).commit();
+                await adminSanityClient.patch(item._id).set({ active: false }).commit();
                 deactivatedIds.push(item._id);
             }
 
@@ -42,7 +42,7 @@ export default async function handler(
                 // Find the last item before the cutoff that isn't protected
                 for (let i = MAX_ACTIVE - 1; i >= 0; i--) {
                     if (activeItems[i]._id !== protectId) {
-                        await sanityClient.patch(activeItems[i]._id).set({ active: false }).commit();
+                        await adminSanityClient.patch(activeItems[i]._id).set({ active: false }).commit();
                         deactivatedIds.push(activeItems[i]._id);
                         break;
                     }
@@ -56,12 +56,12 @@ export default async function handler(
         switch (method) {
             case 'POST':
                 // Auto-calculate order: smallest current order - 1 (so new item is at the top)
-                const bottomItem = await sanityClient.fetch(
+                const bottomItem = await adminSanityClient.fetch(
                     `*[_type == "localNews"] | order(order asc) [0] { order }`
                 );
                 const nextOrder = (bottomItem?.order ?? 0) - 1;
 
-                const newDoc = await sanityClient.create({
+                const newDoc = await adminSanityClient.create({
                     _type: 'localNews',
                     ...req.body,
                     order: nextOrder,
@@ -78,7 +78,7 @@ export default async function handler(
             case 'PATCH':
                 const { _id, ...updates } = req.body;
 
-                const updatedDoc = await sanityClient
+                const updatedDoc = await adminSanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
@@ -92,7 +92,7 @@ export default async function handler(
 
             case 'DELETE':
                 const { id } = req.query;
-                await sanityClient.delete(id as string);
+                await adminSanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });
 
             default:

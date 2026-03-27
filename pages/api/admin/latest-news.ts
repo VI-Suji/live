@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -23,7 +23,7 @@ export default async function handler(
         if (ignoreId) {
             query = `count(*[_type == "latestNews" && active == true && _id != "${ignoreId}"])`;
         }
-        return await sanityClient.fetch(query);
+        return await adminSanityClient.fetch(query);
     };
 
     try {
@@ -36,7 +36,7 @@ export default async function handler(
                     }
                 }
                 
-                const newDoc = await sanityClient.create({
+                const newDoc = await adminSanityClient.create({
                     _type: 'latestNews',
                     ...req.body,
                 });
@@ -57,7 +57,7 @@ export default async function handler(
                     updates.date = new Date().toISOString().split('T')[0];
                 }
 
-                const updatedDoc = await sanityClient
+                const updatedDoc = await adminSanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
@@ -69,7 +69,7 @@ export default async function handler(
                 if (!id) {
                     return res.status(400).json({ error: 'Missing id for delete' });
                 }
-                await sanityClient.delete(id as string);
+                await adminSanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });
 
             default:

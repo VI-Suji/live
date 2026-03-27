@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -20,7 +20,7 @@ export default async function handler(
     try {
         switch (method) {
             case 'GET':
-                const allAds = await sanityClient.fetch(`
+                const allAds = await adminSanityClient.fetch(`
                     *[_type == "advertisement"] | order(_createdAt desc) {
                         _id,
                         title,
@@ -36,7 +36,7 @@ export default async function handler(
                 return res.status(200).json(allAds);
 
             case 'POST':
-                const newDoc = await sanityClient.create({
+                const newDoc = await adminSanityClient.create({
                     _type: 'advertisement',
                     ...req.body,
                 });
@@ -44,7 +44,7 @@ export default async function handler(
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
-                const updatedDoc = await sanityClient
+                const updatedDoc = await adminSanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
@@ -52,7 +52,7 @@ export default async function handler(
 
             case 'DELETE':
                 const { id } = req.query;
-                await sanityClient.delete(id as string);
+                await adminSanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });
 
             default:

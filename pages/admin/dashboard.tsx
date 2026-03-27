@@ -151,6 +151,26 @@ const DashboardContent = () => {
         }
     }, [accessLevel]);
 
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = async () => {
+        if (isSyncing) return;
+        setIsSyncing(true);
+        try {
+            const res = await fetch('/api/admin/sync', { method: 'POST' });
+            if (res.ok) {
+                alert('Frontend and Backend synchronized successfully!');
+            } else {
+                alert('Failed to sync. Please ensure you are authorized.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error connecting to the server.');
+        } finally {
+            setIsSyncing(false);
+        }
+    };
+
     const fetchStats = async () => {
         try {
             const [
@@ -265,7 +285,7 @@ const DashboardContent = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="mb-6 sm:mb-8 flex flex-wrap gap-3 sm:gap-4">
+                <div className="mb-6 sm:mb-8 flex flex-wrap gap-3 sm:gap-4 items-center">
                     <Link
                         href="/"
                         target="_blank"
@@ -273,6 +293,14 @@ const DashboardContent = () => {
                     >
                         View Website →
                     </Link>
+                    <button
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 border-2 border-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 hover:border-blue-700 disabled:opacity-50 transition-all text-sm sm:text-base cursor-pointer flex items-center gap-2"
+                    >
+                        <FaBolt className={isSyncing ? "animate-spin" : ""} />
+                        {isSyncing ? "Syncing..." : "Sync Now"}
+                    </button>
                 </div>
 
                 {/* Content Type Cards */}

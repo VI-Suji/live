@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -25,7 +25,7 @@ export default async function handler(
         console.log('Request body:', JSON.stringify(req.body, null, 2));
 
         // Check if settings document exists
-        const existing = await sanityClient.fetch(`*[_type == "siteSettings"][0]`);
+        const existing = await adminSanityClient.fetch(`*[_type == "siteSettings"][0]`);
 
         const settingsToSave = {
             liveStreamVisible: req.body.liveStreamVisible ?? true,
@@ -43,14 +43,14 @@ export default async function handler(
         if (existing) {
             // Update existing
             console.log('Updating existing site settings:', existing._id);
-            result = await sanityClient
+            result = await adminSanityClient
                 .patch(existing._id)
                 .set(settingsToSave)
                 .commit();
         } else {
             // Create new
             console.log('Creating new site settings');
-            result = await sanityClient.create({
+            result = await adminSanityClient.create({
                 _type: 'siteSettings',
                 ...settingsToSave,
             });

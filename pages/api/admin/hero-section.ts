@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -21,13 +21,13 @@ export default async function handler(
         switch (method) {
             case 'POST':
                 // Check if a heroSection document already exists
-                const existing = await sanityClient.fetch(`*[_type == "heroSection"][0]`);
+                const existing = await adminSanityClient.fetch(`*[_type == "heroSection"][0]`);
 
                 if (existing) {
                     // Update existing document
                     console.log('Updating existing hero section:', existing._id);
                     console.log('Update data:', req.body);
-                    const updatedDoc = await sanityClient
+                    const updatedDoc = await adminSanityClient
                         .patch(existing._id)
                         .set(req.body)
                         .commit();
@@ -36,7 +36,7 @@ export default async function handler(
                 } else {
                     // Create new document
                     console.log('Creating new hero section with data:', req.body);
-                    const newDoc = await sanityClient.create({
+                    const newDoc = await adminSanityClient.create({
                         _type: 'heroSection',
                         ...req.body,
                     });
@@ -51,7 +51,7 @@ export default async function handler(
                 }
                 console.log('Patching hero section:', _id);
                 console.log('Update data:', updates);
-                const updatedDoc = await sanityClient
+                const updatedDoc = await adminSanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
