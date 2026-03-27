@@ -134,6 +134,37 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
         );
     }
 
+    const isMaintenanceMonth = new Date().getFullYear() === 2026 && new Date().getMonth() === 2; // March is 0-indexed as 2
+
+    if (isMaintenanceMonth) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 flex flex-col items-center justify-center p-4">
+                <div className="bg-white max-w-lg w-full p-10 rounded-3xl shadow-2xl text-center border border-gray-100">
+                    <div className="w-24 h-24 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">
+                        <FaLock />
+                    </div>
+                    <h2 className="text-3xl font-black text-gray-900 mb-4">Under Maintenance</h2>
+                    <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                        Normal editing capabilities will automatically resume on <strong>April 1st, 2026</strong>.
+                    </p>
+                    <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium mb-8 text-left">
+                        <span className="font-bold flex items-center gap-2 mb-1">ℹ️ Public Site is Live</span>
+                        The main website is completely unaffected and is successfully serving to visitors.
+                    </div>
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem("gramika_admin_access");
+                            import("next-auth/react").then(m => m.signOut({ callbackUrl: "/" }));
+                        }}
+                        className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                        Sign Out & Return to Website
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <AdminAccessContext.Provider value={accessLevel}>
             {children}
