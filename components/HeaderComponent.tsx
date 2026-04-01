@@ -280,9 +280,10 @@ const Header: React.FC = () => {
                                 >
                                     <Image
                                         src={headerImages[currentImageIndex]}
-                                        alt="Rotating"
+                                        alt="Gramika News"
                                         fill
                                         className="object-contain"
+                                        title="Gramika News"
                                     />
                                 </motion.div>
                             </AnimatePresence>
@@ -290,12 +291,13 @@ const Header: React.FC = () => {
 
                         {/* Center: Text Only (Logo Removed) - Offset slightly left */}
                         <div
-                            className="absolute left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex items-center gap-2 sm:gap-3"
+                            className="absolute left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex flex-col items-center gap-0"
                             onClick={() => scrollToSection("home")}
                         >
                             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
                                 ഗ്രാമിക
                             </h1>
+                            <span className="sr-only">Gramika News</span>
                         </div>
 
                         {/* Right: Navigation & Mobile Menu */}

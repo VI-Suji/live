@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaPhone, FaUsers, FaMapMarkerAlt } from "react-icons/fa";
 import Header from "../components/HeaderComponent";
 import Footer from "../components/FooterComponent";
+import Meta from "../components/Meta";
 
 interface Person {
   name: string;
@@ -239,6 +240,10 @@ const AboutUsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100">
+      <Meta
+        title={`About Gramika | Gramika News`}
+        description={data?.description || `About the team behind Gramika News.`}
+      />
       <Header />
 
       <div className="bg-[#0f172a] px-4 py-12 sm:py-20 text-center relative overflow-hidden">

@@ -51,6 +51,8 @@ const Meta = ({
             <link rel="icon" href="/gramika.png" type="image/png" />
             <link rel="apple-touch-icon" href="/gramika.png" />
 
+            <link rel="manifest" href="/manifest.json" />
+
             {/* JSON-LD Structured Data */}
             <script
                 type="application/ld+json"
@@ -59,18 +61,21 @@ const Meta = ({
                         {
                             "@context": "https://schema.org",
                             "@type": "WebSite",
+                            "@id": "https://www.gramika.in/#website",
                             "name": "Gramika News",
-                            "alternateName": ["Gramika", "ഗ്രാമിക"],
+                            "alternateName": ["Gramika", "ഗ്രാമിക", "Gramika News"],
                             "url": "https://www.gramika.in"
                         },
                         {
                             "@context": "https://schema.org",
                             "@type": "NewsMediaOrganization",
+                            "@id": "https://www.gramika.in/#organization",
                             "name": "Gramika News",
                             "alternateName": ["Gramika", "ഗ്രാമിക", "Gramika TV", "Gramika Web"],
                             "url": "https://www.gramika.in",
                             "logo": {
                               "@type": "ImageObject",
+                              "@id": "https://www.gramika.in/gramika.png",
                               "url": "https://www.gramika.in/gramika.png",
                               "width": 600,
                               "height": 600
@@ -92,7 +97,8 @@ const Meta = ({
                                 "telephone": "04902360808",
                                 "contactType": "newsroom",
                                 "email": "newsgramika@gmail.com"
-                            }
+                            },
+                            "publishingPrinciples": "https://www.gramika.in/about"
                         }
                     ])
                 }}
