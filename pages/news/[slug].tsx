@@ -14,6 +14,7 @@ type SanityPost = {
   slug: { current: string };
   author?: string;
   mainImage?: string;
+  seoImage?: string;
   excerpt?: string;
   body: any[];
   publishedAt?: string;
@@ -169,7 +170,7 @@ export default function NewsSlugPage({ post }: Props) {
       <Meta
         title={`${post.title} | Gramika`}
         description={post.excerpt || post.title}
-        image={post.mainImage}
+        image={post.seoImage || post.mainImage}
         url={`${shareUrl}`}
         type="article"
       />
@@ -339,6 +340,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     slug, 
     author, 
     "mainImage": coalesce(mainImage.asset->url, image.asset->url),
+    "seoImage": coalesce(mainImage.asset->url, image.asset->url) + "?w=1200&h=630&fit=crop&auto=format&q=80",
     "excerpt": coalesce(excerpt, description), 
     body, 
     publishedAt, 
