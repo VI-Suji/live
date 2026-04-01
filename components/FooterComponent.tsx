@@ -7,7 +7,7 @@ const Footer = () => {
     const [tagline, setTagline] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch("/api/sanity/aboutUs")
+        fetch(`/api/sanity/aboutUs`)
             .then(res => res.json())
             .then(data => {
                 if (data && !data.error && data.description) setTagline(data.description);

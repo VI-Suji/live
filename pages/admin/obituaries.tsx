@@ -49,7 +49,7 @@ export default function ObituariesAdmin() {
 
     const fetchObituaries = async () => {
         try {
-            const res = await fetch(`/api/sanity/obituaries?all=true&t=${Date.now()}`);
+            const res = await fetch(`/api/admin/obituaries?all=true&t=${Date.now()}`);
             const data = await res.json();
             setObituaries(data);
         } catch (error) {

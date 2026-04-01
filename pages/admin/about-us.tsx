@@ -15,12 +15,13 @@ export default function AboutUsAdmin() {
         description: "",
         md: { name: "", designation: "", area: "", showArea: true, phone: "" },
         executiveDirectors: [],
-        directors: []
+        directors: [],
+        operators: []
     });
 
     const fetchAboutData = useCallback(async () => {
         try {
-            const res = await fetch(`/api/sanity/aboutUs?raw=true&t=${Date.now()}`);
+            const res = await fetch(`/api/admin/about-us?t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
                 if (data && !data.error) {
@@ -28,7 +29,8 @@ export default function AboutUsAdmin() {
                         description: data.description || "",
                         md: data.md || { name: "", designation: "", area: "", showArea: true, phone: "" },
                         executiveDirectors: Array.isArray(data.executiveDirectors) ? data.executiveDirectors : [],
-                        directors: Array.isArray(data.directors) ? data.directors : []
+                        directors: Array.isArray(data.directors) ? data.directors : [],
+                        operators: Array.isArray(data.operators) ? data.operators : []
                     });
                 }
             }
@@ -141,6 +143,11 @@ export default function AboutUsAdmin() {
         cleanPerson(payload.md);
         if (Array.isArray(payload.executiveDirectors)) payload.executiveDirectors.forEach(cleanPerson);
         if (Array.isArray(payload.directors)) payload.directors.forEach(cleanPerson);
+        if (Array.isArray(payload.operators)) {
+            payload.operators.forEach((op: any) => {
+                if (!op.places) op.places = "";
+            });
+        }
 
         try {
             const res = await fetch("/api/admin/about-us", {
@@ -248,6 +255,48 @@ export default function AboutUsAdmin() {
                     className="py-2 px-3 text-xs"
                 />
 
+            </div>
+        </div>
+    );
+
+    const renderOperatorFields = (operator: any, index: number) => (
+        <div className="space-y-5 relative p-2">
+            <button
+                type="button"
+                onClick={() => removeItem('operators', index)}
+                className="absolute -top-1 -right-1 p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors z-20 shadow-sm"
+            >
+                <FiTrash2 size={14} />
+            </button>
+
+            <div className="space-y-4">
+                <FormInput
+                    label="Operator Name"
+                    required
+                    value={operator.name || ""}
+                    onChange={(e) => handleArrayItemChange('operators', index, 'name', e.target.value)}
+                    className="py-2 px-3 text-xs"
+                    placeholder="Enter name..."
+                />
+
+                <FormInput
+                    label="Phone Number"
+                    required
+                    value={operator.phone || ""}
+                    onChange={(e) => handleArrayItemChange('operators', index, 'phone', e.target.value)}
+                    className="py-2 px-3 text-xs"
+                    placeholder="Phone..."
+                />
+
+                <FormInput
+                    label="Service Locations (Places)"
+                    required
+                    value={operator.places || ""}
+                    onChange={(e) => handleArrayItemChange('operators', index, 'places', e.target.value.toUpperCase())}
+                    className="py-2 px-3 text-xs uppercase"
+                    placeholder="ENTER PLACES SEPARATED BY COMMAS..."
+                    helpText="Example: KOZHIKODE, WAYANAD, etc."
+                />
             </div>
         </div>
     );
@@ -362,6 +411,31 @@ export default function AboutUsAdmin() {
                                         true,
                                         () => removeItem('directors', idx)
                                     )}
+                                </AdminCard>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section>
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                            <h2 className="text-2xl font-black text-slate-950 border-l-4 border-emerald-500 pl-3">Service Operators</h2>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setAboutData((prev: any) => ({
+                                        ...prev,
+                                        operators: [...(prev.operators || []), { name: "", phone: "", places: "" }]
+                                    }));
+                                }}
+                                className="flex items-center gap-2.5 bg-green-600 text-white px-6 py-3 rounded-xl font-black text-sm hover:bg-green-700 transition-all shadow-md active:scale-95"
+                            >
+                                <FiPlus size={20} /> Add Operator
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {(aboutData.operators || []).map((op: any, idx: number) => (
+                                <AdminCard key={`op-${idx}`} className="p-4 border-t-2 border-emerald-500 shadow-md">
+                                    {renderOperatorFields(op, idx)}
                                 </AdminCard>
                             ))}
                         </div>

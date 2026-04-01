@@ -16,14 +16,16 @@ export default async function handler(
     }
 
     const { method } = req;
+    const { all } = req.query;
 
     const MAX_ACTIVE = 50;
 
     // Helper: enforce 50-active cap — deactivate oldest items beyond the limit
     // protectId: the item that was just created/activated and must NEVER be deactivated
     const enforceActiveCap = async (protectId: string): Promise<string[]> => {
+        // EXPLICITLY filter out drafts to avoid double-counting or deactivating drafts
         const activeItems: { _id: string }[] = await adminSanityClient.fetch(
-            `*[_type == "localNews" && active == true] | order(publishedAt desc) { _id }`
+            `*[_type == "localNews" && active == true && !(_id in path("drafts.**"))] | order(publishedAt desc) { _id }`
         );
 
         const deactivatedIds: string[] = [];
@@ -53,7 +55,25 @@ export default async function handler(
     };
 
     try {
+        let result = null;
+
         switch (method) {
+            case 'GET':
+                 // Fetch FRESH data for the admin panel (ignores the cache)
+                 const filter = all === 'true' ? '' : ' && active == true';
+                 const query = `*[_type == "localNews"${filter}] | order(order asc) {
+                    _id,
+                    title,
+                    description,
+                    author,
+                    publishedAt,
+                    order,
+                    active,
+                    "image": image.asset->url
+                 }`;
+                 result = await adminSanityClient.fetch(query);
+                 return res.status(200).json(result);
+
             case 'POST':
                 // Auto-calculate order: smallest current order - 1 (so new item is at the top)
                 const bottomItem = await adminSanityClient.fetch(
@@ -73,7 +93,8 @@ export default async function handler(
                 if (req.body.active !== false) {
                     postDeactivated = await enforceActiveCap(newDoc._id);
                 }
-                return res.status(201).json({ ...newDoc, _deactivatedIds: postDeactivated });
+                result = { ...newDoc, _deactivatedIds: postDeactivated };
+                break;
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
@@ -88,17 +109,22 @@ export default async function handler(
                 if (updates.active === true) {
                     patchDeactivated = await enforceActiveCap(_id);
                 }
-                return res.status(200).json({ ...updatedDoc, _deactivatedIds: patchDeactivated });
+                result = { ...updatedDoc, _deactivatedIds: patchDeactivated };
+                break;
 
             case 'DELETE':
                 const { id } = req.query;
                 await adminSanityClient.delete(id as string);
-                return res.status(200).json({ message: 'Deleted successfully' });
+                result = { message: 'Deleted successfully' };
+                break;
 
             default:
-                res.setHeader('Allow', ['POST', 'PATCH', 'DELETE']);
+                res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
+
+        // NO automatic clearCache() here.
+        return res.status(method === 'POST' ? 201 : 200).json(result);
     } catch (error) {
         console.error('API Error:', error);
         return res.status(500).json({ error: 'Internal server error' });

@@ -60,7 +60,7 @@ export default function TopStoriesAdmin() {
 
     const fetchStories = async () => {
         try {
-            const res = await fetch("/api/sanity/topStories?all=true");
+            const res = await fetch(`/api/admin/top-stories?all=true&t=${Date.now()}`);
             const data = await res.json();
             // Normalize active field (undefined = true for legacy items)
             const normalizedData = data.map((item: any) => ({
@@ -491,6 +491,15 @@ export default function TopStoriesAdmin() {
                                             onClick={() => handleEdit(story)}
                                         >
                                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                {story.mainImage && (
+                                                    <div className="relative w-full sm:w-20 h-40 sm:h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0 shadow-sm">
+                                                        <img
+                                                            src={story.mainImage}
+                                                            alt={story.title}
+                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                        />
+                                                    </div>
+                                                )}
                                                 <div className="flex-1 w-full">
                                                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                         <span className="text-[10px] font-black bg-gray-100 px-2 py-0.5 rounded-full uppercase tracking-wider text-gray-500">#{index + 1}</span>
@@ -570,6 +579,15 @@ export default function TopStoriesAdmin() {
                                             onClick={() => handleEdit(story)}
                                         >
                                             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                                                {story.mainImage && (
+                                                    <div className="relative w-full sm:w-16 h-32 sm:h-16 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 filter contrast-75">
+                                                        <img
+                                                            src={story.mainImage}
+                                                            alt={story.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                )}
                                                 <div className="flex-1 w-full">
                                                     <h3 className="font-bold text-sm text-gray-600 mb-1 break-words">{story.title}</h3>
                                                     <div className="text-[10px] text-gray-400 font-black uppercase tracking-tight">

@@ -50,7 +50,7 @@ export default function LocalNewsAdmin() {
 
     const fetchNews = async () => {
         try {
-            const res = await fetch(`/api/sanity/localNews?all=true&t=${Date.now()}`);
+            const res = await fetch(`/api/admin/local-news?all=true&t=${Date.now()}`);
             const data = await res.json();
             // Normalize active field (undefined = true for legacy items)
             const normalizedData = data.map((item: any) => ({

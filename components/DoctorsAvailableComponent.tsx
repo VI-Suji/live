@@ -11,7 +11,7 @@ const DoctorsAvailable = () => {
     useEffect(() => {
         setCurrentDate(new Date().toLocaleDateString());
         setLoading(true);
-        fetch("/api/sanity/doctors")
+        fetch(`/api/sanity/doctors`)
             .then((res) => res.json())
             .then((data) => setDoctors(data))
             .catch(console.error)

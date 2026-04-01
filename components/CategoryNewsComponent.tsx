@@ -517,7 +517,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
         }
 
         // Fetch to check if latest news exists in order to adjust grid layout
-        fetch(`/api/sanity/latestNews?t=${Date.now()}`)
+        fetch(`/api/sanity/latestNews`)
             .then(res => res.json())
             .then(data => {
                 if (data.error || (Array.isArray(data) && data.length === 0)) {
@@ -558,7 +558,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
                     for (const tab of tabs) {
                         if (tab === activeTab) continue;
                         try {
-                            const res = await fetch(`/api/sanity/categoryNews?type=${tab}&t=${Date.now()}`);
+                            const res = await fetch(`/api/sanity/categoryNews?type=${tab}`);
                             const data = await res.json();
                             const storyIndex = data.findIndex((item: any) => slugify(item.title) === currentSlug);
                             if (storyIndex !== -1) {
@@ -594,7 +594,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
 
     useEffect(() => {
         setLoading(true);
-        fetch(`/api/sanity/categoryNews?type=${activeTab}&t=${Date.now()}`)
+        fetch(`/api/sanity/categoryNews?type=${activeTab}`)
             .then((res) => res.json())
             .then((data) => {
                 setNewsData(Array.isArray(data) ? data : []);

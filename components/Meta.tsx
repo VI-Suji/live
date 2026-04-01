@@ -6,6 +6,7 @@ interface MetaProps {
     keywords?: string;
     image?: string;
     url?: string;
+    type?: 'website' | 'article';
 }
 
 const Meta = ({
@@ -13,7 +14,8 @@ const Meta = ({
     description = "ഏറ്റവും പുതിയ പ്രാദേശിക വാർത്തകൾ, വിശേഷങ്ങൾ, അറിയിപ്പുകൾ എന്നിവ അറിയാൻ ഗ്രാമിക സന്ദർശിക്കുക. Truthful news and updates at your fingertips.",
     keywords = "Gramika, Gramika Web, Gramika News, Gramika TV, News Gramika, ഗ്രാമിക, Malayalam News, Kerala News, Local News, Breaking News, Live News, Kuthuparamba News",
     image = "https://www.gramika.in/gramika.png",
-    url = "https://www.gramika.in"
+    url = "https://www.gramika.in",
+    type = "website"
 }: MetaProps) => {
     return (
         <Head>
@@ -30,12 +32,12 @@ const Meta = ({
             <link rel="canonical" href={url} />
 
             {/* Open Graph / Facebook */}
-            <meta property="og:type" content="website" />
+            <meta property="og:type" content={type} />
             <meta property="og:url" content={url} />
             <meta property="og:title" content={title} />
             <meta property="og:description" content={description} />
             <meta property="og:image" content={image} />
-            <meta property="og:site_name" content="Gramika" />
+            <meta property="og:site_name" content="Gramika News" />
             <meta property="og:locale" content="ml_IN" />
 
             {/* Twitter */}
@@ -49,39 +51,50 @@ const Meta = ({
             <link rel="icon" href="/gramika.png" type="image/png" />
             <link rel="apple-touch-icon" href="/gramika.png" />
 
-            {/* Search Engine Verification (Optional - add codes later) */}
-            {/* <meta name="google-site-verification" content="YOUR_CODE" /> */}
-
             {/* JSON-LD Structured Data */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "NewsMediaOrganization",
-                        "name": "Gramika News",
-                        "alternateName": ["Gramika", "ഗ്രാമിക", "Gramika TV", "Gramika Web"],
-                        "url": "https://www.gramika.in",
-                        "logo": "https://www.gramika.in/gramika.png",
-                        "sameAs": [
-                            "https://www.facebook.com/GRAMIKATV/",
-                            "https://www.instagram.com/gramikatv/",
-                            "https://www.youtube.com/@GramikaTv"
-                        ],
-                        "description": description,
-                        "address": {
-                            "@type": "PostalAddress",
-                            "addressLocality": "Kuthuparamba",
-                            "addressRegion": "Kerala",
-                            "addressCountry": "IN"
+                    __html: JSON.stringify([
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "WebSite",
+                            "name": "Gramika News",
+                            "alternateName": ["Gramika", "ഗ്രാമിക"],
+                            "url": "https://www.gramika.in"
                         },
-                        "contactPoint": {
-                            "@type": "ContactPoint",
-                            "telephone": "04902360808",
-                            "contactType": "newsroom",
-                            "email": "newsgramika@gmail.com"
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "NewsMediaOrganization",
+                            "name": "Gramika News",
+                            "alternateName": ["Gramika", "ഗ്രാമിക", "Gramika TV", "Gramika Web"],
+                            "url": "https://www.gramika.in",
+                            "logo": {
+                              "@type": "ImageObject",
+                              "url": "https://www.gramika.in/gramika.png",
+                              "width": 600,
+                              "height": 600
+                            },
+                            "sameAs": [
+                                "https://www.facebook.com/GRAMIKATV/",
+                                "https://www.instagram.com/gramikatv/",
+                                "https://www.youtube.com/@GramikaTv"
+                            ],
+                            "description": description,
+                            "address": {
+                                "@type": "PostalAddress",
+                                "addressLocality": "Kuthuparamba",
+                                "addressRegion": "Kerala",
+                                "addressCountry": "IN"
+                            },
+                            "contactPoint": {
+                                "@type": "ContactPoint",
+                                "telephone": "04902360808",
+                                "contactType": "newsroom",
+                                "email": "newsgramika@gmail.com"
+                            }
                         }
-                    })
+                    ])
                 }}
             />
         </Head>

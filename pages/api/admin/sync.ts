@@ -19,7 +19,8 @@ export default async function handler(
             return res.status(401).json({ error: 'Unauthorized' });
         }
 
-        // Instantly force clearing of the Sanity fetch cache!
+        // Instantly force clearing of the Sanity fetch cache and signal a sync event
+        // to bypass the Sanity CDN for the next 60 seconds (freshness window).
         clearCache();
 
         return res.status(200).json({ message: 'Frontend and Backend synced successfully!' });

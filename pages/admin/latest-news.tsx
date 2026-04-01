@@ -41,7 +41,7 @@ export default function LatestNewsAdmin() {
 
     const fetchNews = async () => {
         try {
-            const res = await fetch(`/api/sanity/latestNews?all=true&t=${Date.now()}`);
+            const res = await fetch(`/api/admin/latest-news?t=${Date.now()}`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setNews(data);
@@ -151,7 +151,7 @@ export default function LatestNewsAdmin() {
                                 <h1 className="text-xl sm:text-2xl font-black text-gray-900 truncate">Latest News</h1>
                             </div>
                             <div className="flex items-center gap-4">
-                                {news.filter(n => n.active).length < 2 ? (
+                                {news.filter(n => n.active && n.date >= new Date().toISOString().split('T')[0]).length < 2 ? (
                                     <button
                                         onClick={() => {
                                             setShowForm(true);

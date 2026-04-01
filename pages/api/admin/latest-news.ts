@@ -19,15 +19,32 @@ export default async function handler(
     const MAX_ACTIVE = 2; // Latest news only shows 2
 
     const checkActiveLimit = async (ignoreId?: string) => {
-        let query = `count(*[_type == "latestNews" && active == true])`;
+        const today = new Date().toISOString().split('T')[0];
+        // Only count items that are both 'active' AND not 'expired' (date >= today)
+        let query = `count(*[_type == "latestNews" && active == true && date >= $today && !(_id in path("drafts.**"))])`;
         if (ignoreId) {
-            query = `count(*[_type == "latestNews" && active == true && _id != "${ignoreId}"])`;
+            query = `count(*[_type == "latestNews" && active == true && date >= $today && _id != "${ignoreId}" && !(_id in path("drafts.**"))])`;
         }
-        return await adminSanityClient.fetch(query);
+        return await adminSanityClient.fetch(query, { today });
     };
 
     try {
+        let result = null;
+
         switch (method) {
+            case 'GET':
+                 // Fetch FRESH data for the admin panel (ignores the cache)
+                 const query = `*[_type == "latestNews"] | order(date desc) {
+                    _id,
+                    heading,
+                    content,
+                    date,
+                    active,
+                    "image": image.asset->url
+                 }`;
+                 result = await adminSanityClient.fetch(query);
+                 return res.status(200).json(result);
+
             case 'POST':
                 if (req.body.active !== false) {
                     const count = await checkActiveLimit();
@@ -36,11 +53,11 @@ export default async function handler(
                     }
                 }
                 
-                const newDoc = await adminSanityClient.create({
+                result = await adminSanityClient.create({
                     _type: 'latestNews',
                     ...req.body,
                 });
-                return res.status(201).json(newDoc);
+                break;
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
@@ -57,12 +74,11 @@ export default async function handler(
                     updates.date = new Date().toISOString().split('T')[0];
                 }
 
-                const updatedDoc = await adminSanityClient
+                result = await adminSanityClient
                     .patch(_id)
                     .set(updates)
                     .commit();
-
-                return res.status(200).json(updatedDoc);
+                break;
 
             case 'DELETE':
                 const { id } = req.query;
@@ -70,12 +86,18 @@ export default async function handler(
                     return res.status(400).json({ error: 'Missing id for delete' });
                 }
                 await adminSanityClient.delete(id as string);
-                return res.status(200).json({ message: 'Deleted successfully' });
+                result = { message: 'Deleted successfully' };
+                break;
 
             default:
-                res.setHeader('Allow', ['POST', 'PATCH', 'DELETE']);
+                res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
+
+        // NO automatic clearCache() here.
+        // Frontend will stay cached for 2 hours unless manually synced.
+
+        return res.status(method === 'POST' ? 201 : 200).json(result);
     } catch (error: any) {
         console.error('API Error:', error);
         return res.status(500).json({

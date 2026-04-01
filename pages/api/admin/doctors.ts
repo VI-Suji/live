@@ -16,15 +16,35 @@ export default async function handler(
     }
 
     const { method } = req;
+    const { all } = req.query;
 
     try {
+        let result = null;
+
         switch (method) {
+            case 'GET':
+                 // Fetch FRESH data for the admin panel (ignores the cache)
+                 const filter = all === 'true' ? '' : ' && active == true';
+                 const query = `*[_type == "doctor"${filter}] | order(_createdAt desc) {
+                    _id,
+                    name,
+                    specialty,
+                    hospital,
+                    location,
+                    phone,
+                    active,
+                    "photo": photo.asset->url
+                 }`;
+                 result = await adminSanityClient.fetch(query);
+                 return res.status(200).json(result);
+
             case 'POST':
                 const newDoc = await adminSanityClient.create({
                     _type: 'doctor',
                     ...req.body,
                 });
-                return res.status(201).json(newDoc);
+                result = newDoc;
+                break;
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
@@ -32,17 +52,22 @@ export default async function handler(
                     .patch(_id)
                     .set(updates)
                     .commit();
-                return res.status(200).json(updatedDoc);
+                result = updatedDoc;
+                break;
 
             case 'DELETE':
                 const { id } = req.query;
                 await adminSanityClient.delete(id as string);
-                return res.status(200).json({ message: 'Deleted successfully' });
+                result = { message: 'Deleted successfully' };
+                break;
 
             default:
-                res.setHeader('Allow', ['POST', 'PATCH', 'DELETE']);
+                res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
+
+        // NO automatic clearCache() here.
+        return res.status(method === 'POST' ? 201 : 200).json(result);
     } catch (error) {
         console.error('API Error:', error);
         return res.status(500).json({ error: 'Internal server error' });

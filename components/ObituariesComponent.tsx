@@ -12,7 +12,7 @@ const Obituaries = () => {
     const itemsPerPage = 4;
 
     useEffect(() => {
-        fetch("/api/sanity/obituaries")
+        fetch(`/api/sanity/obituaries`)
             .then((res) => res.json())
             .then((data) => setObituaries(data))
             .catch(console.error)

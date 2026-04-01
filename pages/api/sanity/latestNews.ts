@@ -9,6 +9,9 @@ export default async function handler(
     const filter = all === 'true' ? '' : ' && active == true';
     const limit = all === 'true' ? '' : ' [0...2]';
 
+    // Prevent browser caching so Sync Now works instantly for users (by Consulting the server cache)
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
     try {
         const query = `*[_type == "latestNews"${filter}] | order(date desc)${limit} {
             _id,
@@ -20,6 +23,14 @@ export default async function handler(
         }`;
 
         const latestNewsList = await sanityClient.fetch(query);
+        console.log(`[DIAGNOSTIC] Query: ${query.length > 50 ? query.substring(0, 50) + '...' : query}`);
+        console.log(`[DIAGNOSTIC] Items Found: ${latestNewsList ? latestNewsList.length : 0}`);
+        
+        if (latestNewsList && latestNewsList.length > 0) {
+            console.log(`[DIAGNOSTIC] First Item Heading: ${latestNewsList[0].heading}`);
+            console.log(`[DIAGNOSTIC] First Item Active: ${latestNewsList[0].active}`);
+            console.log(`[DIAGNOSTIC] First Item Date: ${latestNewsList[0].date}`);
+        }
 
         if (!latestNewsList || latestNewsList.length === 0) {
             return res.status(404).json({ error: 'No active latest news found' });

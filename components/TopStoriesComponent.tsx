@@ -25,7 +25,7 @@ export default function TopStories() {
     const router = useRouter();
 
     useEffect(() => {
-        fetch("/api/sanity/topStories")
+        fetch(`/api/sanity/topStories`)
             .then((res) => res.json())
             .then((data: Post[]) => {
                 setPosts(data);

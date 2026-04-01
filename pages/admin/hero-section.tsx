@@ -27,7 +27,7 @@ export default function HeroSectionAdmin() {
 
     const fetchHero = async () => {
         try {
-            const res = await fetch(`/api/sanity/heroContent?t=${Date.now()}`);
+            const res = await fetch(`/api/admin/hero-section?t=${Date.now()}`);
             if (!res.ok) {
                 setHero(null);
                 setLoading(false);

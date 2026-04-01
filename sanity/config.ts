@@ -1,36 +1,71 @@
 import { createClient } from '@sanity/client';
 import imageUrlBuilder from '@sanity/image-url';
 
-import { getCachedData, setCachedData } from './cache';
+import { getCachedData, setCachedData, isRecentlySynced } from './cache';
 
-// Original config wrapped in base
+// Base credentials
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '';
+const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production';
+const apiVersion = '2024-01-01';
+
+// Public CDN Client (Standard)
 export const sanityClient = createClient({
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-    apiVersion: '2024-01-01',
-    useCdn: true, // Use CDN for better performance and reduced API requests
+    projectId,
+    dataset,
+    apiVersion,
+    useCdn: true,
 });
 
-// Wrapped client that caches \`.fetch()\` calls for 2 hours in-memory
-const originalFetch = sanityClient.fetch.bind(sanityClient);
+// Public Live Client (Bypasses CDN, NO token for safety)
+const livePublicClient = createClient({
+    projectId,
+    dataset,
+    apiVersion,
+    useCdn: false,
+});
+
+// Admin Client (For mutations - has token)
+export const adminSanityClient = createClient({
+    projectId,
+    dataset,
+    apiVersion,
+    useCdn: false,
+    token: process.env.SANITY_API_TOKEN,
+});
+
+// Capture safe fetch methods
+const cdnFetch = sanityClient.fetch.bind(sanityClient);
+const liveFetch = livePublicClient.fetch.bind(livePublicClient);
+
+// Wrap public client's fetch with caching
 sanityClient.fetch = async (query: string, params: any = {}, options: any = {}) => {
+    // 1. Unique key including query and params (NO timestamp here to allow 2-hr sharing)
     const cacheKey = JSON.stringify({ query, params });
+    
+    // 2. Check local in-memory cache
     const cached = getCachedData(cacheKey);
     if (cached) {
+        // console.log('✅ [CACHE HIT]');
         return cached;
     }
-    const data = await originalFetch(query, params, options);
+
+    // 3. Fallback to API. 
+    // If 'Sync Now' was pressed within the last 60s, we bypass the Sanity CDN globally (freshness).
+    // Otherwise, we use the Sanity CDN to save regular API quota.
+    const mustBypassCDN = isRecentlySynced();
+    if (mustBypassCDN) {
+        console.log(`⚠️  [CDN BYPASS] Manual Sync Active - Fetching fresh data from Sanity Live API...`);
+    } else {
+        console.log(`📡 [FETCHING] Requesting from Sanity CDN Edge...`);
+    }
+    
+    const fetcher = mustBypassCDN ? liveFetch : cdnFetch;
+    const data = await fetcher(query, params, options);
+    
+    // 4. Save to cache
     setCachedData(cacheKey, data);
     return data;
 };
-
-export const adminSanityClient = createClient({
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || '',
-    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-    apiVersion: '2024-01-01',
-    useCdn: false, // Set to false if you want fresh data
-    token: process.env.SANITY_API_TOKEN, // Only needed for mutations
-});
 
 // Image URL builder
 const builder = imageUrlBuilder(sanityClient);

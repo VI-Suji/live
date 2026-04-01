@@ -7,6 +7,7 @@ import { FaArrowLeft, FaShareAlt, FaCalendarAlt, FaUser, FaClock, FaFacebookF, F
 import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { sanityClient } from "../../sanity/config";
+import Meta from "../../components/Meta";
 
 type SanityPost = {
   _id: string;
@@ -166,15 +167,13 @@ export default function StoryPage({ post }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      <Head>
-        <title>{`${post.title} | Gramika News`}</title>
-        <meta name="description" content={post.excerpt || post.title} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt || post.title} />
-        <meta property="og:image" content={post.mainImage} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
+      <Meta
+        title={`${post.title} | Gramika`}
+        description={post.excerpt || post.title}
+        image={post.mainImage}
+        url={`${shareUrl}`}
+        type="article"
+      />
 
       {/* CSS for HTML content formatting */}
       <style jsx global>{`
@@ -481,12 +480,13 @@ export default function StoryPage({ post }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { pageId } = context.params || {};
-  if (!pageId) return { notFound: true };
+  const { pageId, slug } = context.params || {};
+  const identifier = pageId || slug;
+  if (!identifier) return { notFound: true };
 
   // No longer extracting ID from end as IDs were removed for professional look.
   // We match top stories by their dedicated slug, and local/national by title slug.
-  const query = `*[(_type == "topStory" || _type == "localNews" || _type == "nationalNews") && (slug.current == $pageId || title match $pageId)][0] {
+  const query = `*[(_type == "topStory" || _type == "localNews" || _type == "nationalNews") && (slug.current == $identifier || title match $identifier)][0] {
     _id, 
     _type,
     title, 
@@ -501,7 +501,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }`;
 
   try {
-    const post = await sanityClient.fetch(query, { pageId });
+    const post = await sanityClient.fetch(query, { identifier });
     if (!post) return { notFound: true };
     return { props: { post } };
   } catch (error) {

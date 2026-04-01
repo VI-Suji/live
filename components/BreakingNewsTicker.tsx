@@ -18,8 +18,8 @@ export default function BreakingNewsTicker() {
             try {
                 // Fetch breaking news and local news
                 const [breakingRes, localRes] = await Promise.all([
-                    fetch("/api/sanity/breakingNews"),
-                    fetch("/api/sanity/localNews")
+                    fetch(`/api/sanity/breakingNews`),
+                    fetch(`/api/sanity/localNews`)
                 ]);
 
                 const breakingData = await breakingRes.json();

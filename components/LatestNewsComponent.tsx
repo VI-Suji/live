@@ -157,7 +157,7 @@ const LatestNewsComponent: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/sanity/latestNews")
+    fetch(`/api/sanity/latestNews`)
       .then((res) => res.json())
       .then((data) => {
         if (!data.error && Array.isArray(data)) {

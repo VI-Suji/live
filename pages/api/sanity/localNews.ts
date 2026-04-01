@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { sanityClient } from '../../../sanity/config';
+import { setCacheHeaders } from '../../../sanity/cache';
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    // Prevent browser caching so Sync Now works instantly for users (by consulting the server cache)
+    setCacheHeaders(res);
+
     try {
         // Check if we should show all items (for admin) or only active (for public)
         const showAll = req.query.all === 'true';
@@ -33,9 +37,9 @@ export default async function handler(
                 active
               }`;
 
-        const localNews = await sanityClient.fetch(query);
+        const localNewsList = await sanityClient.fetch(query);
 
-        res.status(200).json(localNews);
+        res.status(200).json(localNewsList);
     } catch (error) {
         console.error('Error fetching local news:', error);
         res.status(500).json({ error: 'Failed to fetch local news' });

@@ -54,6 +54,24 @@ export default {
                     { name: 'image', title: 'Photo', type: 'image', options: { hotspot: true } },
                 ]
             }]
+        },
+        {
+            name: 'operators',
+            title: 'Operators',
+            type: 'array',
+            of: [{
+                type: 'object',
+                fields: [
+                    { name: 'name', title: 'Name', type: 'string' },
+                    { 
+                        name: 'places', 
+                        title: 'Places (Comma separated)', 
+                        type: 'string',
+                        description: 'Enter places separated by commas (e.g. Kozhikode, Wayanad)'
+                    },
+                    { name: 'phone', title: 'Phone Number', type: 'string' },
+                ]
+            }]
         }
     ]
 }

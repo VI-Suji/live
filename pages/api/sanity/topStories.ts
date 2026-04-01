@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { sanityClient } from '../../../sanity/config';
+import { setCacheHeaders } from '../../../sanity/cache';
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    // Prevent browser caching so Sync Now works instantly for users (by consulting the server cache)
+    setCacheHeaders(res);
+
     try {
         // Check if we should show all items (for admin) or only active (for public)
         const showAll = req.query.all === 'true';

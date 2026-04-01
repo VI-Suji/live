@@ -525,13 +525,13 @@ const LocalNews = () => {
         const calculateItemsPerPage = async () => {
             try {
                 const [settingsRes, obituariesRes, adOneRes, adTwoRes, entRes, healthRes, sportsRes] = await Promise.all([
-                    fetch("/api/sanity/siteSettings"),
-                    fetch("/api/sanity/obituaries"),
-                    fetch("/api/sanity/advertisement?position=ad-one"),
-                    fetch("/api/sanity/advertisement?position=ad-two"),
-                    fetch("/api/sanity/categoryNews?type=entertainmentNews"),
-                    fetch("/api/sanity/categoryNews?type=healthNews"),
-                    fetch("/api/sanity/categoryNews?type=sportsNews")
+                    fetch(`/api/sanity/siteSettings`),
+                    fetch(`/api/sanity/obituaries`),
+                    fetch(`/api/sanity/advertisement?position=ad-one`),
+                    fetch(`/api/sanity/advertisement?position=ad-two`),
+                    fetch(`/api/sanity/categoryNews?type=entertainmentNews`),
+                    fetch(`/api/sanity/categoryNews?type=healthNews`),
+                    fetch(`/api/sanity/categoryNews?type=sportsNews`)
                 ]);
 
                 const settingsData = await settingsRes.json();
@@ -624,7 +624,7 @@ const LocalNews = () => {
                     const endpoint = otherTab === 'local' ? '/api/sanity/localNews' : '/api/sanity/nationalNews';
 
                     try {
-                        const res = await fetch(`${endpoint}?t=${Date.now()}`);
+                        const res = await fetch(`${endpoint}`);
                         const otherData = await res.json();
                         const otherIndex = otherData.findIndex((item: any) => slugify(item.title) === currentSlug);
 
@@ -679,7 +679,7 @@ const LocalNews = () => {
         setLoading(true);
         const endpoint = activeTab === 'local' ? '/api/sanity/localNews' : '/api/sanity/nationalNews';
 
-        fetch(`${endpoint}?t=${Date.now()}`)
+        fetch(`${endpoint}`)
             .then((res) => res.json())
             .then((data) => {
                 setNewsData(data);

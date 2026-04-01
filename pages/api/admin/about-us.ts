@@ -15,12 +15,46 @@ export default async function handler(
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).end(`Method ${req.method} Not Allowed`);
-    }
+    const { method } = req;
 
     try {
+        if (method === 'GET') {
+            // Fetch FRESH data for the admin panel (ignores the cache)
+            const result = await adminSanityClient.fetch(`*[_type == "aboutUs"][0] {
+                ...,
+                md {
+                    ...,
+                    image {
+                        ...,
+                        "url": asset->url
+                    }
+                },
+                executiveDirectors[] {
+                    ...,
+                    image {
+                        ...,
+                        "url": asset->url
+                    }
+                },
+                directors[] {
+                    ...,
+                    image {
+                        ...,
+                        "url": asset->url
+                    }
+                },
+                operators[] {
+                    ...
+                }
+            }`);
+            return res.status(200).json(result || { error: 'No about us content found' });
+        }
+
+        if (method !== 'POST') {
+            res.setHeader('Allow', ['GET', 'POST']);
+            return res.status(405).end(`Method ${method} Not Allowed`);
+        }
+
         // Remove metadata fields if they were accidentally included in req.body
         const { _id, _rev, _createdAt, _updatedAt, ...cleanData } = req.body;
 
@@ -35,18 +69,20 @@ export default async function handler(
         // Check if an aboutUs document already exists
         const existing = await adminSanityClient.fetch(`*[_type == "aboutUs"][0]`);
 
+        let result = null;
         if (existing) {
             console.log('Updating existing aboutUs document:', existing._id);
-            const updatedDoc = await adminSanityClient
+            result = await adminSanityClient
                 .patch(existing._id)
                 .set(payload)
                 .commit();
-            return res.status(200).json(updatedDoc);
         } else {
             console.log('Creating new aboutUs document');
-            const newDoc = await adminSanityClient.create(payload);
-            return res.status(201).json(newDoc);
+            result = await adminSanityClient.create(payload);
         }
+
+        // NO automatic clearCache() here.
+        return res.status(existing ? 200 : 201).json(result);
     } catch (error: any) {
         console.error('About Us Admin API Error:', error);
         return res.status(500).json({ 

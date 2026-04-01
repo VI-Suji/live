@@ -15,10 +15,16 @@ export default async function handler(
         return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { method } = req;
-
     try {
+        const { method } = req;
+        let result = null;
+
         switch (method) {
+            case 'GET':
+                // Fetch FRESH data for the admin panel (ignores the cache)
+                result = await adminSanityClient.fetch(`*[_type == "heroSection"][0] { _id, greeting, tagline }`);
+                return res.status(200).json(result || { error: 'No hero content found' });
+
             case 'POST':
                 // Check if a heroSection document already exists
                 const existing = await adminSanityClient.fetch(`*[_type == "heroSection"][0]`);
@@ -32,7 +38,8 @@ export default async function handler(
                         .set(req.body)
                         .commit();
                     console.log('Updated successfully:', updatedDoc);
-                    return res.status(200).json(updatedDoc);
+                    result = updatedDoc;
+                    break;
                 } else {
                     // Create new document
                     console.log('Creating new hero section with data:', req.body);
@@ -41,7 +48,8 @@ export default async function handler(
                         ...req.body,
                     });
                     console.log('Created successfully:', newDoc);
-                    return res.status(201).json(newDoc);
+                    result = newDoc;
+                    break;
                 }
 
             case 'PATCH':
@@ -56,12 +64,16 @@ export default async function handler(
                     .set(updates)
                     .commit();
                 console.log('Patched successfully:', updatedDoc);
-                return res.status(200).json(updatedDoc);
+                result = updatedDoc;
+                break;
 
             default:
-                res.setHeader('Allow', ['POST', 'PATCH']);
+                res.setHeader('Allow', ['GET', 'POST', 'PATCH']);
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
+
+        // NO automatic clearCache() here.
+        return res.status(method === 'POST' ? 201 : 200).json(result);
     } catch (error: any) {
         console.error('API Error:', error);
         console.error('Error details:', error.message);

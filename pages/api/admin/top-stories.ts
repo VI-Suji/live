@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { clearCache } from '../../../sanity/cache';
 
 const ALLOWED_EMAIL = 'gramikaweb@gmail.com';
 
@@ -9,7 +10,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    // Check authentication
     const session = await getServerSession(req, res, authOptions);
 
     if (!session || session.user?.email !== ALLOWED_EMAIL) {
@@ -17,12 +17,13 @@ export default async function handler(
     }
 
     const { method } = req;
-
+    const { all } = req.query;
     const MAX_ACTIVE = 50;
 
     const enforceActiveCap = async (protectId: string): Promise<string[]> => {
+        // EXPLICITLY filter out drafts to avoid double-counting or deactivating drafts
         const activeItems: { _id: string }[] = await adminSanityClient.fetch(
-            `*[_type == "topStory" && active == true] | order(publishedAt desc) { _id }`
+            `*[_type == "topStory" && active == true && !(_id in path("drafts.**"))] | order(publishedAt desc) { _id }`
         );
 
         const deactivatedIds: string[] = [];
@@ -48,7 +49,25 @@ export default async function handler(
     };
 
     try {
+        let result = null;
+
         switch (method) {
+            case 'GET':
+                 // Fetch FRESH data for the admin panel (ignores the cache)
+                 const filter = all === 'true' ? '' : ' && active == true';
+                 const query = `*[_type == "topStory"${filter}] | order(publishedAt desc) {
+                    _id,
+                    title,
+                    "mainImage": mainImage.asset->url,
+                    description,
+                    author,
+                    publishedAt,
+                    order,
+                    active
+                 }`;
+                 result = await adminSanityClient.fetch(query);
+                 return res.status(200).json(result);
+
             case 'POST':
                 const bottomItem = await adminSanityClient.fetch(
                     `*[_type == "topStory"] | order(order asc) [0] { order }`
@@ -66,7 +85,8 @@ export default async function handler(
                 if (req.body.active !== false) {
                     postDeactivated = await enforceActiveCap(newStory._id);
                 }
-                return res.status(201).json({ ...newStory, _deactivatedIds: postDeactivated });
+                result = { ...newStory, _deactivatedIds: postDeactivated };
+                break;
 
             case 'PATCH':
                 const { _id, ...updates } = req.body;
@@ -80,17 +100,22 @@ export default async function handler(
                 if (updates.active === true) {
                     patchDeactivated = await enforceActiveCap(_id);
                 }
-                return res.status(200).json({ ...updatedStory, _deactivatedIds: patchDeactivated });
+                result = { ...updatedStory, _deactivatedIds: patchDeactivated };
+                break;
 
             case 'DELETE':
                 const { id } = req.query;
                 await adminSanityClient.delete(id as string);
-                return res.status(200).json({ message: 'Deleted successfully' });
+                result = { message: 'Deleted successfully' };
+                break;
 
             default:
-                res.setHeader('Allow', ['POST', 'PATCH', 'DELETE']);
+                res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
+
+        // NO automatic clearCache() here.
+        return res.status(method === 'POST' ? 201 : 200).json(result);
     } catch (error) {
         console.error('API Error:', error);
         return res.status(500).json({ error: 'Internal server error' });

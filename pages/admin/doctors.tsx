@@ -46,7 +46,7 @@ export default function DoctorsAdmin() {
 
     const fetchDoctors = async () => {
         try {
-            const res = await fetch(`/api/sanity/doctors?all=true&t=${Date.now()}`);
+            const res = await fetch(`/api/admin/doctors?all=true&t=${Date.now()}`);
             const data = await res.json();
             setDoctors(data);
         } catch (error) {

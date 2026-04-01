@@ -50,7 +50,7 @@ export default function EntertainmentNewsAdmin() {
 
     const fetchNews = async () => {
         try {
-            const res = await fetch(`${API_URL}&all=true&t=${Date.now()}`);
+            const res = await fetch(`${ADMIN_API_URL}&all=true&t=${Date.now()}`);
             const data = await res.json();
             const normalizedData = data.map((item: any) => ({
                 ...item,

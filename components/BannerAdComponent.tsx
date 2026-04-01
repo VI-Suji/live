@@ -7,8 +7,7 @@ export default function BannerAd() {
     useEffect(() => {
         console.log('Fetching banner ad...');
         // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        fetch(`/api/sanity/advertisement?position=banner&t=${timestamp}`)
+        fetch(`/api/sanity/advertisement?position=banner`)
             .then((res) => {
                 console.log('Banner ad response status:', res.status);
                 if (res.status === 404) {
