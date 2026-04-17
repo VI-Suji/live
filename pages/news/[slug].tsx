@@ -168,11 +168,17 @@ export default function NewsSlugPage({ post }: Props) {
   return (
     <div className="min-h-screen bg-white">
       <Meta
-        title={`${post.title} | Gramika`}
+        title={`${post.title} | Gramika News`}
         description={post.excerpt || post.title}
+        keywords={`${post.title}, ${post.category || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
         image={post.seoImage || post.mainImage}
         url={`${shareUrl}`}
         type="article"
+        articleData={{
+          publishedTime: post.publishedAt,
+          author: post.author || "Gramika Team",
+          section: post.category,
+        }}
       />
 
       <motion.div
@@ -333,7 +339,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { slug } = context.params || {};
   if (!slug) return { notFound: true };
 
-  const query = `*[(_type == "topStory" || _type == "localNews" || _type == "nationalNews") && (slug.current == $slug || title match $slug)][0] {
+  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (slug.current == $slug || title match $slug)][0] {
     _id, 
     _type,
     title, 

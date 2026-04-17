@@ -17,18 +17,37 @@ function generateSiteMap(posts: any[]) {
        <changefreq>monthly</changefreq>
        <priority>0.5</priority>
      </url>
-     <url>
-       <loc>${EXTERNAL_DATA_URL}/terms-and-conditions</loc>
-       <changefreq>monthly</changefreq>
-       <priority>0.5</priority>
-     </url>
+      <url>
+        <loc>${EXTERNAL_DATA_URL}/terms-and-conditions</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+      </url>
+      <url>
+        <loc>${EXTERNAL_DATA_URL}/about</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+      </url>
 
      <!--Dynamic Story Pages-->
      ${posts
-            .map(({ slug, publishedAt }) => {
+            .map(({ _type, slug, title, publishedAt }) => {
+                const slugify = (text: string) => {
+                    return text
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^\u0D00-\u0D7F\w\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .substring(0, 60);
+                };
+
+                const path = _type === 'topStory' ? 'story' : 'news';
+                const finalSlug = (slug && slug.current) || slugify(title || '');
+                if (!finalSlug) return '';
+
                 return `
        <url>
-           <loc>${`${EXTERNAL_DATA_URL}/story/${slug.current}`}</loc>
+           <loc>${`${EXTERNAL_DATA_URL}/${path}/${finalSlug}`}</loc>
            <lastmod>${publishedAt || new Date().toISOString()}</lastmod>
            <changefreq>weekly</changefreq>
            <priority>0.8</priority>
@@ -46,8 +65,9 @@ function SiteMap() {
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     // We make an API call to gather the URLs for our site
-    const query = `*[_type == "topStory" && active == true] {
+    const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"]] {
     slug,
+    title,
     publishedAt
   }`;
 

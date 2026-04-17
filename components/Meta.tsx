@@ -7,6 +7,13 @@ interface MetaProps {
     image?: string;
     url?: string;
     type?: 'website' | 'article';
+    articleData?: {
+        publishedTime?: string;
+        modifiedTime?: string;
+        author?: string;
+        section?: string;
+        tags?: string[];
+    };
 }
 
 const Meta = ({
@@ -15,7 +22,8 @@ const Meta = ({
     keywords = "Gramika, Gramika Web, Gramika News, Gramika TV, News Gramika, ഗ്രാമിക, Malayalam News, Kerala News, Local News, Breaking News, Live News, Kuthuparamba News",
     image = "https://www.gramika.in/gramika.png",
     url = "https://www.gramika.in",
-    type = "website"
+    type = "website",
+    articleData
 }: MetaProps) => {
     return (
         <Head>
@@ -37,8 +45,21 @@ const Meta = ({
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords} />
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-            <meta name="robots" content="index, follow" />
+            <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
             <meta name="language" content="Malayalam" />
+
+            {type === 'article' && articleData?.publishedTime && (
+                <meta property="article:published_time" content={articleData.publishedTime} />
+            )}
+            {type === 'article' && articleData?.author && (
+                <meta property="article:author" content={articleData.author} />
+            )}
+            {type === 'article' && articleData?.section && (
+                <meta property="article:section" content={articleData.section} />
+            )}
+            {type === 'article' && articleData?.tags && articleData.tags.map(tag => (
+                <meta key={tag} property="article:tag" content={tag} />
+            ))}
 
             {/* Canonical */}
             <link rel="canonical" href={url} />
@@ -102,6 +123,58 @@ const Meta = ({
                                 "email": "newsgramika@gmail.com"
                             },
                             "publishingPrinciples": "https://www.gramika.in/about"
+                        },
+                        ...(type === 'article' ? [{
+                            "@context": "https://schema.org",
+                            "@type": "NewsArticle",
+                            "mainEntityOfPage": {
+                                "@type": "WebPage",
+                                "@id": url
+                            },
+                            "headline": title,
+                            "description": description,
+                            "image": [image],
+                            "datePublished": articleData?.publishedTime,
+                            "dateModified": articleData?.modifiedTime || articleData?.publishedTime,
+                            "author": {
+                                "@type": "Person",
+                                "name": articleData?.author || "Gramika Team",
+                                "url": "https://www.gramika.in"
+                            },
+                            "publisher": {
+                                "@type": "Organization",
+                                "name": "Gramika News",
+                                "logo": {
+                                    "@type": "ImageObject",
+                                    "url": "https://www.gramika.in/gramika.png"
+                                }
+                            }
+                        }] : []),
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "BreadcrumbList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "name": "Home",
+                                    "item": "https://www.gramika.in"
+                                },
+                                ...(type === 'article' ? [
+                                    {
+                                        "@type": "ListItem",
+                                        "position": 2,
+                                        "name": articleData?.section || "News",
+                                        "item": `https://www.gramika.in/news/${articleData?.section?.toLowerCase() || 'general'}`
+                                    },
+                                    {
+                                        "@type": "ListItem",
+                                        "position": 3,
+                                        "name": title,
+                                        "item": url
+                                    }
+                                ] : [])
+                            ]
                         }
                     ])
                 }}
