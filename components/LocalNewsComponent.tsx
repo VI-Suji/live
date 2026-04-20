@@ -21,7 +21,7 @@ const slugify = (text: string) => {
         .replace(/[^\u0D00-\u0D7F\w\s-]/g, '') // Keep Malayalam, alphanumeric, spaces, hyphens
         .replace(/\s+/g, '-') // Spaces to hyphens
         .replace(/-+/g, '-') // Multiple hyphens to single
-        .substring(0, 60); // Max length
+        .substring(0, 200); // Increased max length for better SEO
 };
 
 const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: LocalNewsItem) => void }) => {

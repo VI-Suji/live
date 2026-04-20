@@ -23,9 +23,10 @@ type SanityPost = {
 
 type Props = {
   post: SanityPost | null;
+  currentSlug: string;
 };
 
-export default function NewsSlugPage({ post }: Props) {
+export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -172,7 +173,7 @@ export default function NewsSlugPage({ post }: Props) {
         description={post.excerpt || post.title}
         keywords={`${post.title}, ${post.category || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
         image={post.seoImage || post.mainImage}
-        url={`${shareUrl}`}
+        url={`https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`}
         type="article"
         articleData={{
           publishedTime: post.publishedAt,
@@ -357,7 +358,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const post = await sanityClient.fetch(query, { slug });
     if (!post) return { notFound: true };
-    return { props: { post } };
+    return { props: { post, currentSlug: slug } };
   } catch (error) {
     console.error("Error fetching post:", error);
     return { notFound: true };
