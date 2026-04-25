@@ -36,14 +36,14 @@ const LiveDateTime: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-6 text-gray-600">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-6 text-emerald-50">
             <div className="flex items-center gap-2">
-                <span className="text-[10px] sm:text-sm font-medium uppercase tracking-wider">{formatDate(currentTime)}</span>
+                <span className="text-[10px] sm:text-sm font-semibold uppercase tracking-wider">{formatDate(currentTime)}</span>
             </div>
-            <div className="hidden sm:block w-px h-4 bg-gray-300"></div>
+            <div className="hidden sm:block w-px h-4 bg-emerald-400/50"></div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse"></div>
-                <span className="text-[10px] sm:text-sm font-bold tabular-nums text-gray-900">{formatTime(currentTime)}</span>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-400 animate-pulse"></div>
+                <span className="text-[10px] sm:text-sm font-bold tabular-nums text-white">{formatTime(currentTime)}</span>
             </div>
         </div>
     );

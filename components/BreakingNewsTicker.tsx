@@ -52,7 +52,7 @@ export default function BreakingNewsTicker() {
     }
 
     return (
-        <div className={`w-full ${isBreaking ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-gradient-to-r from-blue-600 to-blue-700'} text-white overflow-hidden shadow-lg relative z-40 transition-colors duration-500`}>
+        <div className={`w-full ${isBreaking ? 'bg-gradient-to-r from-red-600 to-red-700' : 'bg-blue-600'} text-white overflow-hidden shadow-lg relative z-40 transition-colors duration-500`}>
             <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="flex items-center h-8 sm:h-10">
                     {/* Label */}
@@ -92,7 +92,7 @@ export default function BreakingNewsTicker() {
                                             className={`inline-flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm text-left transition-colors
                                                 ${!item.isBreaking ? 'cursor-pointer hover:text-yellow-200' : 'cursor-default'}`}
                                         >
-                                            <span className={`inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 ${isBreaking ? 'bg-yellow-300' : 'bg-blue-200'} rounded-full`}></span>
+                                            <span className={`inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 ${isBreaking ? 'bg-yellow-300' : 'bg-blue-300'} rounded-full`}></span>
                                             {item.scrollTitle && item.scrollTitle.trim() !== "" ? item.scrollTitle : item.title}
                                         </button>
                                     </React.Fragment>

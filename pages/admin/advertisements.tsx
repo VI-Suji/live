@@ -310,7 +310,10 @@ export default function AdvertisementsAdmin() {
                                                                 body: data,
                                                             });
 
-                                                            if (!res.ok) throw new Error("Upload failed");
+                                                            if (!res.ok) {
+                                                                const errorData = await res.json();
+                                                                throw new Error(errorData.details || errorData.error || "Upload failed");
+                                                            }
 
                                                             const asset = await res.json();
                                                             if (asset._id) {
@@ -327,9 +330,9 @@ export default function AdvertisementsAdmin() {
                                                                 });
                                                                 alert("Video uploaded successfully!");
                                                             }
-                                                        } catch (err) {
+                                                        } catch (err: any) {
                                                             console.error("Upload failed", err);
-                                                            alert("Video upload failed. Check the file size (<100MB).");
+                                                            alert(`Video upload failed: ${err.message}`);
                                                         } finally {
                                                             setIsUploading(false);
                                                             e.target.value = '';

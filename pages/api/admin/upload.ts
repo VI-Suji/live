@@ -25,35 +25,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const form = new IncomingForm({
-        maxFileSize: 100 * 1024 * 1024, // 100MB Limit for large videos
+        maxFileSize: 500 * 1024 * 1024, // Increase to 500MB just in case
         keepExtensions: true,
     });
 
     try {
-        const { files } = await new Promise<{ fields: any; files: any }>((resolve, reject) => {
-            form.parse(req, (err, fields, files) => {
-                if (err) reject(err);
-                resolve({ fields, files });
-            });
-        });
+        console.log('Starting file upload parse...');
+        const [fields, files] = await form.parse(req);
+        
+        console.log('Files received:', Object.keys(files));
 
         // Handle both array and single file cases (formidable v3)
         const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
 
         if (!uploadedFile) {
+            console.error('No file found in the request');
             return res.status(400).json({ error: 'No file uploaded' });
         }
+
+        console.log('Uploading to Sanity:', {
+            filename: uploadedFile.originalFilename,
+            size: uploadedFile.size,
+            mimetype: uploadedFile.mimetype,
+            filepath: uploadedFile.filepath
+        });
 
         const fileStream = fs.createReadStream(uploadedFile.filepath);
         const type = req.query.type === 'file' ? 'file' : 'image';
 
         const asset = await adminSanityClient.assets.upload(type, fileStream, {
             filename: uploadedFile.originalFilename || 'upload',
+            contentType: uploadedFile.mimetype || undefined,
         });
 
+        console.log('Upload successful:', asset._id);
         return res.status(200).json(asset);
-    } catch (error) {
-        console.error('Upload error:', error);
-        return res.status(500).json({ error: 'Upload failed' });
+    } catch (error: any) {
+        console.error('Detailed Upload error:', error);
+        return res.status(500).json({ 
+            error: 'Upload failed', 
+            details: error.message,
+            code: error.code 
+        });
     }
 }

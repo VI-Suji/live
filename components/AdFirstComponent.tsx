@@ -35,25 +35,31 @@ export default function AdOne() {
 
     return (
         <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
-            {ad.video ? (
-                <video
-                    src={ad.video}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                />
-            ) : ad.image ? (
-                <div className="relative w-full h-full">
-                    <Image
-                        src={ad.image}
-                        alt={ad.title}
-                        fill
-                        className="object-cover"
+            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                {ad.video ? (
+                    <video
+                        src={ad.video}
+                        poster={ad.image || ""}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className="w-full h-full object-cover transition-opacity duration-500"
+                        onLoadedData={(e) => (e.currentTarget.style.opacity = "1")}
+                        style={{ opacity: ad.image ? 1 : 0 }}
                     />
-                </div>
-            ) : null}
+                ) : ad.image ? (
+                    <div className="relative w-full h-full">
+                        <Image
+                            src={ad.image}
+                            alt={ad.title}
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+                ) : null}
+            </div>
             {ad.link && (
                 <a
                     href={ad.link}

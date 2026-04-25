@@ -341,7 +341,7 @@ const Header: React.FC = () => {
             {/* Scrollable Content Below Fixed Header */}
             <div className="pt-28 sm:pt-32"> {/* Spacer for fixed header - adjusted for proper spacing */}
                 {/* Live Date & Time */}
-                <div className="bg-white/95 backdrop-blur-md border-b border-gray-200">
+                <div className="bg-emerald-700 shadow-inner">
                     <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1 sm:py-2">
                         <LiveDateTime />
                     </div>

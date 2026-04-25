@@ -34,27 +34,29 @@ export default function BannerAd() {
 
     return (
         <div className="w-full relative rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white">
-            {ad.video ? (
-                <div className="relative w-full aspect-video sm:aspect-[21/9]">
+            <div className="relative w-full aspect-video sm:aspect-[21/9] bg-gray-100 flex items-center justify-center">
+                {ad.video ? (
                     <video
                         src={ad.video}
+                        poster={ad.image || ""}
                         autoPlay
                         loop
                         muted
                         playsInline
-                        className="absolute inset-0 w-full h-full object-cover"
+                        preload="auto"
+                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                        onLoadedData={(e) => (e.currentTarget.style.opacity = "1")}
+                        style={{ opacity: ad.image ? 1 : 0 }}
                     />
-                </div>
-            ) : ad.image ? (
-                <div className="relative w-full aspect-video sm:aspect-[21/9]">
+                ) : ad.image ? (
                     <Image
                         src={ad.image}
                         alt={ad.title}
                         fill
                         className="object-cover"
                     />
-                </div>
-            ) : null}
+                ) : null}
+            </div>
             {ad.link && (
                 <a
                     href={ad.link}
