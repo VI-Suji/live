@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminSanityClient } from '../../../sanity/config';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { del } from '@vercel/blob';
 
 const ALLOWED_EMAIL = 'gramikaweb@gmail.com';
 
@@ -53,6 +54,22 @@ export default async function handler(
 
             case 'DELETE':
                 const { id } = req.query;
+                
+                // 1. Fetch the doc to check for videoUrl
+                const doc = await adminSanityClient.fetch(`*[_id == $id][0]{videoUrl}`, { id });
+                
+                // 2. If it has a Vercel Blob URL, delete it from Vercel
+                if (doc?.videoUrl) {
+                    try {
+                        console.log('Deleting blob from Vercel:', doc.videoUrl);
+                        await del(doc.videoUrl);
+                    } catch (blobError) {
+                        console.error('Failed to delete blob from Vercel:', blobError);
+                        // We continue anyway so the Sanity record is deleted even if blob fails
+                    }
+                }
+
+                // 3. Delete from Sanity
                 await adminSanityClient.delete(id as string);
                 return res.status(200).json({ message: 'Deleted successfully' });
 

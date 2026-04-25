@@ -24,6 +24,7 @@ export default function AdvertisementsAdmin() {
     const [isUploading, setIsUploading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [editingItem, setEditingItem] = useState<Advertisement | null>(null);
+    const [pendingDeleteBlob, setPendingDeleteBlob] = useState<string | null>(null);
 
     const [formData, setFormData] = useState<{
         title: string;
@@ -137,6 +138,13 @@ export default function AdvertisementsAdmin() {
             const savedItem = await res.json();
 
             if (res.ok) {
+                // If there was a pending deletion from a video replacement, clean it up now
+                if (pendingDeleteBlob) {
+                    fetch(`/api/admin/blob-delete?url=${encodeURIComponent(pendingDeleteBlob)}`, { method: 'DELETE' })
+                        .catch(err => console.error("Failed to cleanup old blob:", err));
+                    setPendingDeleteBlob(null);
+                }
+
                 setShowForm(false);
                 setEditingItem(null);
                 setFormData({
@@ -300,6 +308,11 @@ export default function AdvertisementsAdmin() {
 
                                                         setIsUploading(true);
                                                         try {
+                                                            // Queue old blob for deletion if it exists
+                                                            if (formData.videoUrl) {
+                                                                setPendingDeleteBlob(formData.videoUrl);
+                                                            }
+
                                                             // Use Vercel Blob for direct client-side upload (bypasses Vercel payload limits)
                                                             const newBlob = await upload(file.name, file, {
                                                                 access: 'public',
@@ -346,8 +359,7 @@ export default function AdvertisementsAdmin() {
                                             onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-900 focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
                                         >
-                                            <option value="ad-one">Sidebar Top (Ad One)</option>
-                                            <option value="ad-two">Sidebar Middle (Ad Two)</option>
+                                            <option value="ad-one">Sidebar (Ad One)</option>
                                             <option value="banner">Banner</option>
                                         </select>
                                     </div>

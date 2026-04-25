@@ -2,41 +2,45 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function BannerAd() {
-    const [ad, setAd] = useState<any>(null);
+    const [ads, setAds] = useState<any[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
-        console.log('Fetching banner ad...');
-        // Add timestamp to prevent caching
-        fetch(`/api/sanity/advertisement?position=banner`)
-            .then((res) => {
-                console.log('Banner ad response status:', res.status);
-                if (res.status === 404) {
-                    console.log('Banner ad not found (404)');
-                    return null;
-                }
-                return res.json();
-            })
+        fetch(`/api/sanity/advertisement?position=banner&t=${Date.now()}`)
+            .then((res) => res.json())
             .then((data) => {
-                console.log('Banner ad data:', data);
-                // Only set ad if we have valid data (not null and not an error object)
-                if (data && !data.error) {
-                    setAd(data);
+                if (Array.isArray(data) && data.length > 0) {
+                    setAds(data);
                 }
             })
-            .catch((err) => {
-                console.error('Banner ad fetch error:', err);
-            });
+            .catch((err) => console.error('Banner ad fetch error:', err));
     }, []);
 
-    if (!ad || !ad.active) {
-        return null; // Don't show anything if no banner ad is active
-    }
+    useEffect(() => {
+        if (ads.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setIsVisible(false);
+            setTimeout(() => {
+                setCurrentIndex((prev) => (prev + 1) % ads.length);
+                setIsVisible(true);
+            }, 500); // Wait for fade out
+        }, 60000); // 1 minute
+
+        return () => clearInterval(interval);
+    }, [ads]);
+
+    if (ads.length === 0) return null;
+
+    const ad = ads[currentIndex];
 
     return (
-        <div className="w-full relative rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white">
+        <div className={`w-full relative rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="relative w-full aspect-video sm:aspect-[21/9] bg-gray-100 flex items-center justify-center">
                 {(ad.videoUrl || ad.video) ? (
                     <video
+                        key={ad._id} // Key ensures video reloads/plays when ad changes
                         src={ad.videoUrl || ad.video}
                         poster={ad.image || ""}
                         autoPlay
@@ -44,9 +48,7 @@ export default function BannerAd() {
                         muted
                         playsInline
                         preload="auto"
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
-                        onLoadedData={(e) => (e.currentTarget.style.opacity = "1")}
-                        style={{ opacity: ad.image ? 1 : 0 }}
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
                 ) : ad.image ? (
                     <Image

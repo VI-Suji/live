@@ -9,7 +9,6 @@ import BentoGridSection from "../../components/SocialsComponent";
 import HeroComponent from "../../components/HeroComponent";
 import LatestNewsWidget from "../../components/LatestNewsWidget";
 import AdFirstComponent from "../../components/AdFirstComponent";
-import AdSecondComponent from "../../components/AdSecondComponent";
 import { FaCopyright } from "react-icons/fa";
 
 const MainArea: React.FC = () => {
@@ -127,18 +126,7 @@ const MainArea: React.FC = () => {
                         </motion.div>
                     )}
 
-                    {/* Second Ad */}
-                    {siteSettings.advertisementsVisible && (
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.5 }}
-                            className="w-full"
-                        >
-                            <AdSecondComponent />
-                        </motion.div>
-                    )}
+
                 </div>
             </section>
 

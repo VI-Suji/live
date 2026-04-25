@@ -20,7 +20,7 @@ export default async function handler(
 
         const query = `*[_type == "advertisement" && position == $position && (active == true || !defined(active)) && 
       (!defined(startDate) || startDate <= $today) && 
-      (!defined(endDate) || endDate >= $today)][0] {
+      (!defined(endDate) || endDate >= $today)] | order(_createdAt desc) {
       _id,
       title,
       position,
@@ -33,13 +33,9 @@ export default async function handler(
       endDate
     }`;
 
-        const ad = await sanityClient.fetch(query, { position, today });
+        const ads = await sanityClient.fetch(query, { position, today });
 
-        if (!ad) {
-            return res.status(404).json({ error: 'No active advertisement found for this position' });
-        }
-
-        res.status(200).json(ad);
+        res.status(200).json(ads || []);
     } catch (error) {
         console.error('Error fetching advertisement:', error);
         res.status(500).json({ error: 'Failed to fetch advertisement' });

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import AdOne from "./AdFirstComponent";
-import AdTwo from "./AdSecondComponent";
 import BannerAd from "./BannerAdComponent";
 import CategoryNews from "./CategoryNewsComponent";
 import Obituaries from "./ObituariesComponent";
@@ -32,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         </div>
       )}
 
-      {showAds && <AdTwo />}
+
 
 
       {/* Local News Widget - Mobile Only */}
