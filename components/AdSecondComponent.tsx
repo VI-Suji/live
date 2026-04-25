@@ -36,9 +36,9 @@ export default function AdTwo() {
     return (
         <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
             <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                {ad.video ? (
+                {(ad.videoUrl || ad.video) ? (
                     <video
-                        src={ad.video}
+                        src={ad.videoUrl || ad.video}
                         poster={ad.image || ""}
                         autoPlay
                         loop

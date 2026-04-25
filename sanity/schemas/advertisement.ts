@@ -39,6 +39,12 @@ export default {
             },
         },
         {
+            name: 'videoUrl',
+            title: 'Video URL (Vercel Blob)',
+            type: 'string',
+            description: 'Used for large videos uploaded via Vercel Blob to bypass limits.',
+        },
+        {
             name: 'link',
             title: 'Link URL',
             type: 'url',

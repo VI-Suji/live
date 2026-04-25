@@ -27,6 +27,7 @@ export default async function handler(
                         position,
                         "image": image.asset->url,
                         "video": video.asset->url,
+                        videoUrl,
                         link,
                         active,
                         startDate,

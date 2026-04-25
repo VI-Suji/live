@@ -508,7 +508,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    }, [isMobile]);
 
     useEffect(() => {
         if (!latestNewsVisible) {
@@ -590,7 +590,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
             window.removeEventListener('popstate', handleGlobalUrl);
             window.removeEventListener('hashchange', handleGlobalUrl);
         };
-    }, [newsData, itemsPerPage, currentPage, activeTab]);
+    }, [newsData, itemsPerPage, currentPage, activeTab, isMobile]);
 
     useEffect(() => {
         setLoading(true);

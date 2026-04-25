@@ -35,9 +35,9 @@ export default function BannerAd() {
     return (
         <div className="w-full relative rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white">
             <div className="relative w-full aspect-video sm:aspect-[21/9] bg-gray-100 flex items-center justify-center">
-                {ad.video ? (
+                {(ad.videoUrl || ad.video) ? (
                     <video
-                        src={ad.video}
+                        src={ad.videoUrl || ad.video}
                         poster={ad.image || ""}
                         autoPlay
                         loop

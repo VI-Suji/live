@@ -31,11 +31,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         console.log('Starting file upload parse...');
-        const [fields, files] = await form.parse(req);
+        
+        const { fields, files } = await new Promise<{ fields: any, files: any }>((resolve, reject) => {
+            form.parse(req, (err, fields, files) => {
+                if (err) {
+                    console.error('Formidable parse error:', err);
+                    reject(err);
+                    return;
+                }
+                resolve({ fields, files });
+            });
+        });
         
         console.log('Files received:', Object.keys(files));
 
-        // Handle both array and single file cases (formidable v3)
         const uploadedFile = Array.isArray(files.file) ? files.file[0] : files.file;
 
         if (!uploadedFile) {
@@ -62,9 +71,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json(asset);
     } catch (error: any) {
         console.error('Detailed Upload error:', error);
+        // Force JSON response for errors
+        res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({ 
             error: 'Upload failed', 
-            details: error.message,
+            details: error.message || 'Unknown error during upload',
             code: error.code 
         });
     }

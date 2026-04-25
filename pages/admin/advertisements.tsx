@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import AdminAuthGuard from "../../components/AdminAuthGuard";
 import { FaArrowLeft, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { upload } from "@vercel/blob/client";
 
 type Advertisement = {
     _id: string;
@@ -13,6 +14,7 @@ type Advertisement = {
     active: boolean;
     startDate?: string;
     endDate?: string;
+    videoUrl?: string;
 };
 
 export default function AdvertisementsAdmin() {
@@ -32,6 +34,7 @@ export default function AdvertisementsAdmin() {
         endDate: string;
         image?: any;
         video?: any;
+        videoUrl?: string;
     }>({
         title: "",
         position: "ad-one",
@@ -39,6 +42,7 @@ export default function AdvertisementsAdmin() {
         active: true,
         startDate: "",
         endDate: "",
+        videoUrl: "",
     });
 
     useEffect(() => {
@@ -47,18 +51,9 @@ export default function AdvertisementsAdmin() {
 
     const fetchAds = async () => {
         try {
-            // We need a new API endpoint to fetch ALL ads for admin, not just active ones
-            // For now, we'll reuse the existing one but we might need to update it or create a new one
-            // Let's create a specific admin fetch in the component for now using GROQ if needed, 
-            // but better to use the API we created.
-            // The current /api/sanity/advertisement fetches by position.
-            // We should probably update the admin API to fetch all.
-
-            // Let's assume we update the admin API to support GET all
-            const res = await fetch(`/api/admin/advertisements?t=${Date.now()}`); // We need to implement GET in this route
+            const res = await fetch(`/api/admin/advertisements?t=${Date.now()}`);
             if (res.ok) {
                 const data = await res.json();
-                // Normalize active field (undefined = true for legacy items)
                 const normalizedData = data.map((item: any) => ({
                     ...item,
                     active: item.active !== false
@@ -151,6 +146,7 @@ export default function AdvertisementsAdmin() {
                     active: true,
                     startDate: "",
                     endDate: "",
+                    videoUrl: "",
                 });
 
                 // Update local state
@@ -195,6 +191,7 @@ export default function AdvertisementsAdmin() {
                                         active: true,
                                         startDate: "",
                                         endDate: "",
+                                        videoUrl: "",
                                     });
                                 }}
                                 className="flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors flex-shrink-0"
@@ -218,7 +215,7 @@ export default function AdvertisementsAdmin() {
                                         <p className="text-xs text-gray-600 mb-3">Choose either an image or video for this advertisement</p>
 
                                         {/* Preview */}
-                                        {(formData.image || formData.video || (editingItem as any)?.image || (editingItem as any)?.video) && (
+                                        {(formData.image || formData.video || formData.videoUrl || (editingItem as any)?.image || (editingItem as any)?.video || (editingItem as any)?.videoUrl) && (
                                             <div className="mb-4 p-4 bg-gray-50 rounded-xl">
                                                 <p className="text-xs font-bold text-gray-700 mb-2">Current Upload:</p>
                                                 {(formData.image || (editingItem as any)?.image) && (
@@ -231,9 +228,9 @@ export default function AdvertisementsAdmin() {
                                                         <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Image</span>
                                                     </div>
                                                 )}
-                                                {(formData.video || (editingItem as any)?.video) && !formData.image && !(editingItem as any)?.image && (
+                                                {(formData.video || (editingItem as any)?.video || formData.videoUrl || (editingItem as any)?.videoUrl) && !formData.image && !(editingItem as any)?.image && (
                                                     <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-gray-300 bg-gray-900 flex items-center justify-center">
-                                                        <span className="text-white text-sm">Video Uploaded</span>
+                                                        <span className="text-white text-sm">Video Ready</span>
                                                         <span className="absolute top-2 right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">Video</span>
                                                     </div>
                                                 )}
@@ -276,6 +273,7 @@ export default function AdvertisementsAdmin() {
                                                                         previewUrl: asset.url,
                                                                     } as any,
                                                                     video: undefined,
+                                                                    videoUrl: undefined,
                                                                 });
                                                             }
                                                         } catch (err) {
@@ -301,37 +299,22 @@ export default function AdvertisementsAdmin() {
                                                         if (!file) return;
 
                                                         setIsUploading(true);
-                                                        const data = new FormData();
-                                                        data.append("file", file);
-
                                                         try {
-                                                            const res = await fetch("/api/admin/upload?type=file", {
-                                                                method: "POST",
-                                                                body: data,
+                                                            // Use Vercel Blob for direct client-side upload (bypasses Vercel payload limits)
+                                                            const newBlob = await upload(file.name, file, {
+                                                                access: 'public',
+                                                                handleUploadUrl: '/api/admin/blob-upload',
                                                             });
 
-                                                            if (!res.ok) {
-                                                                const errorData = await res.json();
-                                                                throw new Error(errorData.details || errorData.error || "Upload failed");
-                                                            }
-
-                                                            const asset = await res.json();
-                                                            if (asset._id) {
-                                                                setFormData({
-                                                                    ...formData,
-                                                                    video: {
-                                                                        _type: "file",
-                                                                        asset: {
-                                                                            _type: "reference",
-                                                                            _ref: asset._id,
-                                                                        },
-                                                                    } as any,
-                                                                    image: undefined,
-                                                                });
-                                                                alert("Video uploaded successfully!");
-                                                            }
+                                                            setFormData({
+                                                                ...formData,
+                                                                videoUrl: newBlob.url,
+                                                                video: undefined, // Clear traditional Sanity video
+                                                                image: undefined, // Clear image
+                                                            });
+                                                            alert("Video uploaded to Vercel Blob successfully!");
                                                         } catch (err: any) {
-                                                            console.error("Upload failed", err);
+                                                            console.error("Vercel Blob upload failed", err);
                                                             alert(`Video upload failed: ${err.message}`);
                                                         } finally {
                                                             setIsUploading(false);
@@ -443,6 +426,7 @@ export default function AdvertisementsAdmin() {
                                         active: ad.active,
                                         startDate: ad.startDate || "",
                                         endDate: ad.endDate || "",
+                                        videoUrl: ad.videoUrl || "",
                                     });
                                     setShowForm(true);
                                 }}
@@ -482,6 +466,7 @@ export default function AdvertisementsAdmin() {
                                                 active: ad.active,
                                                 startDate: ad.startDate || "",
                                                 endDate: ad.endDate || "",
+                                                videoUrl: ad.videoUrl || "",
                                             });
                                             setShowForm(true);
                                         }}
