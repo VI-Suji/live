@@ -33,7 +33,7 @@ export default function AdminLogin() {
             <div className="max-w-md w-full">
                 {/* Logo/Brand */}
                 <div className="text-center mb-8">
-                    <h1 className="text-5xl font-black text-white mb-2">ഗ്രാമിക</h1>
+                    <h1 className="text-5xl font-black text-white mb-2">GRAMIKA NEWS ONLINE</h1>
                     <p className="text-gray-400 text-lg">Admin Portal</p>
                 </div>
 

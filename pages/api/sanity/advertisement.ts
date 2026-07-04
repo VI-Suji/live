@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { adminSanityClient as sanityClient } from '../../../sanity/config';
 import { setCacheHeaders } from '../../../sanity/cache';
 
 export default async function handler(

@@ -18,7 +18,6 @@ const MainSection: React.FC = () => {
         latestNewsVisible: true,
         topStoriesVisible: true,
     });
-    const [hasActiveBanner, setHasActiveBanner] = useState(false);
     const [hasActiveTopStories, setHasActiveTopStories] = useState(true);
 
     useEffect(() => {
@@ -42,21 +41,7 @@ const MainSection: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        // Check if there is an active banner ad
-        const checkBanner = () => {
-            fetch(`/api/sanity/advertisement?position=banner&t=${Date.now()}`)
-                .then(res => res.json())
-                .then(data => {
-                    setHasActiveBanner(data && data.active && !data.error);
-                })
-                .catch(() => setHasActiveBanner(false));
-        };
 
-        checkBanner();
-        const interval = setInterval(checkBanner, 30000);
-        return () => clearInterval(interval);
-    }, []);
 
     useEffect(() => {
         // Check if there are any active top stories
@@ -110,9 +95,9 @@ const MainSection: React.FC = () => {
                 </div>
             </section>
 
-            {/* Banner Ad Section - Full width, pushes down sidebar content - Desktop Only */}
-            {siteSettings.advertisementsVisible && hasActiveBanner && (
-                <section className="hidden lg:block bg-gradient-to-br from-gray-50 via-white to-blue-50 py-6 sm:py-8">
+            {/* Banner Ad Section - Full width, pushes down sidebar content */}
+            {siteSettings.advertisementsVisible && (
+                <section className="bg-gradient-to-br from-gray-50 via-white to-blue-50 py-6 sm:py-8">
                     <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
                         <BannerAd />
                     </div>

@@ -7,7 +7,7 @@ export default {
             name: 'greeting',
             title: 'Greeting Text',
             type: 'string',
-            initialValue: 'നമസ്കാരം,',
+            initialValue: 'GRAMIKA NEWS ONLINE',
         },
         {
             name: 'tagline',

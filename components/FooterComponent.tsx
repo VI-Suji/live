@@ -29,7 +29,7 @@ const Footer = () => {
                                     className="object-contain"
                                 />
                             </div>
-                            <h2 className="text-3xl font-black tracking-tight">ഗ്രാമിക</h2>
+                            <h2 className="text-3xl font-black tracking-tight">GRAMIKA NEWS ONLINE</h2>
                         </div>
                         {tagline && (
                             <p className="text-gray-400 leading-relaxed text-sm max-w-md">

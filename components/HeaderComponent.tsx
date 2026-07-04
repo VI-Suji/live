@@ -291,11 +291,16 @@ const Header: React.FC = () => {
 
                         {/* Center: Text Only (Logo Removed) - Offset slightly left */}
                         <div
-                            className="absolute left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex flex-col items-center gap-0"
+                            className="absolute left-1/2 sm:left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex flex-col items-center gap-0"
                             onClick={() => scrollToSection("home")}
                         >
-                            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-gray-900 whitespace-nowrap">
-                                ഗ്രാമിക
+                            <h1 className="flex flex-col sm:flex-row items-center sm:gap-2 text-center leading-none sm:whitespace-nowrap select-none">
+                                <span className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-gray-900 uppercase">
+                                    GRAMIKA NEWS
+                                </span>
+                                <span className="text-[10px] sm:text-2xl md:text-3xl font-bold sm:font-black tracking-[0.35em] sm:tracking-tight text-blue-600 uppercase mt-1 sm:mt-0 ml-[0.35em] sm:ml-2">
+                                    ONLINE
+                                </span>
                             </h1>
                             <span className="sr-only">Gramika News</span>
                         </div>

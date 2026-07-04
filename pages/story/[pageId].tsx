@@ -335,7 +335,7 @@ export default function StoryPage({ post, currentSlug }: Props) {
 
       {/* Simple Navigation */}
       <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-40 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative">
           <button
             onClick={() => router.push("/")}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
@@ -344,8 +344,13 @@ export default function StoryPage({ post, currentSlug }: Props) {
             <span className="text-sm font-medium">Back</span>
           </button>
 
-          <span className="text-2xl font-bold text-gray-900 tracking-tight">
-            ഗ്രാമിക
+          <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col sm:flex-row items-center sm:gap-2 text-center leading-none sm:whitespace-nowrap select-none">
+            <span className="text-base sm:text-2xl font-black tracking-tight text-gray-900 uppercase">
+              GRAMIKA NEWS
+            </span>
+            <span className="text-[10px] sm:text-2xl font-bold sm:font-black tracking-[0.35em] sm:tracking-tight text-blue-600 uppercase mt-1 sm:mt-0 ml-[0.35em] sm:ml-2">
+              ONLINE
+            </span>
           </span>
 
           <div className="relative">

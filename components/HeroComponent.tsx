@@ -10,7 +10,7 @@ interface Props {
 
 const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
     const [heroData, setHeroData] = React.useState({
-        greeting: "GRAMIKA NEWS",
+        greeting: "GRAMIKA NEWS ONLINE",
         tagline: "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം."
     });
 
@@ -22,7 +22,7 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
                     const data = await res.json();
                     if (data && !data.error) {
                         setHeroData({
-                            greeting: data.greeting || "ഗ്രാമിക",
+                            greeting: data.greeting || "GRAMIKA NEWS ONLINE",
                             tagline: data.tagline || "ഗ്രാമിക — ഗ്രാമീണതയുടെ ഹൃദയതാളം."
                         });
                     }

@@ -247,7 +247,7 @@ const DashboardContent = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex-shrink-0">
-                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">ഗ്രാമിക</h1>
+                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">GRAMIKA NEWS ONLINE</h1>
                             <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Admin Dashboard</p>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-4">

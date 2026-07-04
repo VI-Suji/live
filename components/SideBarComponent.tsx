@@ -39,12 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
         <LocalNews />
       </div>
 
-      {showAds && (
-        <div className="w-full lg:hidden">
-          <BannerAd />
-        </div>
-      )}
-
       <CategoryNews latestNewsVisible={showNews} />
       <VideoGallery />
       <Obituaries />
