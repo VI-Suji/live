@@ -295,10 +295,10 @@ const Header: React.FC = () => {
                             onClick={() => scrollToSection("home")}
                         >
                             <h1 className="flex flex-col sm:flex-row items-center sm:gap-2 text-center leading-none sm:whitespace-nowrap select-none">
-                                <span className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-gray-900 uppercase">
+                                <span className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
                                     GRAMIKA NEWS
                                 </span>
-                                <span className="text-[10px] sm:text-2xl md:text-3xl font-bold sm:font-black tracking-[0.35em] sm:tracking-tight text-blue-600 uppercase mt-1 sm:mt-0 ml-[0.35em] sm:ml-2">
+                                <span className="text-base sm:text-2xl md:text-3xl font-bold sm:font-black tracking-tight text-black uppercase mt-1 sm:mt-0">
                                     ONLINE
                                 </span>
                             </h1>
