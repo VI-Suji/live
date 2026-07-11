@@ -3,6 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import NewsShareMenu from "./NewsShareMenu";
+import { getNewsSharePath } from "../utils/slugify";
+import { getSiteOrigin } from "../utils/shareMeta";
 
 interface NewsItem {
   _id: string;
@@ -78,6 +81,7 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
   const year = dateObj.getFullYear();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const month = monthNames[dateObj.getMonth()];
+  const shareUrl = `${getSiteOrigin()}${getNewsSharePath(news.heading)}`;
 
   return (
     <motion.div
@@ -90,7 +94,8 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
     >
       <div className="p-4 sm:p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
         <h3 className="font-black text-lg sm:text-xl text-gray-900">Latest News</h3>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <NewsShareMenu shareUrl={shareUrl} size="sm" />
           {isExpandable && (
             <div className={`text-gray-400 transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isExpanded ? 'rotate-180' : ''}`}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

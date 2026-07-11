@@ -8,4 +8,16 @@ export const slugify = (text: string) => {
     .substring(0, 200);
 };
 
-export const getNewsSharePath = (title: string) => `/news/${encodeURIComponent(slugify(title))}`;
+export const decodeSlug = (slug: string) => {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+};
+
+export const getNewsSharePath = (title: string) => `/news/${slugify(title)}`;
+
+export const getStorySharePath = (slug: string) => `/story/${slug}`;
+
+export const getAbsoluteShareUrl = (origin: string, path: string) => `${origin}${path}`;

@@ -1,26 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Head from "next/head";
 import { GetServerSideProps } from "next";
 import { FaArrowLeft, FaShareAlt, FaCalendarAlt, FaUser, FaClock, FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
 import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { sanityClient } from "../../sanity/config";
 import Meta from "../../components/Meta";
+import { findTopStoryByIdentifier, NewsPost } from "../../utils/newsPost";
+import { decodeSlug } from "../../utils/slugify";
+import {
+  buildWhatsAppShareUrl,
+  getNewsCategoryLabel,
+  getOgImageUrl,
+  getPlainTextDescription,
+} from "../../utils/shareMeta";
 
-type SanityPost = {
-  _id: string;
-  title: string;
-  slug: { current: string };
-  author?: string;
-  mainImage?: string;
-  seoImage?: string;
-  excerpt?: string;
-  body: any[];
-  publishedAt?: string;
-  category?: string;
-};
+type SanityPost = NewsPost;
 
 type Props = {
   post: SanityPost | null;
@@ -29,6 +24,14 @@ type Props = {
 
 export default function StoryPage({ post, currentSlug }: Props) {
   const router = useRouter();
+  const shareUrl = `https://www.gramika.in/story/${currentSlug}`;
+  const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
+  const shareDescription = post
+    ? getPlainTextDescription(post.excerpt, post.title)
+    : "Gramika News";
+  const shareImage = post ? getOgImageUrl(post.seoImage || post.mainImage) : undefined;
+  const shareSection = post ? getNewsCategoryLabel(post._type, post.category) : undefined;
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -43,10 +46,10 @@ export default function StoryPage({ post, currentSlug }: Props) {
     }
   }, [post]);
 
-  const [shareUrl, setShareUrl] = useState('');
+  const [shareUrlState, setShareUrlState] = useState(shareUrl);
 
   useEffect(() => {
-    setShareUrl(window.location.href);
+    setShareUrlState(window.location.href);
   }, []);
 
   if (router.isFallback || !post) {
@@ -67,10 +70,10 @@ export default function StoryPage({ post, currentSlug }: Props) {
   };
 
   const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrlState)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrlState)}&text=${encodeURIComponent(post.title)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlState)}`,
+    whatsapp: buildWhatsAppShareUrl(shareUrlState),
   };
 
   const portableTextComponents = {
@@ -170,16 +173,17 @@ export default function StoryPage({ post, currentSlug }: Props) {
   return (
     <div className="min-h-screen bg-white">
       <Meta
-        title={`${post.title} | Gramika News`}
-        description={post.excerpt || post.title}
-        keywords={`${post.title}, ${post.category || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
-        image={post.seoImage || post.mainImage}
-        url={`https://www.gramika.in/story/${encodeURIComponent(currentSlug)}`}
+        title={shareTitle}
+        description={shareDescription}
+        keywords={`${post.title}, ${shareSection || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
+        image={shareImage}
+        imageAlt={post.title}
+        url={shareUrl}
         type="article"
         articleData={{
           publishedTime: post.publishedAt,
           author: post.author || "Gramika Team",
-          section: post.category,
+          section: shareSection,
         }}
       />
 
@@ -441,29 +445,41 @@ export default function StoryPage({ post, currentSlug }: Props) {
 
         {/* Article Content */}
         <div className="prose prose-lg max-w-none">
-          {post.excerpt && (() => {
+          {post.body && Array.isArray(post.body) && post.body.length > 0 ? (
+            <PortableText value={post.body} components={portableTextComponents} />
+          ) : post.excerpt ? (() => {
             try {
-              // If excerpt is a JSON string, parse it
               const content = (typeof post.excerpt === 'string' && (post.excerpt as string).startsWith('{'))
                 ? JSON.parse(post.excerpt as string)
                 : post.excerpt;
 
-              // If it's still a string (HTML), render it
               if (typeof content === 'string') {
-                return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                if (content.includes('<') && content.includes('>')) {
+                  return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                }
+                return (
+                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
+                    {content}
+                  </p>
+                );
               }
 
-              // Otherwise use PortableText
               return <PortableText value={content} components={portableTextComponents} />;
             } catch (e) {
               console.error('Error parsing excerpt:', e);
-              // If parsing fails, treat as HTML string
               if (typeof post.excerpt === 'string') {
-                return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+                if (post.excerpt.includes('<') && post.excerpt.includes('>')) {
+                  return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+                }
+                return (
+                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
+                    {post.excerpt}
+                  </p>
+                );
               }
               return null;
             }
-          })()}
+          })() : null}
         </div>
 
         {/* Share Section */}
@@ -494,28 +510,13 @@ export default function StoryPage({ post, currentSlug }: Props) {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { pageId, slug } = context.params || {};
-  const identifier = pageId || slug;
-  if (!identifier) return { notFound: true };
+  const rawIdentifier = pageId || slug;
+  if (!rawIdentifier || Array.isArray(rawIdentifier)) return { notFound: true };
 
-  // No longer extracting ID from end as IDs were removed for professional look.
-  // We match top stories by their dedicated slug, and local/national by title slug.
-  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (slug.current == $identifier || title match $identifier)][0] {
-    _id, 
-    _type,
-    title, 
-    slug, 
-    author, 
-    "mainImage": coalesce(mainImage.asset->url, image.asset->url),
-    "seoImage": coalesce(mainImage.asset->url, image.asset->url) + "?w=1200&h=630&fit=crop&auto=format&q=80",
-    "excerpt": coalesce(excerpt, description), 
-    body, 
-    publishedAt, 
-    featured, 
-    category
-  }`;
+  const identifier = decodeSlug(rawIdentifier);
 
   try {
-    const post = await sanityClient.fetch(query, { identifier });
+    const post = await findTopStoryByIdentifier(identifier);
     if (!post) return { notFound: true };
     return { props: { post, currentSlug: identifier } };
   } catch (error) {

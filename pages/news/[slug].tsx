@@ -5,9 +5,9 @@ import { GetServerSideProps } from "next";
 import { FaArrowLeft, FaShareAlt, FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
 import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { sanityClient } from "../../sanity/config";
 import Meta from "../../components/Meta";
-import { slugify } from "../../utils/slugify";
+import { findNewsPostByIdentifier, NewsPost } from "../../utils/newsPost";
+import { decodeSlug } from "../../utils/slugify";
 import {
   buildWhatsAppShareUrl,
   getNewsCategoryLabel,
@@ -15,19 +15,7 @@ import {
   getPlainTextDescription,
 } from "../../utils/shareMeta";
 
-type SanityPost = {
-  _id: string;
-  _type?: string;
-  title: string;
-  slug: { current: string };
-  author?: string;
-  mainImage?: string;
-  seoImage?: string;
-  excerpt?: string;
-  body: any[];
-  publishedAt?: string;
-  category?: string;
-};
+type SanityPost = NewsPost;
 
 type Props = {
   post: SanityPost | null;
@@ -36,7 +24,7 @@ type Props = {
 
 export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
-  const shareUrl = `https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`;
+  const shareUrl = `https://www.gramika.in/news/${currentSlug}`;
   const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
   const shareDescription = post
     ? getPlainTextDescription(post.excerpt, post.title)
@@ -378,43 +366,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const rawSlug = context.params?.slug;
   if (!rawSlug || Array.isArray(rawSlug)) return { notFound: true };
 
-  const slug = decodeURIComponent(rawSlug);
-
-  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (!defined(active) || active == true)] {
-    _id, 
-    _type,
-    title, 
-    slug, 
-    author, 
-    "mainImage": coalesce(mainImage.asset->url, image.asset->url),
-    "seoImage": coalesce(mainImage.asset->url, image.asset->url) + "?w=1200&h=630&fit=crop&auto=format&q=80",
-    "excerpt": coalesce(excerpt, description), 
-    body, 
-    publishedAt, 
-    featured, 
-    category
-  }`;
+  const slug = decodeSlug(rawSlug);
 
   try {
-    const posts = await sanityClient.fetch(query);
-    const post = posts.find(
-      (item: SanityPost) => item.slug?.current === slug || slugify(item.title) === slug
-    );
+    const post = await findNewsPostByIdentifier(slug);
     if (!post) return { notFound: true };
-
-    const mainImage = getOgImageUrl(post.mainImage);
-    const seoImage = getOgImageUrl(post.seoImage || post.mainImage);
-
-    return {
-      props: {
-        post: {
-          ...post,
-          mainImage,
-          seoImage,
-        },
-        currentSlug: slug,
-      },
-    };
+    return { props: { post, currentSlug: slug } };
   } catch (error) {
     console.error("Error fetching post:", error);
     return { notFound: true };

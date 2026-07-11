@@ -4,6 +4,9 @@ import React, { useRef, useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight, FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import NewsShareMenu from "./NewsShareMenu";
+import { getStorySharePath } from "../utils/slugify";
+import { getSiteOrigin } from "../utils/shareMeta";
 
 type Post = {
     _id: string;
@@ -166,6 +169,12 @@ export default function TopStories() {
 
                         {/* Content */}
                         <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                            <div className="absolute top-4 right-4 z-20" onClick={(e) => e.stopPropagation()}>
+                                <NewsShareMenu
+                                    shareUrl={`${getSiteOrigin()}${getStorySharePath(post.slug.current)}`}
+                                    size="sm"
+                                />
+                            </div>
                             <div className="transform transition-transform duration-300 translate-y-4 group-hover:translate-y-0">
                                 <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-4">
                                     Featured

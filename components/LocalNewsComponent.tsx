@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { FaChevronLeft, FaChevronRight, FaShareAlt, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { slugify, getNewsSharePath } from "../utils/slugify";
-import { buildWhatsAppShareUrl } from "../utils/shareMeta";
+import { slugify, getNewsSharePath, decodeSlug } from "../utils/slugify";
+import { buildWhatsAppShareUrl, getSiteOrigin } from "../utils/shareMeta";
+import NewsShareMenu from "./NewsShareMenu";
 
 type LocalNewsItem = {
     _id: string;
@@ -76,103 +77,11 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
                         <FaChevronRight size={8} />
                     </div>
 
-                    <ShareButton news={news} />
+                    <NewsShareMenu
+                        shareUrl={`${getSiteOrigin()}${getNewsSharePath(news.title)}`}
+                    />
                 </div>
             </div>
-        </div>
-    );
-};
-
-const ShareButton = ({ news }: { news: LocalNewsItem }) => {
-    const [showShare, setShowShare] = useState(false);
-    const [copied, setCopied] = useState(false);
-
-    const getShareUrl = () => {
-        if (typeof window === 'undefined') return '';
-        return `${window.location.origin}${getNewsSharePath(news.title)}`;
-    };
-
-    const shareLinks = {
-        whatsapp: buildWhatsAppShareUrl(getShareUrl()),
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`,
-        instagram: `https://www.instagram.com/`,
-    };
-
-    const copyToClipboard = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(getShareUrl());
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    const handleShareClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setShowShare(!showShare);
-    };
-
-    const handleLinkClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-    };
-
-    return (
-        <div className="relative">
-            <button
-                onClick={handleShareClick}
-                className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all"
-                aria-label="Share"
-            >
-                <FaShareAlt size={14} />
-            </button>
-
-            <AnimatePresence>
-                {showShare && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        className="absolute right-0 bottom-full mb-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-2 flex gap-2 z-50"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <a
-                            href={shareLinks.whatsapp}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={handleLinkClick}
-                            className="p-2 rounded-lg bg-green-50 hover:bg-green-100 text-green-600 transition-all"
-                            aria-label="Share on WhatsApp"
-                        >
-                            <FaWhatsapp size={16} />
-                        </a>
-                        <a
-                            href={shareLinks.facebook}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={handleLinkClick}
-                            className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all"
-                            aria-label="Share on Facebook"
-                        >
-                            <FaFacebookF size={16} />
-                        </a>
-                        <a
-                            href={shareLinks.instagram}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={handleLinkClick}
-                            className="p-2 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-600 transition-all"
-                            aria-label="Share on Instagram"
-                        >
-                            <FaInstagram size={16} />
-                        </a>
-                        <button
-                            onClick={copyToClipboard}
-                            className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-all"
-                            aria-label="Copy link"
-                        >
-                            {copied ? <FaCheck size={16} className="text-green-600" /> : <FaLink size={16} />}
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </div>
     );
 };
@@ -215,10 +124,7 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
         if (isRightSwipe && onPrev) onPrev();
     };
 
-    const getShareUrl = () => {
-        if (typeof window === 'undefined') return '';
-        return `${window.location.origin}${getNewsSharePath(news.title)}`;
-    };
+    const getShareUrl = () => `${getSiteOrigin()}${getNewsSharePath(news.title)}`;
 
     const shareLinks = {
         whatsapp: buildWhatsAppShareUrl(getShareUrl()),
@@ -594,7 +500,7 @@ const LocalNews = () => {
 
             // Handle new professional path (e.g., /news/title)
             if (path.startsWith('/news/')) {
-                const currentSlug = path.replace('/news/', '');
+                const currentSlug = decodeSlug(path.replace('/news/', ''));
 
                 // 1. Try finding in current newsData
                 const index = newsData.findIndex(item => slugify(item.title) === currentSlug);

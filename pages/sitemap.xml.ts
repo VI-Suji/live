@@ -38,7 +38,7 @@ function generateSiteMap(posts: any[]) {
 
         return `
        <url>
-           <loc>${`${EXTERNAL_DATA_URL}/${path}/${encodeURIComponent(finalSlug)}`}</loc>
+           <loc>${`${EXTERNAL_DATA_URL}/${path}/${finalSlug}`}</loc>
            <lastmod>${publishedAt || new Date().toISOString()}</lastmod>
            <changefreq>weekly</changefreq>
            <priority>0.8</priority>
@@ -56,14 +56,22 @@ function SiteMap() {
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   // We make an API call to gather the URLs for our site
-  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"]] {
-    _type,
-    slug,
-    title,
-    publishedAt
+  const query = `{
+    "standard": *[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"]] {
+      _type,
+      slug,
+      title,
+      publishedAt
+    },
+    "latest": *[_type == "latestNews" && active == true] {
+      _type,
+      "title": heading,
+      "publishedAt": date
+    }
   }`;
 
-  const posts = await sanityClient.fetch(query);
+  const data = await sanityClient.fetch(query);
+  const posts = [...(data.standard || []), ...(data.latest || []).map((item: any) => ({ ...item, _type: 'latestNews' }))];
 
   // We generate the XML sitemap with the posts data
   const sitemap = generateSiteMap(posts);

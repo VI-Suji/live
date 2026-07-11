@@ -72,7 +72,11 @@ export const getNewsCategoryLabel = (type?: string, category?: string) => {
     healthNews: 'Health',
     sportsNews: 'Sports',
     topStory: 'Top Story',
+    latestNews: 'Latest News',
   };
 
   return type ? labels[type] || 'News' : 'News';
 };
+
+export const getSiteOrigin = () =>
+  typeof window !== 'undefined' ? window.location.origin : 'https://www.gramika.in';
