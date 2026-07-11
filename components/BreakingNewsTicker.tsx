@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaBolt, FaNewspaper } from "react-icons/fa";
+import { getNewsSharePath } from "../utils/slugify";
 
 type NewsItem = {
     _id: string;
@@ -78,15 +79,7 @@ export default function BreakingNewsTicker() {
                                             onClick={() => {
                                                 if (item.isBreaking) return;
 
-                                                const slug = (item.title || "")
-                                                    .toLowerCase()
-                                                    .trim()
-                                                    .replace(/[^\u0D00-\u0D7F\w\s-]/g, '')
-                                                    .replace(/\s+/g, '-')
-                                                    .replace(/-+/g, '-')
-                                                    .substring(0, 60);
-
-                                                window.history.pushState(null, '', `/news/${slug}`);
+                                                window.history.pushState(null, '', getNewsSharePath(item.title));
                                                 window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
                                             }}
                                             className={`inline-flex items-center gap-1.5 sm:gap-2 font-semibold text-xs sm:text-sm text-left transition-colors

@@ -7,6 +7,7 @@ import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { sanityClient } from "../../sanity/config";
 import Meta from "../../components/Meta";
+import { slugify } from "../../utils/slugify";
 
 type SanityPost = {
   _id: string;
@@ -288,25 +289,41 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
         </h1>
 
         <div className="prose prose-lg max-w-none">
-          {post.excerpt && (() => {
+          {post.body && Array.isArray(post.body) && post.body.length > 0 ? (
+            <PortableText value={post.body} components={portableTextComponents} />
+          ) : post.excerpt ? (() => {
             try {
               const content = (typeof post.excerpt === 'string' && (post.excerpt as string).startsWith('{'))
                 ? JSON.parse(post.excerpt as string)
                 : post.excerpt;
 
               if (typeof content === 'string') {
-                return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                if (content.includes('<') && content.includes('>')) {
+                  return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                }
+                return (
+                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
+                    {content}
+                  </p>
+                );
               }
 
               return <PortableText value={content} components={portableTextComponents} />;
             } catch (e) {
               console.error('Error parsing excerpt:', e);
               if (typeof post.excerpt === 'string') {
-                return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+                if (post.excerpt.includes('<') && post.excerpt.includes('>')) {
+                  return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+                }
+                return (
+                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
+                    {post.excerpt}
+                  </p>
+                );
               }
               return null;
             }
-          })()}
+          })() : null}
         </div>
 
         <div className="mt-16 pt-10 border-t-2 border-gray-900">
@@ -342,10 +359,12 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { slug } = context.params || {};
-  if (!slug) return { notFound: true };
+  const rawSlug = context.params?.slug;
+  if (!rawSlug || Array.isArray(rawSlug)) return { notFound: true };
 
-  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (slug.current == $slug || title match $slug)][0] {
+  const slug = decodeURIComponent(rawSlug);
+
+  const query = `*[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (!defined(active) || active == true)] {
     _id, 
     _type,
     title, 
@@ -361,7 +380,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }`;
 
   try {
-    const post = await sanityClient.fetch(query, { slug });
+    const posts = await sanityClient.fetch(query);
+    const post = posts.find(
+      (item: SanityPost) => item.slug?.current === slug || slugify(item.title) === slug
+    );
     if (!post) return { notFound: true };
     return { props: { post, currentSlug: slug } };
   } catch (error) {

@@ -2,16 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight, FaShareAlt, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-
-const slugify = (text: string) => {
-    return text
-        .toLowerCase()
-        .trim()
-        .replace(/[^\u0D00-\u0D7F\w\s-]/g, '') // Keep Malayalam, alphanumeric, spaces, hyphens
-        .replace(/\s+/g, '-') // Spaces to hyphens
-        .replace(/-+/g, '-') // Multiple hyphens to single
-        .substring(0, 200); // Increased max length for better SEO
-};
+import { slugify, getNewsSharePath } from "../utils/slugify";
 
 interface CategoryNewsItemData {
     _id: string;
@@ -76,8 +67,7 @@ const CategoryShareButton = ({ news }: { news: CategoryNewsItemData }) => {
 
     const getShareUrl = () => {
         if (typeof window === 'undefined') return '';
-        const slug = slugify(news.title);
-        return `${window.location.origin}/news/${slug}`;
+        return `${window.location.origin}${getNewsSharePath(news.title)}`;
     };
 
     const shareLinks = {
@@ -205,8 +195,7 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: CategoryNewsItemDa
 
     const getShareUrl = () => {
         if (typeof window === 'undefined') return '';
-        const slug = slugify(news.title);
-        return `${window.location.origin}/news/${slug}`;
+        return `${window.location.origin}${getNewsSharePath(news.title)}`;
     };
 
     const shareLinks = {
@@ -687,8 +676,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
                                     key={news._id}
                                     news={news}
                                     onOpen={(item) => {
-                                        const slug = slugify(item.title);
-                                        window.history.pushState(null, '', `/news/${slug}`);
+                                        window.history.pushState(null, '', getNewsSharePath(item.title));
                                         setSelectedNews(item);
                                     }}
                                 />
@@ -708,8 +696,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
                                     const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                     if (idx !== -1 && idx < newsData.length - 1) {
                                         const nextItem = newsData[idx + 1];
-                                        const slug = slugify(nextItem.title);
-                                        window.history.pushState(null, '', `/news/${slug}`);
+                                        window.history.pushState(null, '', getNewsSharePath(nextItem.title));
                                         setSelectedNews(nextItem);
                                     }
                                 }}
@@ -717,8 +704,7 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
                                     const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                     if (idx > 0) {
                                         const prevItem = newsData[idx - 1];
-                                        const slug = slugify(prevItem.title);
-                                        window.history.pushState(null, '', `/news/${slug}`);
+                                        window.history.pushState(null, '', getNewsSharePath(prevItem.title));
                                         setSelectedNews(prevItem);
                                     }
                                 }}

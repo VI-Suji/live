@@ -1,5 +1,6 @@
 import { GetServerSideProps } from 'next';
 import { sanityClient } from '../sanity/config';
+import { slugify } from '../utils/slugify';
 
 const EXTERNAL_DATA_URL = 'https://www.gramika.in';
 
@@ -31,16 +32,6 @@ function generateSiteMap(posts: any[]) {
      <!--Dynamic Story Pages-->
      ${posts
       .map(({ _type, slug, title, publishedAt }) => {
-        const slugify = (text: string) => {
-          return text
-            .toLowerCase()
-            .trim()
-            .replace(/[^\u0D00-\u0D7F\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .substring(0, 200);
-        };
-
         const path = _type === 'topStory' ? 'story' : 'news';
         const finalSlug = (slug && slug.current) || slugify(title || '');
         if (!finalSlug) return '';

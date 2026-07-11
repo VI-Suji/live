@@ -26,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
 
       {/* Latest News Widget */}
       {showNews && (
-        <div className="w-full sticky top-12 z-30">
+        <div className="w-full lg:sticky lg:top-24 lg:z-30">
           <LatestNewsComponent />
         </div>
       )}

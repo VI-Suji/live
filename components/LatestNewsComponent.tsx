@@ -88,8 +88,8 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
       className={`w-full bg-white rounded-[2.5rem] shadow-2xl shadow-blue-100/20 border border-gray-100 overflow-hidden z-30 transition-shadow duration-300 ${isExpandable ? 'cursor-pointer hover:shadow-3xl hover:shadow-blue-900/5' : ''}`}
       onClick={toggleExpand}
     >
-      <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
-        <h3 className="font-black text-xl text-gray-900">Latest News</h3>
+      <div className="p-4 sm:p-6 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
+        <h3 className="font-black text-lg sm:text-xl text-gray-900">Latest News</h3>
         <div className="flex items-center gap-4">
           {isExpandable && (
             <div className={`text-gray-400 transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isExpanded ? 'rotate-180' : ''}`}>
@@ -105,9 +105,9 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
         </div>
       </div>
 
-      <div className="p-6 flex flex-col gap-6">
+      <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
         {news.image && (
-          <div className="w-full relative h-48 rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+          <div className="w-full relative h-40 sm:h-48 rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
             <Image
               src={news.image}
               alt={news.heading}
@@ -125,7 +125,7 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
             <span className="text-xs font-bold uppercase">{month}</span>
           </div>
 
-          <div className="flex-1 w-full mb-4">
+          <div className="flex-1 w-full mb-2 sm:mb-4">
             <div className="md:hidden inline-block bg-blue-50/50 rounded-lg px-3 py-1 text-blue-600 font-bold text-xs uppercase tracking-wide mb-2">
               {day} {month} {year}
             </div>
@@ -214,7 +214,7 @@ const LatestNewsComponent: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4 w-full relative">
-      <div className="relative overflow-hidden min-h-[400px]">
+      <div className={`relative overflow-hidden transition-all duration-300 ${newsToDisplay.image ? 'min-h-[305px] sm:min-h-[385px] lg:min-h-[400px]' : 'min-h-[140px] sm:min-h-[190px] lg:min-h-[220px]'}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={newsToDisplay._id}

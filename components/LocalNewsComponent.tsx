@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight, FaShareAlt, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { slugify, getNewsSharePath } from "../utils/slugify";
 
 type LocalNewsItem = {
     _id: string;
@@ -12,16 +13,6 @@ type LocalNewsItem = {
     description?: string;
     author?: string;
     publishedAt: string;
-};
-
-const slugify = (text: string) => {
-    return text
-        .toLowerCase()
-        .trim()
-        .replace(/[^\u0D00-\u0D7F\w\s-]/g, '') // Keep Malayalam, alphanumeric, spaces, hyphens
-        .replace(/\s+/g, '-') // Spaces to hyphens
-        .replace(/-+/g, '-') // Multiple hyphens to single
-        .substring(0, 200); // Increased max length for better SEO
 };
 
 const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: LocalNewsItem) => void }) => {
@@ -97,8 +88,7 @@ const ShareButton = ({ news }: { news: LocalNewsItem }) => {
 
     const getShareUrl = () => {
         if (typeof window === 'undefined') return '';
-        const slug = slugify(news.title);
-        return `${window.location.origin}/news/${slug}`;
+        return `${window.location.origin}${getNewsSharePath(news.title)}`;
     };
 
     const shareLinks = {
@@ -226,8 +216,7 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
 
     const getShareUrl = () => {
         if (typeof window === 'undefined') return '';
-        const slug = slugify(news.title);
-        return `${window.location.origin}/news/${slug}`;
+        return `${window.location.origin}${getNewsSharePath(news.title)}`;
     };
 
     const shareLinks = {
@@ -723,7 +712,7 @@ const LocalNews = () => {
     );
 
     return (
-        <div id="local-news" className="w-full mt-8 sm:mt-2">
+        <div id="local-news" className="w-full mt-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
@@ -783,8 +772,7 @@ const LocalNews = () => {
                                         key={news._id}
                                         news={news}
                                         onOpen={(item) => {
-                                            const slug = slugify(item.title);
-                                            window.history.pushState(null, '', `/news/${slug}`);
+                                            window.history.pushState(null, '', getNewsSharePath(item.title));
                                             setSelectedNews(item);
                                         }}
                                     />
@@ -803,8 +791,7 @@ const LocalNews = () => {
                                             const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                             if (idx !== -1 && idx < newsData.length - 1) {
                                                 const nextItem = newsData[idx + 1];
-                                                const slug = slugify(nextItem.title);
-                                                window.history.pushState(null, '', `/news/${slug}`);
+                                                window.history.pushState(null, '', getNewsSharePath(nextItem.title));
                                                 setSelectedNews(nextItem);
                                             }
                                         }}
@@ -812,8 +799,7 @@ const LocalNews = () => {
                                             const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                             if (idx > 0) {
                                                 const prevItem = newsData[idx - 1];
-                                                const slug = slugify(prevItem.title);
-                                                window.history.pushState(null, '', `/news/${slug}`);
+                                                window.history.pushState(null, '', getNewsSharePath(prevItem.title));
                                                 setSelectedNews(prevItem);
                                             }
                                         }}
