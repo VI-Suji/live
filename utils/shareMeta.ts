@@ -1,5 +1,11 @@
-const DEFAULT_OG_IMAGE = 'https://www.gramika.in/gramika.png';
 const SITE_ORIGIN = 'https://www.gramika.in';
+
+const getOptimizedSiteImageUrl = (path: string) => {
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${SITE_ORIGIN}/_next/image?url=${encodeURIComponent(normalized)}&w=1200&h=630&fit=cover&q=80`;
+};
+
+const DEFAULT_OG_IMAGE = getOptimizedSiteImageUrl('/gramika.png');
 
 export const getOgImageType = (imageUrl: string) => {
   const lower = imageUrl.toLowerCase();
@@ -15,6 +21,9 @@ export const getOgImageUrl = (image?: string | null) => {
   }
 
   if (image.startsWith('http')) {
+    if (image.includes('gramika.in') && image.includes('/gramika.png')) {
+      return DEFAULT_OG_IMAGE;
+    }
     if (image.includes('cdn.sanity.io') && !image.includes('w=')) {
       const separator = image.includes('?') ? '&' : '?';
       return `${image}${separator}w=1200&h=630&fit=crop&auto=format&q=80`;
@@ -22,7 +31,7 @@ export const getOgImageUrl = (image?: string | null) => {
     return image;
   }
 
-  return `${SITE_ORIGIN}${image.startsWith('/') ? image : `/${image}`}`;
+  return getOptimizedSiteImageUrl(image);
 };
 
 export const getPlainTextDescription = (
