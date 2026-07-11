@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
-import { slugify, getNewsSharePath, decodeSlug, isNewsModalUrl, navigateBackFromNewsModal } from "../utils/slugify";
-import { getSiteOrigin } from "../utils/shareMeta";
+import { motion } from "framer-motion";
+import { useRouter } from "next/router";
+import { getNewsSharePath } from "../utils/slugify";
+import { getCanonicalNewsShareUrl } from "../utils/shareMeta";
 import NewsShareMenu from "./NewsShareMenu";
-import NewsReportModal from "./NewsReportModal";
 import SectionHeader from "./SectionHeader";
 
 interface CategoryNewsItemData {
@@ -59,7 +59,7 @@ const CategoryNewsItem = ({ news, onOpen }: { news: CategoryNewsItemData, onOpen
                     </div>
 
                     <NewsShareMenu
-                        shareUrl={`${getSiteOrigin()}${getNewsSharePath(news.title)}`}
+                        shareUrl={getCanonicalNewsShareUrl(news.title)}
                         size="sm"
                     />
                 </div>
@@ -70,13 +70,17 @@ const CategoryNewsItem = ({ news, onOpen }: { news: CategoryNewsItemData, onOpen
 
 
 const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible?: boolean }) => {
+    const router = useRouter();
     const [newsData, setNewsData] = useState<CategoryNewsItemData[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [activeTab, setActiveTab] = useState<'entertainmentNews' | 'healthNews' | 'sportsNews'>('entertainmentNews');
-    const [selectedNews, setSelectedNews] = useState<CategoryNewsItemData | null>(null);
     const [itemsPerPage, setItemsPerPage] = useState(2);
     const [isMobile, setIsMobile] = useState(false);
+
+    const openArticle = (item: CategoryNewsItemData) => {
+        void router.push(getNewsSharePath(item.title));
+    };
 
     useEffect(() => {
         const checkMobile = () => {
@@ -107,82 +111,13 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
     }, [latestNewsVisible]);
 
     useEffect(() => {
-        const handleGlobalUrl = async () => {
-            let path = window.location.pathname;
-            let hash = window.location.hash;
-            try {
-                path = decodeURIComponent(window.location.pathname);
-                hash = decodeURIComponent(window.location.hash);
-            } catch (e) {
-                console.warn("Failed to decode URL path/hash", e);
-            }
-
-            if (path.startsWith('/news/')) {
-                const currentSlug = decodeSlug(path.replace('/news/', ''));
-                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
-
-                if (index !== -1) {
-                    const page = Math.floor(index / (isMobile ? 2 : itemsPerPage)) + 1;
-                    if (page !== currentPage) {
-                        setCurrentPage(page);
-                    }
-                    setSelectedNews(newsData[index]);
-                    return;
-                }
-
-                if (newsData.length > 0) {
-                    const tabs: ('entertainmentNews' | 'healthNews' | 'sportsNews')[] = ['entertainmentNews', 'healthNews', 'sportsNews'];
-                    for (const tab of tabs) {
-                        if (tab === activeTab) continue;
-                        try {
-                            const res = await fetch(`/api/sanity/categoryNews?type=${tab}`);
-                            const data = await res.json();
-                            const storyIndex = data.findIndex((item: any) => slugify(item.title) === currentSlug);
-                            if (storyIndex !== -1) {
-                                setActiveTab(tab);
-                                setSelectedNews(data[storyIndex]);
-                                return;
-                            }
-                        } catch (e) { }
-                    }
-                }
-                return;
-            }
-
-            // Legacy hash support
-            if (hash.startsWith('#news/')) {
-                const currentSlug = decodeSlug(hash.replace('#news/', ''));
-                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
-                if (index !== -1) setSelectedNews(newsData[index]);
-                return;
-            }
-
-            if (!isNewsModalUrl(path, hash)) {
-                setSelectedNews(null);
-            }
-        };
-
-        window.addEventListener('popstate', handleGlobalUrl);
-        window.addEventListener('hashchange', handleGlobalUrl);
-        if (newsData.length > 0) handleGlobalUrl();
-        else if (window.location.pathname.startsWith('/news/')) handleGlobalUrl();
-
-        return () => {
-            window.removeEventListener('popstate', handleGlobalUrl);
-            window.removeEventListener('hashchange', handleGlobalUrl);
-        };
-    }, [newsData, itemsPerPage, currentPage, activeTab, isMobile]);
-
-    useEffect(() => {
         setLoading(true);
         fetch(`/api/sanity/categoryNews?type=${activeTab}`)
             .then((res) => res.json())
             .then((data) => {
                 setNewsData(Array.isArray(data) ? data : []);
                 setLoading(false);
-                if (!window.location.pathname.startsWith('/news/')) {
-                    setCurrentPage(1);
-                }
+                setCurrentPage(1);
             })
             .catch((err) => {
                 console.error(`Error fetching ${activeTab} news:`, err);
@@ -259,89 +194,58 @@ const CategoryNewsComponent = ({ latestNewsVisible = true }: { latestNewsVisible
                                 <CategoryNewsItem
                                     key={news._id}
                                     news={news}
-                                    onOpen={(item) => {
-                                        window.history.pushState(null, '', getNewsSharePath(item.title));
-                                        setSelectedNews(item);
-                                    }}
+                                    onOpen={openArticle}
                                 />
                             ))}
                         </div>
                     )}
 
-                    <AnimatePresence>
-                        {selectedNews && (
-                            <NewsReportModal
-                                news={selectedNews}
-                                onClose={() => {
-                                    setSelectedNews(null);
-                                    navigateBackFromNewsModal();
-                                }}
-                                onNext={() => {
-                                    const idx = newsData.findIndex(n => n._id === selectedNews._id);
-                                    if (idx !== -1 && idx < newsData.length - 1) {
-                                        const nextItem = newsData[idx + 1];
-                                        window.history.replaceState(null, '', getNewsSharePath(nextItem.title));
-                                        setSelectedNews(nextItem);
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 sm:gap-3 mt-10 mb-2 sm:mt-8 sm:mb-0 px-1">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`pagination-btn ${currentPage === 1 ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
+                                aria-label="Previous page"
+                            >
+                                <FaChevronLeft size={12} />
+                                <span className="text-sm font-bold">Prev</span>
+                            </button>
+
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                {(() => {
+                                    const pages: number[] = [];
+                                    pages.push(1);
+                                    if (currentPage !== 1 && currentPage !== totalPages) {
+                                        pages.push(currentPage);
                                     }
-                                }}
-                                onPrev={() => {
-                                    const idx = newsData.findIndex(n => n._id === selectedNews._id);
-                                    if (idx > 0) {
-                                        const prevItem = newsData[idx - 1];
-                                        window.history.replaceState(null, '', getNewsSharePath(prevItem.title));
-                                        setSelectedNews(prevItem);
+                                    if (totalPages > 1) {
+                                        pages.push(totalPages);
                                     }
-                                }}
-                            />
-                        )}
-                    </AnimatePresence>
+                                    return pages.map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => handlePageChange(page)}
+                                            className={`pagination-page ${currentPage === page ? "pagination-page-current" : "pagination-page-default"}`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ));
+                                })()}
+                            </div>
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`pagination-btn ${currentPage === totalPages ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
+                                aria-label="Next page"
+                            >
+                                <span className="text-sm font-bold">Next</span>
+                                <FaChevronRight size={12} />
+                            </button>
+                        </div>
+                    )}
                 </>
-            )}
-
-            {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 sm:gap-3 mt-10 mb-2 sm:mt-8 sm:mb-0 px-1">
-                    <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`pagination-btn ${currentPage === 1 ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
-                        aria-label="Previous page"
-                    >
-                        <FaChevronLeft size={12} />
-                        <span className="text-sm font-bold">Prev</span>
-                    </button>
-
-                    <div className="flex items-center gap-1 sm:gap-2">
-                        {(() => {
-                            const pages: number[] = [];
-                            pages.push(1);
-                            if (currentPage !== 1 && currentPage !== totalPages) {
-                                pages.push(currentPage);
-                            }
-                            if (totalPages > 1) {
-                                pages.push(totalPages);
-                            }
-                            return pages.map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`pagination-page ${currentPage === page ? "pagination-page-current" : "pagination-page-default"}`}
-                                >
-                                    {page}
-                                </button>
-                            ));
-                        })()}
-                    </div>
-
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`pagination-btn ${currentPage === totalPages ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
-                        aria-label="Next page"
-                    >
-                        <span className="text-sm font-bold">Next</span>
-                        <FaChevronRight size={12} />
-                    </button>
-                </div>
             )}
         </div>
     );

@@ -1,4 +1,4 @@
-import { sanityClient } from '../sanity/config';
+import { sanityLiveClient } from '../sanity/config';
 import { slugify, decodeSlug } from './slugify';
 import { getOgImageUrl } from './shareMeta';
 
@@ -17,6 +17,8 @@ export type NewsPost = {
   category?: string;
 };
 
+const OG_IMAGE_PARAMS = "?w=1200&h=630&fit=crop&auto=format&q=80";
+
 const NEWS_POST_FIELDS = `{
   _id,
   _type,
@@ -24,12 +26,22 @@ const NEWS_POST_FIELDS = `{
   slug,
   author,
   "mainImage": coalesce(mainImage.asset->url, image.asset->url),
-  "seoImage": coalesce(mainImage.asset->url, image.asset->url) + "?w=1200&h=630&fit=crop&auto=format&q=80",
+  "seoImage": select(
+    defined(coalesce(mainImage.asset->url, image.asset->url)) => coalesce(mainImage.asset->url, image.asset->url) + "${OG_IMAGE_PARAMS}",
+    null
+  ),
   "excerpt": coalesce(excerpt, description),
   body,
   publishedAt,
   featured,
-  category
+  "category": coalesce(category, select(
+    _type == "localNews" => "Local News",
+    _type == "nationalNews" => "National News",
+    _type == "entertainmentNews" => "Entertainment",
+    _type == "healthNews" => "Health",
+    _type == "sportsNews" => "Sports",
+    "News"
+  ))
 }`;
 
 const LATEST_NEWS_FIELDS = `{
@@ -39,18 +51,18 @@ const LATEST_NEWS_FIELDS = `{
   "publishedAt": date,
   "mainImage": image.asset->url,
   "seoImage": select(
-    defined(image.asset->url) => image.asset->url + "?w=1200&h=630&fit=crop&auto=format&q=80",
+    defined(image.asset->url) => image.asset->url + "${OG_IMAGE_PARAMS}",
     null
   ),
   "category": "Latest News"
 }`;
 
 export const ALL_NEWS_POSTS_QUERY = `{
-  "standard": *[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (!defined(active) || active == true)] ${NEWS_POST_FIELDS},
-  "latest": *[_type == "latestNews" && active == true] ${LATEST_NEWS_FIELDS}
+  "standard": *[_type in ["localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (!defined(active) || active == true) && !(_id in path("drafts.**"))] ${NEWS_POST_FIELDS},
+  "latest": *[_type == "latestNews" && active == true && !(_id in path("drafts.**"))] ${LATEST_NEWS_FIELDS}
 }`;
 
-export const TOP_STORY_POSTS_QUERY = `*[_type == "topStory" && (!defined(active) || active == true)] ${NEWS_POST_FIELDS}`;
+export const TOP_STORY_POSTS_QUERY = `*[_type == "topStory" && (!defined(active) || active == true) && !(_id in path("drafts.**"))] ${NEWS_POST_FIELDS}`;
 
 export const matchPostByIdentifier = (post: NewsPost, identifier: string) => {
   const decoded = decodeSlug(identifier);
@@ -58,11 +70,12 @@ export const matchPostByIdentifier = (post: NewsPost, identifier: string) => {
 };
 
 export const normalizeNewsPost = (post: NewsPost): NewsPost => {
-  const mainImage = getOgImageUrl(post.mainImage);
+  const rawMain = post.mainImage || null;
+  const rawSeo = post.seoImage || rawMain;
   return {
     ...post,
-    mainImage,
-    seoImage: getOgImageUrl(post.seoImage || post.mainImage),
+    mainImage: rawMain ? getOgImageUrl(rawMain) : undefined,
+    seoImage: rawSeo ? getOgImageUrl(rawSeo) : undefined,
   };
 };
 
@@ -72,7 +85,7 @@ const flattenNewsPosts = (data: { standard: NewsPost[]; latest: NewsPost[] }) =>
 ];
 
 export const findNewsPostByIdentifier = async (identifier: string) => {
-  const data = await sanityClient.fetch<{ standard: NewsPost[]; latest: NewsPost[] }>(
+  const data = await sanityLiveClient.fetch<{ standard: NewsPost[]; latest: NewsPost[] }>(
     ALL_NEWS_POSTS_QUERY
   );
   const posts = flattenNewsPosts(data);
@@ -81,7 +94,7 @@ export const findNewsPostByIdentifier = async (identifier: string) => {
 };
 
 export const findTopStoryByIdentifier = async (identifier: string) => {
-  const posts = await sanityClient.fetch<NewsPost[]>(TOP_STORY_POSTS_QUERY);
+  const posts = await sanityLiveClient.fetch<NewsPost[]>(TOP_STORY_POSTS_QUERY);
   const post = posts.find((item) => matchPostByIdentifier(item, identifier));
   return post ? normalizeNewsPost(post) : null;
 };

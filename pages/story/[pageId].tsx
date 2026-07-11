@@ -68,8 +68,9 @@ export default function StoryPage({ post, currentSlug }: Props) {
 
   if (router.isFallback || !post) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)]">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[var(--bg-page)] px-6">
         <div className="w-10 h-10 border-2 border-[var(--border-default)] border-t-[var(--accent)] rounded-full animate-spin" />
+        <p className="text-sm text-[var(--text-secondary)] font-medium">Loading story…</p>
       </div>
     );
   }

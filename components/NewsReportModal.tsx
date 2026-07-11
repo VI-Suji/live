@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaArrowLeft, FaCalendarAlt, FaChevronLeft, FaChevronRight, FaTimes, FaUser } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { getNewsSharePath } from "../utils/slugify";
-import { getSiteOrigin } from "../utils/shareMeta";
+import { getCanonicalNewsShareUrl } from "../utils/shareMeta";
 import NewsShareMenu from "./NewsShareMenu";
 import ThemeToggle from "./ThemeToggle";
 
@@ -25,7 +24,7 @@ type NewsReportModalProps = {
 };
 
 export default function NewsReportModal({ news, onClose, onNext, onPrev }: NewsReportModalProps) {
-    const shareUrl = `${getSiteOrigin()}${getNewsSharePath(news.title)}`;
+    const shareUrl = getCanonicalNewsShareUrl(news.title);
 
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);

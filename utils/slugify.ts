@@ -16,7 +16,7 @@ export const decodeSlug = (slug: string) => {
   }
 };
 
-export const getNewsSharePath = (title: string) => `/news/${slugify(title)}`;
+export const getNewsSharePath = (title: string) => `/news/${encodeURIComponent(slugify(title))}`;
 
 export const getStorySharePath = (slug: string) => `/story/${slug}`;
 
@@ -44,20 +44,10 @@ function isHomePage(pathname = typeof window !== "undefined" ? window.location.p
   return pathname === "/" || pathname === "";
 }
 
-/** Open local/category news modal on home; navigate to home first from other pages. */
+/** Navigate to the full article page (new UI). */
 export function openNewsReport(title: string) {
   if (typeof window === "undefined") return;
-
-  const path = getNewsSharePath(title);
-
-  if (isHomePage()) {
-    window.history.pushState(null, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
-    return;
-  }
-
-  const slug = slugify(title);
-  window.location.href = `/#news/${encodeURIComponent(slug)}`;
+  window.location.assign(getNewsSharePath(title));
 }
 
 /** Navigate to a home-page section from another page. */

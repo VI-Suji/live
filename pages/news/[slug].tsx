@@ -24,7 +24,7 @@ type Props = {
 
 export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
-  const shareUrl = `https://www.gramika.in/news/${currentSlug}`;
+  const shareUrl = `https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`;
   const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
   const shareDescription = post
     ? getPlainTextDescription(post.excerpt, post.title)

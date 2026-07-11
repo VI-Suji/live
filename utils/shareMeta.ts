@@ -1,3 +1,5 @@
+import { getNewsSharePath, getStorySharePath } from './slugify';
+
 const SITE_ORIGIN = 'https://www.gramika.in';
 
 const getOptimizedSiteImageUrl = (path: string) => {
@@ -71,6 +73,14 @@ export const getPlainTextDescription = (
 export const buildWhatsAppShareUrl = (shareUrl: string) =>
   `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
 
+/** Canonical production URL for /news/ shares (WhatsApp crawlers need this). */
+export const getCanonicalNewsShareUrl = (title: string) =>
+  `${SITE_ORIGIN}${getNewsSharePath(title)}`;
+
+/** Canonical production URL for /story/ feature shares. */
+export const getCanonicalStoryShareUrl = (slug: string) =>
+  `${SITE_ORIGIN}${getStorySharePath(slug)}`;
+
 export const getNewsCategoryLabel = (type?: string, category?: string) => {
   if (category) return category;
 
@@ -88,4 +98,4 @@ export const getNewsCategoryLabel = (type?: string, category?: string) => {
 };
 
 export const getSiteOrigin = () =>
-  typeof window !== 'undefined' ? window.location.origin : 'https://www.gramika.in';
+  typeof window !== 'undefined' ? window.location.origin : SITE_ORIGIN;

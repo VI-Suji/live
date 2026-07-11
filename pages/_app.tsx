@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { Noto_Sans_Malayalam, Inter } from "next/font/google";
+import LegacyShareRedirect from "@/components/LegacyShareRedirect";
 
 const notoSansMalayalam = Noto_Sans_Malayalam({
   weight: ["400", "500", "600", "700"],
@@ -20,6 +21,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
   return (
     <SessionProvider session={session}>
       <div className={`${notoSansMalayalam.variable} ${inter.variable} font-sans`}>
+        <LegacyShareRedirect />
         <Component {...pageProps} />
       </div>
     </SessionProvider>

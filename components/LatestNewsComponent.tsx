@@ -4,8 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import NewsShareMenu from "./NewsShareMenu";
-import { getNewsSharePath } from "../utils/slugify";
-import { getSiteOrigin } from "../utils/shareMeta";
+import { getCanonicalNewsShareUrl } from "../utils/shareMeta";
 
 interface NewsItem {
   _id: string;
@@ -61,7 +60,7 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
   const day = dateObj.getDate();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const month = monthNames[dateObj.getMonth()];
-  const shareUrl = `${getSiteOrigin()}${getNewsSharePath(news.heading)}`;
+  const shareUrl = getCanonicalNewsShareUrl(news.heading);
 
   return (
     <motion.div

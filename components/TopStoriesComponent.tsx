@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaChevronLeft, FaChevronRight, FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import NewsShareMenu from "./NewsShareMenu";
-import { getStorySharePath } from "../utils/slugify";
-import { getSiteOrigin } from "../utils/shareMeta";
+import { getCanonicalStoryShareUrl } from "../utils/shareMeta";
 
 const STORIES_PER_PAGE = 3;
 
@@ -30,7 +30,23 @@ export default function TopStories() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [navigatingSlug, setNavigatingSlug] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const clearNavigating = () => setNavigatingSlug(null);
+        router.events.on("routeChangeComplete", clearNavigating);
+        router.events.on("routeChangeError", clearNavigating);
+        return () => {
+            router.events.off("routeChangeComplete", clearNavigating);
+            router.events.off("routeChangeError", clearNavigating);
+        };
+    }, [router]);
 
     React.useEffect(() => {
         fetch(`/api/sanity/topStories`)
@@ -54,7 +70,9 @@ export default function TopStories() {
     }, [posts.length, currentPage, totalPages]);
 
     function handleReadMore(post: Post) {
-        router.push(`/story/${post.slug.current}`);
+        if (navigatingSlug) return;
+        setNavigatingSlug(post.slug.current);
+        void router.push(`/story/${post.slug.current}`);
     }
 
     const handlePageChange = (newPage: number) => {
@@ -91,7 +109,12 @@ export default function TopStories() {
             {loading ? renderLoader() : (
                 <>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
-                        <FeaturedSlot post={featuredPost} pageKey={currentPage} onRead={handleReadMore} />
+                        <FeaturedSlot
+                            post={featuredPost}
+                            pageKey={currentPage}
+                            onRead={handleReadMore}
+                            navigatingSlug={navigatingSlug}
+                        />
 
                         {sidePosts.length > 0 && (
                             <div className={`grid gap-3 lg:gap-4 ${sidePosts.length >= 2 ? "grid-cols-2 lg:grid-cols-1" : "grid-cols-1"}`}>
@@ -102,6 +125,7 @@ export default function TopStories() {
                                         index={i}
                                         pageKey={currentPage}
                                         onRead={handleReadMore}
+                                        navigatingSlug={navigatingSlug}
                                     />
                                 ))}
                             </div>
@@ -148,6 +172,21 @@ export default function TopStories() {
                     )}
                 </>
             )}
+
+            {mounted && navigatingSlug && createPortal(
+                <div
+                    className="fixed inset-0 z-[300] flex flex-col items-center justify-center gap-4 bg-black/75 backdrop-blur-sm px-6"
+                    role="status"
+                    aria-live="polite"
+                    aria-busy="true"
+                >
+                    <div className="w-11 h-11 border-2 border-white/25 border-t-white rounded-full animate-spin" />
+                    <p className="text-sm sm:text-base font-medium text-white text-center">
+                        Loading story…
+                    </p>
+                </div>,
+                document.body
+            )}
         </div>
     );
 }
@@ -156,10 +195,12 @@ function FeaturedSlot({
     post,
     pageKey,
     onRead,
+    navigatingSlug,
 }: {
     post: Post;
     pageKey: number;
     onRead: (p: Post) => void;
+    navigatingSlug: string | null;
 }) {
     return (
         <AnimatePresence mode="wait">
@@ -171,7 +212,13 @@ function FeaturedSlot({
                 transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className="lg:col-span-2"
             >
-                <FeaturedCard post={post} onRead={onRead} size="large" />
+                <FeaturedCard
+                    post={post}
+                    onRead={onRead}
+                    size="large"
+                    isNavigating={navigatingSlug === post.slug.current}
+                    isDisabled={Boolean(navigatingSlug)}
+                />
             </motion.div>
         </AnimatePresence>
     );
@@ -182,11 +229,13 @@ function SideSlot({
     index,
     pageKey,
     onRead,
+    navigatingSlug,
 }: {
     post: Post;
     index: number;
     pageKey: number;
     onRead: (p: Post) => void;
+    navigatingSlug: string | null;
 }) {
     return (
         <AnimatePresence mode="popLayout">
@@ -197,13 +246,31 @@ function SideSlot({
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25, delay: index * 0.05 }}
             >
-                <FeaturedCard post={post} onRead={onRead} size="small" />
+                <FeaturedCard
+                    post={post}
+                    onRead={onRead}
+                    size="small"
+                    isNavigating={navigatingSlug === post.slug.current}
+                    isDisabled={Boolean(navigatingSlug)}
+                />
             </motion.div>
         </AnimatePresence>
     );
 }
 
-function FeaturedCard({ post, onRead, size }: { post: Post; onRead: (p: Post) => void; size: "large" | "small" }) {
+function FeaturedCard({
+    post,
+    onRead,
+    size,
+    isNavigating,
+    isDisabled,
+}: {
+    post: Post;
+    onRead: (p: Post) => void;
+    size: "large" | "small";
+    isNavigating: boolean;
+    isDisabled: boolean;
+}) {
     const heights = {
         large: "h-[300px] sm:h-[360px] lg:h-[500px]",
         small: "h-[180px] lg:h-[238px]",
@@ -211,9 +278,17 @@ function FeaturedCard({ post, onRead, size }: { post: Post; onRead: (p: Post) =>
 
     return (
         <article
-            onClick={() => onRead(post)}
-            className={`group relative ${heights[size]} rounded-2xl overflow-hidden cursor-pointer border border-white/15 active:scale-[0.99] transition-transform`}
+            onClick={() => !isDisabled && onRead(post)}
+            className={`group relative ${heights[size]} rounded-2xl overflow-hidden border border-white/15 transition-transform ${
+                isDisabled ? "cursor-wait" : "cursor-pointer active:scale-[0.99]"
+            } ${isNavigating ? "ring-2 ring-white/40" : ""}`}
+            aria-busy={isNavigating}
         >
+            {isNavigating && (
+                <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/50">
+                    <div className="w-9 h-9 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                </div>
+            )}
             <StoryCardContent post={post} size={size} />
         </article>
     );
@@ -250,7 +325,7 @@ function StoryCardContent({ post, size }: { post: Post; size: "large" | "small" 
             <div className={`absolute inset-0 flex flex-col justify-end ${isLarge ? "p-5 sm:p-8" : "p-4"}`}>
                 <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30" onClick={(e) => e.stopPropagation()}>
                     <NewsShareMenu
-                        shareUrl={`${getSiteOrigin()}${getStorySharePath(post.slug.current)}`}
+                        shareUrl={getCanonicalStoryShareUrl(post.slug.current)}
                         size="sm"
                         variant="on-dark"
                         menuPlacement="below"

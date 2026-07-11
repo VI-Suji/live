@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
-import { slugify, getNewsSharePath, decodeSlug, isNewsModalUrl, navigateBackFromNewsModal } from "../utils/slugify";
-import { getSiteOrigin } from "../utils/shareMeta";
+import { motion } from "framer-motion";
+import { useRouter } from "next/router";
+import { getNewsSharePath } from "../utils/slugify";
+import { getCanonicalNewsShareUrl } from "../utils/shareMeta";
 import NewsShareMenu from "./NewsShareMenu";
-import NewsReportModal from "./NewsReportModal";
 import SectionHeader from "./SectionHeader";
 
 type LocalNewsItem = {
@@ -20,28 +20,11 @@ type LocalNewsItem = {
 };
 
 const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: LocalNewsItem) => void }) => {
-    const [isHighlighted, setIsHighlighted] = useState(false);
-
-    useEffect(() => {
-        const checkHash = () => {
-            if (window.location.hash === `#news-${news._id}`) {
-                setIsHighlighted(true);
-                onOpen(news);
-                setTimeout(() => setIsHighlighted(false), 3000);
-            }
-        };
-
-        checkHash();
-        window.addEventListener('hashchange', checkHash);
-        return () => window.removeEventListener('hashchange', checkHash);
-    }, [news, onOpen]);
-
     return (
         <div
             id={`news-${news._id}`}
             onClick={() => onOpen(news)}
-            className={`group surface-card surface-card-interactive p-3 sm:p-5 items-start relative cursor-pointer flex flex-col sm:flex-row gap-4 sm:gap-5
-                ${isHighlighted ? 'ring-2 ring-[var(--accent)] border-[var(--accent)]' : ''}`}
+            className="group surface-card surface-card-interactive p-3 sm:p-5 items-start relative cursor-pointer flex flex-col sm:flex-row gap-4 sm:gap-5"
         >
             <div className="image-frame relative h-40 sm:h-40 w-full sm:w-44 flex-shrink-0">
                 <Image
@@ -79,7 +62,7 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
                     </div>
 
                     <NewsShareMenu
-                        shareUrl={`${getSiteOrigin()}${getNewsSharePath(news.title)}`}
+                        shareUrl={getCanonicalNewsShareUrl(news.title)}
                     />
                 </div>
             </div>
@@ -89,12 +72,16 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
 
 
 const LocalNews = () => {
+    const router = useRouter();
     const [newsData, setNewsData] = useState<LocalNewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [activeTab, setActiveTab] = useState<'local' | 'national'>('local');
     const [itemsPerPage, setItemsPerPage] = useState(4);
-    const [selectedNews, setSelectedNews] = useState<LocalNewsItem | null>(null);
+
+    const openArticle = (item: LocalNewsItem) => {
+        void router.push(getNewsSharePath(item.title));
+    };
 
     useEffect(() => {
         const calculateItemsPerPage = async () => {
@@ -167,95 +154,6 @@ const LocalNews = () => {
     }, []);
 
     useEffect(() => {
-        const handleGlobalUrl = async () => {
-            let path = window.location.pathname;
-            let hash = window.location.hash;
-            try {
-                path = decodeURIComponent(window.location.pathname);
-                hash = decodeURIComponent(window.location.hash);
-            } catch (e) {
-                console.warn("Failed to decode URL path/hash", e);
-            }
-
-            // Handle new professional path (e.g., /news/title)
-            if (path.startsWith('/news/')) {
-                const currentSlug = decodeSlug(path.replace('/news/', ''));
-
-                // 1. Try finding in current newsData
-                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
-
-                if (index !== -1) {
-                    const page = Math.floor(index / itemsPerPage) + 1;
-                    if (page !== currentPage) {
-                        setCurrentPage(page);
-                    }
-                    setSelectedNews(newsData[index]);
-                    return;
-                }
-
-                // 2. Search other category if needed
-                if (newsData.length > 0) {
-                    const otherTab = activeTab === 'local' ? 'national' : 'local';
-                    const endpoint = otherTab === 'local' ? '/api/sanity/localNews' : '/api/sanity/nationalNews';
-
-                    try {
-                        const res = await fetch(`${endpoint}`);
-                        const otherData = await res.json();
-                        const otherIndex = otherData.findIndex((item: any) => slugify(item.title) === currentSlug);
-
-                        if (otherIndex !== -1) {
-                            setActiveTab(otherTab);
-                            setSelectedNews(otherData[otherIndex]);
-                            return;
-                        }
-                    } catch (e) {
-                        console.error("Error searching other tab for story:", e);
-                    }
-                }
-                return;
-            }
-
-            // Handle legacy slash-hashes (backward compatibility)
-            if (hash.startsWith('#news/')) {
-                const currentSlug = decodeSlug(hash.replace('#news/', ''));
-                const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
-                if (index !== -1) {
-                    setSelectedNews(newsData[index]);
-                }
-                return;
-            }
-
-            // Handle legacy dash-hashes
-            if (hash.startsWith('#news-')) {
-                const id = hash.replace('#news-', '');
-                const index = newsData.findIndex(item => item._id === id);
-                if (index !== -1) {
-                    setSelectedNews(newsData[index]);
-                }
-                return;
-            }
-
-            if (!isNewsModalUrl(path, hash)) {
-                setSelectedNews(null);
-            }
-        };
-
-        window.addEventListener('popstate', handleGlobalUrl);
-        window.addEventListener('hashchange', handleGlobalUrl);
-
-        if (newsData.length > 0) {
-            handleGlobalUrl();
-        } else if (window.location.pathname.startsWith('/news/')) {
-            handleGlobalUrl();
-        }
-
-        return () => {
-            window.removeEventListener('popstate', handleGlobalUrl);
-            window.removeEventListener('hashchange', handleGlobalUrl);
-        };
-    }, [newsData, itemsPerPage, currentPage, activeTab]);
-
-    useEffect(() => {
         setLoading(true);
         const endpoint = activeTab === 'local' ? '/api/sanity/localNews' : '/api/sanity/nationalNews';
 
@@ -264,9 +162,7 @@ const LocalNews = () => {
             .then((data) => {
                 setNewsData(data);
                 setLoading(false);
-                if (!window.location.hash.startsWith('#news-')) {
-                    setCurrentPage(1);
-                }
+                setCurrentPage(1);
             })
             .catch((err) => {
                 console.error(`Error fetching ${activeTab} news:`, err);
@@ -354,41 +250,10 @@ const LocalNews = () => {
                                     <LocalNewsItem
                                         key={news._id}
                                         news={news}
-                                        onOpen={(item) => {
-                                            window.history.pushState(null, '', getNewsSharePath(item.title));
-                                            setSelectedNews(item);
-                                        }}
+                                        onOpen={openArticle}
                                     />
                                 ))}
                             </motion.div>
-
-                            <AnimatePresence>
-                                {selectedNews && (
-                                    <NewsReportModal
-                                        news={selectedNews}
-                                        onClose={() => {
-                                            setSelectedNews(null);
-                                            navigateBackFromNewsModal();
-                                        }}
-                                        onNext={() => {
-                                            const idx = newsData.findIndex(n => n._id === selectedNews._id);
-                                            if (idx !== -1 && idx < newsData.length - 1) {
-                                                const nextItem = newsData[idx + 1];
-                                                window.history.replaceState(null, '', getNewsSharePath(nextItem.title));
-                                                setSelectedNews(nextItem);
-                                            }
-                                        }}
-                                        onPrev={() => {
-                                            const idx = newsData.findIndex(n => n._id === selectedNews._id);
-                                            if (idx > 0) {
-                                                const prevItem = newsData[idx - 1];
-                                                window.history.replaceState(null, '', getNewsSharePath(prevItem.title));
-                                                setSelectedNews(prevItem);
-                                            }
-                                        }}
-                                    />
-                                )}
-                            </AnimatePresence>
 
                             {totalPages > 1 && (
                                 <div className="flex justify-center items-center gap-2 sm:gap-3 mt-10 mb-4 sm:mt-8 sm:mb-0 px-1">
