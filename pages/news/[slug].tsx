@@ -8,9 +8,16 @@ import { motion, useScroll, useSpring } from "framer-motion";
 import { sanityClient } from "../../sanity/config";
 import Meta from "../../components/Meta";
 import { slugify } from "../../utils/slugify";
+import {
+  buildWhatsAppShareUrl,
+  getNewsCategoryLabel,
+  getOgImageUrl,
+  getPlainTextDescription,
+} from "../../utils/shareMeta";
 
 type SanityPost = {
   _id: string;
+  _type?: string;
   title: string;
   slug: { current: string };
   author?: string;
@@ -29,6 +36,14 @@ type Props = {
 
 export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
+  const shareUrl = `https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`;
+  const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
+  const shareDescription = post
+    ? getPlainTextDescription(post.excerpt, post.title)
+    : "Gramika News";
+  const shareImage = post ? getOgImageUrl(post.seoImage || post.mainImage) : undefined;
+  const shareSection = post ? getNewsCategoryLabel(post._type, post.category) : undefined;
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -43,10 +58,10 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
     }
   }, [post]);
 
-  const [shareUrl, setShareUrl] = useState('');
+  const [shareUrlState, setShareUrlState] = useState(shareUrl);
 
   useEffect(() => {
-    setShareUrl(window.location.href);
+    setShareUrlState(window.location.href);
   }, []);
 
   if (router.isFallback || !post) {
@@ -67,10 +82,10 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
   };
 
   const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(post.title)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(post.title + ' ' + shareUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrlState)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrlState)}&text=${encodeURIComponent(post.title)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlState)}`,
+    whatsapp: buildWhatsAppShareUrl(shareUrlState),
   };
 
   const portableTextComponents = {
@@ -170,16 +185,17 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
   return (
     <div className="min-h-screen bg-white">
       <Meta
-        title={`${post.title} | Gramika News`}
-        description={post.excerpt || post.title}
-        keywords={`${post.title}, ${post.category || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
-        image={post.seoImage || post.mainImage}
-        url={`https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`}
+        title={shareTitle}
+        description={shareDescription}
+        keywords={`${post.title}, ${shareSection || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
+        image={shareImage}
+        imageAlt={post.title}
+        url={shareUrl}
         type="article"
         articleData={{
           publishedTime: post.publishedAt,
           author: post.author || "Gramika Team",
-          section: post.category,
+          section: shareSection,
         }}
       />
 
@@ -385,7 +401,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       (item: SanityPost) => item.slug?.current === slug || slugify(item.title) === slug
     );
     if (!post) return { notFound: true };
-    return { props: { post, currentSlug: slug } };
+
+    const mainImage = getOgImageUrl(post.mainImage);
+    const seoImage = getOgImageUrl(post.seoImage || post.mainImage);
+
+    return {
+      props: {
+        post: {
+          ...post,
+          mainImage,
+          seoImage,
+        },
+        currentSlug: slug,
+      },
+    };
   } catch (error) {
     console.error("Error fetching post:", error);
     return { notFound: true };

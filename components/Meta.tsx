@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { getOgImageType, getOgImageUrl, getPlainTextDescription } from '../utils/shareMeta';
 
 interface MetaProps {
     title?: string;
@@ -7,6 +8,7 @@ interface MetaProps {
     image?: string;
     url?: string;
     type?: 'website' | 'article';
+    imageAlt?: string;
     articleData?: {
         publishedTime?: string;
         modifiedTime?: string;
@@ -23,26 +25,33 @@ const Meta = ({
     image = "https://www.gramika.in/gramika.png",
     url = "https://www.gramika.in",
     type = "website",
+    imageAlt,
     articleData
 }: MetaProps) => {
+    const ogImage = getOgImageUrl(image);
+    const ogDescription = getPlainTextDescription(description, title);
+    const ogImageType = getOgImageType(ogImage);
+
     return (
         <Head>
             {/* Essential Meta Tags for WhatsApp & Social Media */}
             <meta property="og:title" content={title} />
-            <meta property="og:description" content={description} />
-            <meta property="og:image" content={image} />
-            <meta property="og:image:secure_url" content={image} />
-            <meta property="og:image:type" content="image/png" />
+            <meta property="og:description" content={ogDescription} />
+            <meta property="og:image" content={ogImage} />
+            <meta property="og:image:secure_url" content={ogImage} />
+            <meta property="og:image:type" content={ogImageType} />
             <meta property="og:image:width" content="1200" />
             <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={imageAlt || title} />
             <meta property="og:url" content={url} />
             <meta property="og:type" content={type} />
             <meta property="og:site_name" content="Gramika News" />
+            <meta property="og:locale" content="ml_IN" />
 
             {/* Primary Meta Tags */}
             <title>{title}</title>
             <meta name="title" content={title} />
-            <meta name="description" content={description} />
+            <meta name="description" content={ogDescription} />
             <meta name="keywords" content={keywords} />
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
             <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -68,8 +77,8 @@ const Meta = ({
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:url" content={url} />
             <meta name="twitter:title" content={title} />
-            <meta name="twitter:description" content={description} />
-            <meta name="twitter:image" content={image} />
+            <meta name="twitter:description" content={ogDescription} />
+            <meta name="twitter:image" content={ogImage} />
 
             {/* Favicon */}
             <link rel="icon" href="/gramika.png" type="image/png" />
@@ -132,8 +141,8 @@ const Meta = ({
                                 "@id": url
                             },
                             "headline": title,
-                            "description": description,
-                            "image": [image],
+                            "description": ogDescription,
+                            "image": [ogImage],
                             "datePublished": articleData?.publishedTime,
                             "dateModified": articleData?.modifiedTime || articleData?.publishedTime,
                             "author": {

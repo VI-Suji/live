@@ -5,6 +5,7 @@ import Image from "next/image";
 import { FaChevronLeft, FaChevronRight, FaShareAlt, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser, FaClock } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { slugify, getNewsSharePath } from "../utils/slugify";
+import { buildWhatsAppShareUrl } from "../utils/shareMeta";
 
 type LocalNewsItem = {
     _id: string;
@@ -92,7 +93,7 @@ const ShareButton = ({ news }: { news: LocalNewsItem }) => {
     };
 
     const shareLinks = {
-        whatsapp: `https://wa.me/?text=${encodeURIComponent(news.title + "\n" + getShareUrl())}`,
+        whatsapp: buildWhatsAppShareUrl(getShareUrl()),
         facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`,
         instagram: `https://www.instagram.com/`,
     };
@@ -220,7 +221,7 @@ const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onC
     };
 
     const shareLinks = {
-        whatsapp: `https://wa.me/?text=${encodeURIComponent(news.title + "\n" + getShareUrl())}`,
+        whatsapp: buildWhatsAppShareUrl(getShareUrl()),
         facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`,
         instagram: `https://www.instagram.com/`,
     };
