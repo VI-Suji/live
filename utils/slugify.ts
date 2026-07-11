@@ -16,7 +16,17 @@ export const decodeSlug = (slug: string) => {
   }
 };
 
-export const getNewsSharePath = (title: string) => `/news/${encodeURIComponent(slugify(title))}`;
+/** Readable Malayalam slug segment (no percent-encoding). */
+export const getNewsSlug = (title: string) => slugify(title);
+
+/** Article page path — used for navigation and WhatsApp crawlers (needs /news/, not #hash). */
+export const getNewsSharePath = (title: string, id?: string) => {
+  const path = `/news/${getNewsSlug(title)}`;
+  return id ? `${path}?id=${encodeURIComponent(id)}` : path;
+};
+
+/** Legacy hash URL — kept for old bookmarks; redirects to the article page in _app. */
+export const getLegacyNewsHashUrl = (title: string) => `/#news/${getNewsSlug(title)}`;
 
 export const getStorySharePath = (slug: string) => `/story/${slug}`;
 
@@ -47,7 +57,17 @@ function isHomePage(pathname = typeof window !== "undefined" ? window.location.p
 /** Navigate to the full article page (new UI). */
 export function openNewsReport(title: string) {
   if (typeof window === "undefined") return;
-  window.location.assign(getNewsSharePath(title));
+
+  const path = getNewsSharePath(title);
+
+  if (isHomePage()) {
+    window.history.pushState(null, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+    return;
+  }
+
+  const slug = getNewsSlug(title);
+  window.location.href = `/#news/${slug}`;
 }
 
 /** Navigate to a home-page section from another page. */

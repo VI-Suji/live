@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(404).json({ error: 'Not found' });
         }
 
-        return res.status(200).json({ path: getNewsSharePath(title) });
+        return res.status(200).json({ path: getNewsSharePath(title, id as string) });
     } catch (error) {
         console.error('resolveNews error:', error);
         return res.status(500).json({ error: 'Failed to resolve news' });

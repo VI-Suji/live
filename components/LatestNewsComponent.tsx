@@ -60,7 +60,7 @@ const NewsItemCard: React.FC<{ news: NewsItem }> = ({ news }) => {
   const day = dateObj.getDate();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const month = monthNames[dateObj.getMonth()];
-  const shareUrl = getCanonicalNewsShareUrl(news.heading);
+  const shareUrl = getCanonicalNewsShareUrl(news.heading, news._id);
 
   return (
     <motion.div

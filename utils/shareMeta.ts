@@ -73,9 +73,13 @@ export const getPlainTextDescription = (
 export const buildWhatsAppShareUrl = (shareUrl: string) =>
   `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
 
-/** Canonical production URL for /news/ shares (WhatsApp crawlers need this). */
-export const getCanonicalNewsShareUrl = (title: string) =>
-  `${SITE_ORIGIN}${getNewsSharePath(title)}`;
+/**
+ * Canonical share URL for WhatsApp / social previews.
+ * Uses readable Malayalam /news/slug (not percent-encoded) plus optional Sanity id
+ * so the correct article (and image) is resolved even when titles slug-collide.
+ */
+export const getCanonicalNewsShareUrl = (title: string, id?: string) =>
+  `${SITE_ORIGIN}${getNewsSharePath(title, id)}`;
 
 /** Canonical production URL for /story/ feature shares. */
 export const getCanonicalStoryShareUrl = (slug: string) =>

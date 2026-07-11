@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 
 /**
- * Redirects legacy shared URLs (hash-based) to the dedicated article pages.
- * Old links like https://www.gramika.in/#news/slug opened the homepage modal.
+ * Opens legacy hash URLs on the homepage modal instead of navigating away.
+ * e.g. /#news/slug → stay on home, push /news/slug and open popup
  */
 export default function LegacyShareRedirect() {
     const router = useRouter();
@@ -21,7 +21,8 @@ export default function LegacyShareRedirect() {
         if (hash.startsWith("#news/")) {
             const slug = decodeURIComponent(hash.slice("#news/".length)).replace(/^\/+/, "");
             if (slug) {
-                window.location.replace(`/news/${encodeURIComponent(slug)}`);
+                window.history.replaceState(null, "", `/news/${slug}`);
+                window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
             }
             return;
         }
@@ -33,7 +34,8 @@ export default function LegacyShareRedirect() {
                 .then((res) => (res.ok ? res.json() : null))
                 .then((data) => {
                     if (data?.path) {
-                        window.location.replace(data.path);
+                        window.history.replaceState(null, "", data.path);
+                        window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
                     }
                 })
                 .catch(() => {});

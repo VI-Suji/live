@@ -7,9 +7,10 @@ import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Meta from "../../components/Meta";
 import { findNewsPostByIdentifier, NewsPost } from "../../utils/newsPost";
-import { decodeSlug } from "../../utils/slugify";
+import { decodeSlug, getNewsSlug } from "../../utils/slugify";
 import {
   buildWhatsAppShareUrl,
+  getCanonicalNewsShareUrl,
   getNewsCategoryLabel,
   getOgImageUrl,
   getPlainTextDescription,
@@ -24,7 +25,7 @@ type Props = {
 
 export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
-  const shareUrl = `https://www.gramika.in/news/${encodeURIComponent(currentSlug)}`;
+  const shareUrl = getCanonicalNewsShareUrl(post?.title || currentSlug, post?._id);
   const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
   const shareDescription = post
     ? getPlainTextDescription(post.excerpt, post.title)
@@ -335,11 +336,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (!rawSlug || Array.isArray(rawSlug)) return { notFound: true };
 
   const slug = decodeSlug(rawSlug);
+  const preferredId =
+    typeof context.query.id === "string" ? context.query.id : undefined;
 
   try {
-    const post = await findNewsPostByIdentifier(slug);
+    const post = await findNewsPostByIdentifier(slug, preferredId);
     if (!post) return { notFound: true };
-    return { props: { post, currentSlug: slug } };
+    return { props: { post, currentSlug: getNewsSlug(post.title) } };
   } catch (error) {
     console.error("Error fetching post:", error);
     return { notFound: true };

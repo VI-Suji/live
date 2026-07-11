@@ -84,13 +84,41 @@ const flattenNewsPosts = (data: { standard: NewsPost[]; latest: NewsPost[] }) =>
   ...(data.latest || []).map((post) => ({ ...post, _type: 'latestNews' })),
 ];
 
-export const findNewsPostByIdentifier = async (identifier: string) => {
+export const findNewsPostById = async (id: string) => {
   const data = await sanityLiveClient.fetch<{ standard: NewsPost[]; latest: NewsPost[] }>(
     ALL_NEWS_POSTS_QUERY
   );
   const posts = flattenNewsPosts(data);
-  const post = posts.find((item) => matchPostByIdentifier(item, identifier));
+  const post = posts.find((item) => item._id === id);
   return post ? normalizeNewsPost(post) : null;
+};
+
+export const findNewsPostByIdentifier = async (identifier: string, preferredId?: string) => {
+  if (preferredId) {
+    const byId = await findNewsPostById(preferredId);
+    if (byId) return byId;
+  }
+
+  const data = await sanityLiveClient.fetch<{ standard: NewsPost[]; latest: NewsPost[] }>(
+    ALL_NEWS_POSTS_QUERY
+  );
+  const posts = flattenNewsPosts(data);
+  const matches = posts.filter((item) => matchPostByIdentifier(item, identifier));
+
+  if (matches.length === 0) return null;
+  if (matches.length === 1) return normalizeNewsPost(matches[0]);
+
+  // When titles slug-collide across sections, prefer the post that has a share image.
+  const sorted = [...matches].sort((a, b) => {
+    const aHasImage = a.mainImage || a.seoImage ? 1 : 0;
+    const bHasImage = b.mainImage || b.seoImage ? 1 : 0;
+    if (bHasImage !== aHasImage) return bHasImage - aHasImage;
+    return (
+      new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime()
+    );
+  });
+
+  return normalizeNewsPost(sorted[0]);
 };
 
 export const findTopStoryByIdentifier = async (identifier: string) => {

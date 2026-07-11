@@ -9,6 +9,7 @@ import NewsShareMenu from "./NewsShareMenu";
 import ThemeToggle from "./ThemeToggle";
 
 export type NewsReportItem = {
+    _id?: string;
     title: string;
     image: string;
     description?: string;
@@ -24,7 +25,7 @@ type NewsReportModalProps = {
 };
 
 export default function NewsReportModal({ news, onClose, onNext, onPrev }: NewsReportModalProps) {
-    const shareUrl = getCanonicalNewsShareUrl(news.title);
+    const shareUrl = getCanonicalNewsShareUrl(news.title, news._id);
 
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
