@@ -34,8 +34,8 @@ export default function AdTwo() {
     }
 
     return (
-        <div className="w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200">
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <div className="w-full relative rounded-3xl shadow-[var(--shadow-md)] overflow-hidden aspect-video border border-[var(--border-default)]">
+            <div className="w-full h-full bg-[var(--bg-muted)] flex items-center justify-center">
                 {(ad.videoUrl || ad.video) ? (
                     <video
                         src={ad.videoUrl || ad.video}

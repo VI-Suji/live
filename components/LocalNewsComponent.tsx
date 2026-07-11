@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { FaChevronLeft, FaChevronRight, FaWhatsapp, FaFacebookF, FaInstagram, FaLink, FaCheck, FaTimes, FaCalendarAlt, FaUser } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { slugify, getNewsSharePath, decodeSlug } from "../utils/slugify";
-import { buildWhatsAppShareUrl, getSiteOrigin } from "../utils/shareMeta";
+import { slugify, getNewsSharePath, decodeSlug, isNewsModalUrl, navigateBackFromNewsModal } from "../utils/slugify";
+import { getSiteOrigin } from "../utils/shareMeta";
 import NewsShareMenu from "./NewsShareMenu";
+import NewsReportModal from "./NewsReportModal";
+import SectionHeader from "./SectionHeader";
 
 type LocalNewsItem = {
     _id: string;
@@ -38,11 +40,10 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
         <div
             id={`news-${news._id}`}
             onClick={() => onOpen(news)}
-            className={`group bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-4 transition-all duration-500 border-2 items-start relative cursor-pointer
-                ${isHighlighted ? 'border-blue-500 shadow-2xl ring-4 ring-blue-100 scale-[1.02]' : 'border-transparent hover:border-gray-100 shadow-sm hover:shadow-xl'} 
-                flex flex-col sm:flex-row gap-4 sm:gap-6`}
+            className={`group surface-card surface-card-interactive p-3 sm:p-5 items-start relative cursor-pointer flex flex-col sm:flex-row gap-4 sm:gap-5
+                ${isHighlighted ? 'ring-2 ring-[var(--accent)] border-[var(--accent)]' : ''}`}
         >
-            <div className="relative h-40 sm:h-40 w-full sm:w-48 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+            <div className="image-frame relative h-40 sm:h-40 w-full sm:w-44 flex-shrink-0">
                 <Image
                     src={news.image || "/gramika.png"}
                     alt={news.title}
@@ -52,27 +53,27 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
             </div>
             <div className="flex-1 px-2 sm:px-0 w-full">
                 <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 leading-tight transition-colors mb-2 sm:mb-3 group-hover:text-blue-600">
+                    <h3 className="text-base sm:text-lg font-medium text-[var(--text-primary)] leading-snug transition-colors mb-2 group-hover:text-[var(--accent)]">
                         {news.title}
                     </h3>
                 </div>
 
                 {news.author && (
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-[family-name:var(--font-display)] font-medium text-[var(--accent)] uppercase tracking-wider bg-[var(--accent-muted)] px-2 py-0.5 rounded-md">
                             {news.author}
                         </span>
                     </div>
                 )}
 
                 {news.description && (
-                    <p className="text-sm sm:text-base text-gray-500 line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
                         {news.description.trim()}
                     </p>
                 )}
 
                 <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-widest transition-all">
+                    <div className="flex items-center gap-2 text-[var(--accent)] font-[family-name:var(--font-display)] font-medium text-xs transition-all">
                         <span>Read Report</span>
                         <FaChevronRight size={8} />
                     </div>
@@ -86,328 +87,6 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
     );
 };
 
-const NewsModal = ({ news, onClose, onNext, onPrev }: { news: LocalNewsItem, onClose: () => void, onNext?: () => void, onPrev?: () => void }) => {
-    const [copied, setCopied] = useState(false);
-
-    // Keyboard navigation
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'ArrowRight' && onNext) onNext();
-            if (e.key === 'ArrowLeft' && onPrev) onPrev();
-            if (e.key === 'Escape') onClose();
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onNext, onPrev, onClose]);
-
-    // Touch Navigation
-    const [touchStart, setTouchStart] = useState<number | null>(null);
-    const [touchEnd, setTouchEnd] = useState<number | null>(null);
-    const minSwipeDistance = 50;
-
-    const onTouchStart = (e: React.TouchEvent) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
-    };
-
-    const onTouchMove = (e: React.TouchEvent) => {
-        setTouchEnd(e.targetTouches[0].clientX);
-    };
-
-    const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-
-        if (isLeftSwipe && onNext) onNext();
-        if (isRightSwipe && onPrev) onPrev();
-    };
-
-    const getShareUrl = () => `${getSiteOrigin()}${getNewsSharePath(news.title)}`;
-
-    const shareLinks = {
-        whatsapp: buildWhatsAppShareUrl(getShareUrl()),
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl())}`,
-        instagram: `https://www.instagram.com/`,
-    };
-
-    const copyToClipboard = () => {
-        navigator.clipboard.writeText(getShareUrl());
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-0 sm:p-4 lg:p-8"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ y: 40, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 40, opacity: 0 }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="bg-white w-full max-w-4xl h-full sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden relative shadow-2xl flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-            >
-                {/* Header Bar */}
-                <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100 bg-white sticky top-0 z-50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-                        <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-blue-600 hidden sm:block">Gramika News</span>
-                        <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-600 sm:hidden">Gramika</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <div className="flex items-center bg-gray-50 rounded-full p-1 mr-2">
-                            <button
-                                onClick={onPrev}
-                                disabled={!onPrev}
-                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${onPrev
-                                    ? "hover:bg-white hover:shadow-sm text-gray-700 hover:text-blue-600"
-                                    : "text-gray-300 cursor-not-allowed"}`}
-                                title="Previous Story (Left Arrow)"
-                            >
-                                <FaChevronLeft size={12} />
-                            </button>
-                            <div className="w-[1px] h-4 bg-gray-200 mx-1" />
-                            <button
-                                onClick={onNext}
-                                disabled={!onNext}
-                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${onNext
-                                    ? "hover:bg-white hover:shadow-sm text-gray-700 hover:text-blue-600"
-                                    : "text-gray-300 cursor-not-allowed"}`}
-                                title="Next Story (Right Arrow)"
-                            >
-                                <FaChevronRight size={12} />
-                            </button>
-                        </div>
-
-                        <button
-                            onClick={onClose}
-                            className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-red-50 hover:text-red-500 rounded-full transition-all"
-                            title="Close (Esc)"
-                        >
-                            <FaTimes size={20} />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="overflow-y-auto flex-1">
-                    <div className="max-w-3xl mx-auto px-6 py-10 sm:px-12">
-                        {/* Article Header */}
-                        <header className="mb-8">
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 leading-[1.1] mb-8 tracking-tight">
-                                {news.title}
-                            </h2>
-
-                            <div className="flex flex-wrap items-center gap-y-4 gap-x-8 pt-8 border-t border-gray-100">
-                                {news.author && (
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-blue-600 border border-gray-100">
-                                            <FaUser size={16} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Reported By</p>
-                                            <p className="text-sm font-black text-gray-900">{news.author}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {news.author && <div className="h-8 w-[1px] bg-gray-100 hidden sm:block" />}
-
-                                <div className="flex flex-col">
-                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-0.5">Published On</p>
-                                    <div className="flex items-center gap-2 text-sm text-gray-900 font-bold">
-                                        <FaCalendarAlt size={12} className="text-gray-400" />
-                                        <span>{new Date(news.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                    </div>
-                                </div>
-
-                                <div className="h-8 w-[1px] bg-gray-100 hidden sm:block" />
-
-                                <div className="flex flex-col">
-                                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Share on Socials</p>
-                                    <div className="flex items-center gap-2">
-                                        <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer"
-                                            className="w-9 h-9 flex items-center justify-center bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-full transition-all shadow-sm" title="Share on WhatsApp">
-                                            <FaWhatsapp size={16} />
-                                        </a>
-                                        <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer"
-                                            className="w-9 h-9 flex items-center justify-center bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2] hover:text-white rounded-full transition-all shadow-sm" title="Share on Facebook">
-                                            <FaFacebookF size={16} />
-                                        </a>
-                                        <a href={shareLinks.instagram} target="_blank" rel="noopener noreferrer"
-                                            className="w-9 h-9 flex items-center justify-center bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white hover:opacity-90 rounded-full transition-all shadow-sm" title="Share on Instagram">
-                                            <FaInstagram size={16} />
-                                        </a>
-
-                                        <div className="w-[1px] h-6 bg-gray-100 mx-1" />
-
-                                        <button onClick={copyToClipboard}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-[10px] uppercase tracking-widest transition-all shadow-sm ${copied ? 'bg-green-600 text-white shadow-green-100' : 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white'}`}>
-                                            {copied ? <FaCheck size={12} /> : <FaLink size={12} />}
-                                            <span>{copied ? 'Link Copied' : 'Copy Link'}</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </header>
-
-                        {/* Article Image */}
-                        <figure className="mb-12 relative rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm">
-                            <div className="aspect-[16/9] relative">
-                                <Image
-                                    src={news.image || "/gramika.png"}
-                                    alt={news.title}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        </figure>
-
-                        {/* Article Content */}
-                        <div className="prose prose-blue max-w-none">
-                            <p className="text-gray-700 text-lg sm:text-xl leading-[1.8] whitespace-pre-line font-medium pb-12">
-                                {(() => {
-                                    if (!news.description) return null;
-                                    const trimmedDesc = news.description.trim();
-                                    const colonIndex = trimmedDesc.indexOf(':');
-                                    if (colonIndex !== -1) {
-                                        const prefix = trimmedDesc.substring(0, colonIndex + 1);
-                                        const rest = trimmedDesc.substring(colonIndex + 1);
-                                        return (
-                                            <>
-                                                <span className="font-black text-gray-950 mr-1">{prefix}</span>
-                                                {rest}
-                                            </>
-                                        );
-                                    }
-                                    return trimmedDesc;
-                                })()}
-                            </p>
-                        </div>
-
-                        {/* Article Footer Navigation & Share */}
-                        <div className="mt-12 pt-8 border-t border-gray-100 pb-16">
-                            <div className="flex flex-col items-center gap-8">
-                                <div className="w-full flex flex-col sm:flex-row items-center gap-6 sm:gap-4">
-                                    {/* Navigation Row - Full width on mobile, separate items on desktop */}
-                                    <div className="w-full flex items-center justify-between sm:contents order-2 sm:order-none">
-                                        {/* Prev Hint */}
-                                        <div className="sm:flex-1">
-                                            <button
-                                                onClick={onPrev}
-                                                disabled={!onPrev}
-                                                className="group flex flex-col items-start gap-1.5 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-left w-fit"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <motion.div
-                                                        animate={{ x: [0, -4, 0] }}
-                                                        transition={{ repeat: Infinity, duration: 2 }}
-                                                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
-                                                    >
-                                                        <FaChevronLeft size={10} />
-                                                    </motion.div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 sm:hidden">Swipe</span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 hidden sm:block whitespace-nowrap">Click Left Arrow</span>
-                                                </div>
-                                                <span className="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-tighter ml-1 sm:ml-0">Previous</span>
-                                            </button>
-                                        </div>
-
-                                        {/* Next Hint (Mobile Only Position) */}
-                                        <div className="sm:hidden">
-                                            <button
-                                                onClick={onNext}
-                                                disabled={!onNext}
-                                                className="group flex flex-col items-end gap-1.5 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-right w-fit"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Swipe</span>
-                                                    <motion.div
-                                                        animate={{ x: [0, 4, 0] }}
-                                                        transition={{ repeat: Infinity, duration: 2 }}
-                                                        className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
-                                                    >
-                                                        <FaChevronRight size={10} />
-                                                    </motion.div>
-                                                </div>
-                                                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tighter mr-1">Next</span>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Share Center - Stacked on mobile, middle on desktop */}
-                                    <div className="w-full sm:w-auto order-1 sm:order-none">
-                                        <div className="flex flex-col items-center gap-3 sm:gap-4 px-6 sm:px-8 py-3 sm:py-4 bg-gray-50/50 rounded-[2rem] border border-gray-100">
-                                            <p className="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-[0.3em]">Share Report</p>
-                                            <div className="flex items-center gap-2 sm:gap-3">
-                                                <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer"
-                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
-                                                    <FaWhatsapp size={18} className="group-hover:scale-110 transition-transform" />
-                                                </a>
-                                                <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer"
-                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#1877F2] hover:bg-[#1877F2] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
-                                                    <FaFacebookF size={18} className="group-hover:scale-110 transition-transform" />
-                                                </a>
-                                                <a href={shareLinks.instagram} target="_blank" rel="noopener noreferrer"
-                                                    className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center bg-white text-[#E4405F] hover:bg-[#E4405F] hover:text-white rounded-xl transition-all shadow-sm border border-gray-100 group">
-                                                    <FaInstagram size={18} className="group-hover:scale-110 transition-transform" />
-                                                </a>
-                                                <button onClick={copyToClipboard}
-                                                    className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl transition-all shadow-sm border group ${copied ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 hover:bg-blue-600 hover:text-white border-gray-100'}`}>
-                                                    {copied ? <FaCheck size={16} /> : <FaLink size={16} className="group-hover:scale-110 transition-transform" />}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Next Hint (Desktop Position) */}
-                                    <div className="hidden sm:flex flex-1 justify-end">
-                                        <button
-                                            onClick={onNext}
-                                            disabled={!onNext}
-                                            className="group flex flex-col items-end gap-2 opacity-60 hover:opacity-100 disabled:opacity-20 transition-all text-right w-fit"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Click Right Arrow</span>
-                                                <motion.div
-                                                    animate={{ x: [0, 4, 0] }}
-                                                    transition={{ repeat: Infinity, duration: 2 }}
-                                                    className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100"
-                                                >
-                                                    <FaChevronRight size={10} />
-                                                </motion.div>
-                                            </div>
-                                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Next Story</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* <div className="flex items-center gap-4 text-gray-200">
-                                    <div className="h-[1px] w-12 bg-gray-100"></div>
-                                    <div className="flex items-center gap-2">
-                                        <kbd className="px-1.5 py-0.5 rounded border border-gray-200 bg-white text-[9px] font-black text-gray-400">ESC</kbd>
-                                        <span className="text-[9px] font-black uppercase tracking-widest">to close</span>
-                                    </div>
-                                    <div className="h-[1px] w-12 bg-gray-100"></div>
-                                </div> */}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-};
 
 const LocalNews = () => {
     const [newsData, setNewsData] = useState<LocalNewsItem[]>([]);
@@ -538,7 +217,7 @@ const LocalNews = () => {
 
             // Handle legacy slash-hashes (backward compatibility)
             if (hash.startsWith('#news/')) {
-                const currentSlug = hash.replace('#news/', '');
+                const currentSlug = decodeSlug(hash.replace('#news/', ''));
                 const index = newsData.findIndex(item => slugify(item.title) === currentSlug);
                 if (index !== -1) {
                     setSelectedNews(newsData[index]);
@@ -553,6 +232,11 @@ const LocalNews = () => {
                 if (index !== -1) {
                     setSelectedNews(newsData[index]);
                 }
+                return;
+            }
+
+            if (!isNewsModalUrl(path, hash)) {
+                setSelectedNews(null);
             }
         };
 
@@ -604,14 +288,14 @@ const LocalNews = () => {
     };
 
     const renderLoader = () => (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
             {Array.from({ length: 3 }).map((_, idx) => (
-                <div key={idx} className="bg-white rounded-3xl p-4 flex flex-col sm:flex-row gap-6 items-center animate-pulse">
-                    <div className="h-48 sm:h-40 w-full sm:w-64 flex-shrink-0 rounded-2xl bg-gray-200"></div>
+                <div key={idx} className="surface-card p-4 flex flex-col sm:flex-row gap-4">
+                    <div className="h-40 sm:h-36 w-full sm:w-44 flex-shrink-0 skeleton rounded-xl" />
                     <div className="flex-1 space-y-3 w-full">
-                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full"></div>
-                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                        <div className="h-5 skeleton w-3/4" />
+                        <div className="h-4 skeleton w-full" />
+                        <div className="h-4 skeleton w-5/6" />
                     </div>
                 </div>
             ))}
@@ -619,31 +303,23 @@ const LocalNews = () => {
     );
 
     return (
-        <div id="local-news" className="w-full mt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 sm:h-8 bg-blue-600 rounded-full"></div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                        {activeTab === 'local' ? 'Local News' : 'National News'}
-                    </h2>
-                </div>
+        <div id="local-news" className="w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-3 sm:mb-4">
+                <SectionHeader
+                    title={activeTab === 'local' ? 'Local News' : 'National News'}
+                    compact
+                />
 
-                <div className="flex bg-gray-100 p-1 rounded-xl sm:rounded-2xl w-fit">
+                <div className="tab-group w-fit flex-shrink-0">
                     <button
                         onClick={() => setActiveTab('local')}
-                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm font-bold transition-all ${activeTab === 'local'
-                            ? "bg-white text-blue-600 shadow-sm"
-                            : "text-gray-500 hover:text-gray-700"
-                            }`}
+                        className={`tab-item ${activeTab === 'local' ? 'tab-item-active' : ''}`}
                     >
                         Local
                     </button>
                     <button
                         onClick={() => setActiveTab('national')}
-                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm font-bold transition-all ${activeTab === 'national'
-                            ? "bg-white text-blue-600 shadow-sm"
-                            : "text-gray-500 hover:text-gray-700"
-                            }`}
+                        className={`tab-item ${activeTab === 'national' ? 'tab-item-active' : ''}`}
                     >
                         National
                     </button>
@@ -653,8 +329,8 @@ const LocalNews = () => {
             {loading ? renderLoader() : (
                 <>
                     {newsData.length === 0 ? (
-                        <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
-                            <p className="text-gray-500 font-medium">No {activeTab} news available at the moment.</p>
+                        <div className="surface-card p-12 text-center">
+                            <p className="text-[var(--text-secondary)] text-sm">No {activeTab} news available at the moment.</p>
                         </div>
                     ) : (
                         <>
@@ -688,17 +364,17 @@ const LocalNews = () => {
 
                             <AnimatePresence>
                                 {selectedNews && (
-                                    <NewsModal
+                                    <NewsReportModal
                                         news={selectedNews}
                                         onClose={() => {
                                             setSelectedNews(null);
-                                            window.history.pushState(null, '', '/');
+                                            navigateBackFromNewsModal();
                                         }}
                                         onNext={() => {
                                             const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                             if (idx !== -1 && idx < newsData.length - 1) {
                                                 const nextItem = newsData[idx + 1];
-                                                window.history.pushState(null, '', getNewsSharePath(nextItem.title));
+                                                window.history.replaceState(null, '', getNewsSharePath(nextItem.title));
                                                 setSelectedNews(nextItem);
                                             }
                                         }}
@@ -706,7 +382,7 @@ const LocalNews = () => {
                                             const idx = newsData.findIndex(n => n._id === selectedNews._id);
                                             if (idx > 0) {
                                                 const prevItem = newsData[idx - 1];
-                                                window.history.pushState(null, '', getNewsSharePath(prevItem.title));
+                                                window.history.replaceState(null, '', getNewsSharePath(prevItem.title));
                                                 setSelectedNews(prevItem);
                                             }
                                         }}
@@ -715,14 +391,11 @@ const LocalNews = () => {
                             </AnimatePresence>
 
                             {totalPages > 1 && (
-                                <div className="flex justify-center items-center gap-2 sm:gap-3 mt-8">
+                                <div className="flex justify-center items-center gap-2 sm:gap-3 mt-10 mb-4 sm:mt-8 sm:mb-0 px-1">
                                     <button
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={currentPage === 1}
-                                        className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === 1
-                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                                            }`}
+                                        className={`pagination-btn ${currentPage === 1 ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
                                         aria-label="Previous page"
                                     >
                                         <FaChevronLeft size={12} />
@@ -746,10 +419,7 @@ const LocalNews = () => {
                                                 <button
                                                     key={`page-${page}`}
                                                     onClick={() => handlePageChange(page)}
-                                                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all ${currentPage === page
-                                                        ? "bg-blue-600 text-white shadow-md transform scale-105"
-                                                        : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
-                                                        }`}
+                                                    className={`pagination-page ${currentPage === page ? "pagination-page-current" : "pagination-page-default"}`}
                                                 >
                                                     {page}
                                                 </button>
@@ -760,10 +430,7 @@ const LocalNews = () => {
                                     <button
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage === totalPages}
-                                        className={`px-4 h-10 rounded-xl flex items-center gap-2 transition-all ${currentPage === totalPages
-                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-sm"
-                                            }`}
+                                        className={`pagination-btn ${currentPage === totalPages ? "pagination-btn-disabled" : "pagination-btn-enabled"}`}
                                         aria-label="Next page"
                                     >
                                         <span className="text-sm font-bold">Next</span>

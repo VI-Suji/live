@@ -37,8 +37,8 @@ export default function AdOne() {
     const ad = ads[currentIndex];
 
     return (
-        <div className={`w-full relative rounded-3xl shadow-xl overflow-hidden aspect-video border border-gray-200 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <div className={`w-full relative rounded-3xl shadow-[var(--shadow-md)] overflow-hidden aspect-video border border-[var(--border-default)] transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="w-full h-full bg-[var(--bg-muted)] flex items-center justify-center">
                 {(ad.videoUrl || ad.video) ? (
                     <video
                         key={ad._id} // Key ensures video reloads/plays when ad changes

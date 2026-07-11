@@ -14,95 +14,76 @@ const Footer = () => {
             })
             .catch(() => {});
     }, []);
+
     return (
-        <footer className="w-full bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white pt-16 pb-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <footer className="w-full bg-zinc-950 text-zinc-300 pt-16 pb-8 border-t border-zinc-800">
+            <div className="page-container">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-                    {/* Brand Column */}
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         <div className="flex items-center gap-3">
-                            <div className="relative w-10 h-10">
-                                <Image
-                                    src="/gramika.png"
-                                    alt="Gramika Logo"
-                                    fill
-                                    className="object-contain"
-                                />
+                            <div className="relative w-9 h-9">
+                                <Image src="/gramika.png" alt="Gramika Logo" fill className="object-contain" />
                             </div>
-                            <h2 className="text-3xl font-black tracking-tight">GRAMIKA NEWS ONLINE</h2>
+                            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight text-white">
+                                GRAMIKA NEWS ONLINE
+                            </h2>
                         </div>
                         {tagline && (
-                            <p className="text-gray-400 leading-relaxed text-sm max-w-md">
+                            <p className="text-zinc-400 leading-relaxed text-sm max-w-md">
                                 {tagline}
                             </p>
                         )}
-                        <div className="flex gap-3">
-                            <a
-                                href="https://www.facebook.com/GRAMIKATV/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-blue-600 hover:scale-110 transition-all duration-300 border border-white/10"
-                            >
-                                <FaFacebookF size={18} />
-                            </a>
-                            <a
-                                href="https://www.instagram.com/gramikatv/reels/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-pink-600 hover:scale-110 transition-all duration-300 border border-white/10"
-                            >
-                                <FaInstagram size={18} />
-                            </a>
-                            <a
-                                href="https://www.youtube.com/@GramikaTv"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-red-600 hover:scale-110 transition-all duration-300 border border-white/10"
-                            >
-                                <FaYoutube size={18} />
-                            </a>
-                            <a
-                                href="https://chat.whatsapp.com/Hyue1YLgww0E3DYtgQK97J"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-11 h-11 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-green-500 hover:scale-110 transition-all duration-300 border border-white/10"
-                            >
-                                <FaWhatsapp size={18} />
-                            </a>
+                        <div className="flex gap-2">
+                            {[
+                                { href: "https://www.facebook.com/GRAMIKATV/", icon: FaFacebookF, hover: "hover:bg-blue-600" },
+                                { href: "https://www.instagram.com/gramikatv/reels/", icon: FaInstagram, hover: "hover:bg-pink-600" },
+                                { href: "https://www.youtube.com/@GramikaTv", icon: FaYoutube, hover: "hover:bg-red-600" },
+                                { href: "https://chat.whatsapp.com/Hyue1YLgww0E3DYtgQK97J", icon: FaWhatsapp, hover: "hover:bg-green-600" },
+                            ].map(({ href, icon: Icon, hover }) => (
+                                <a
+                                    key={href}
+                                    href={href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white ${hover} transition-all duration-200 border border-zinc-700/50`}
+                                >
+                                    <Icon size={16} />
+                                </a>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Contact */}
-                    <div className="md:text-right space-y-6">
-                        <h3 className="font-black text-xl text-white mb-6">Contact Us</h3>
-                        <ul className="space-y-4 text-sm text-gray-400">
+                    <div className="md:text-right space-y-5">
+                        <h3 className="font-[family-name:var(--font-display)] font-medium text-white text-sm uppercase tracking-wider">
+                            Contact
+                        </h3>
+                        <ul className="space-y-3 text-sm text-zinc-400">
                             <li className="flex items-center gap-3 md:justify-end">
-                                <FaEnvelope className="text-blue-400" />
+                                <FaEnvelope className="text-zinc-500 flex-shrink-0" size={14} />
                                 <a href="mailto:newsgramika@gmail.com" className="hover:text-white transition-colors">
                                     newsgramika@gmail.com
                                 </a>
                             </li>
                             <li className="flex items-center gap-3 md:justify-end">
-                                <FaPhone className="text-green-400" />
+                                <FaPhone className="text-zinc-500 flex-shrink-0" size={14} />
                                 <span>04902360808</span>
                             </li>
                             <li className="flex items-start gap-3 md:justify-end md:text-right">
-                                <FaMapMarkerAlt className="text-red-400 mt-1" />
+                                <FaMapMarkerAlt className="text-zinc-500 mt-0.5 flex-shrink-0" size={14} />
                                 <span>Gramika, Kuthuparmba Co. Op Rural Bank Complex,<br />Paral, Kuthuparamba</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                {/* Bottom Bar */}
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-gray-500">
+                <div className="border-t border-zinc-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-xs text-zinc-500">
                         © 2025 Gramika Limited. All rights reserved.
                     </p>
-                    <div className="flex gap-6 text-sm text-gray-500">
-                        <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
-                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</Link>
+                    <div className="flex gap-6 text-xs text-zinc-500">
+                        <Link href="/about" className="hover:text-zinc-300 transition-colors">About</Link>
+                        <Link href="/privacy-policy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
+                        <Link href="/terms-and-conditions" className="hover:text-zinc-300 transition-colors">Terms</Link>
                     </div>
                 </div>
             </div>

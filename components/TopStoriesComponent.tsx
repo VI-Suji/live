@@ -1,19 +1,25 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaChevronLeft, FaChevronRight, FaArrowRight } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 import NewsShareMenu from "./NewsShareMenu";
 import { getStorySharePath } from "../utils/slugify";
 import { getSiteOrigin } from "../utils/shareMeta";
 
+const STORIES_PER_PAGE = 3;
+
+function stripHtml(html?: string) {
+    if (!html) return "";
+    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 type Post = {
     _id: string;
     title: string;
-    slug: {
-        current: string;
-    };
+    slug: { current: string };
     mainImage?: string;
     excerpt?: string;
     publishedAt?: string;
@@ -21,212 +27,271 @@ type Post = {
 };
 
 export default function TopStories() {
-    const containerRef = useRef<HTMLDivElement | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const router = useRouter();
 
-    useEffect(() => {
+    React.useEffect(() => {
         fetch(`/api/sanity/topStories`)
             .then((res) => res.json())
-            .then((data: Post[]) => {
-                setPosts(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error(err);
-                setLoading(false);
-            });
+            .then((data: Post[]) => { setPosts(data); setLoading(false); })
+            .catch((err) => { console.error(err); setLoading(false); });
     }, []);
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+    const totalPages = Math.ceil(posts.length / STORIES_PER_PAGE);
+    const pagePosts = posts.slice(
+        (currentPage - 1) * STORIES_PER_PAGE,
+        currentPage * STORIES_PER_PAGE
+    );
+    const featuredPost = pagePosts[0];
+    const sidePosts = pagePosts.slice(1);
 
-        const handleScroll = () => {
-            const scrollLeft = container.scrollLeft;
-            const cardWidth = container.clientWidth;
-            const index = Math.round(scrollLeft / cardWidth);
-            setCurrentIndex(index);
-        };
-
-        container.addEventListener('scroll', handleScroll);
-        return () => container.removeEventListener('scroll', handleScroll);
-    }, [posts]);
-
-    function scrollNext() {
-        const el = containerRef.current;
-        if (!el) return;
-        const scrollAmount = el.clientWidth * 0.8;
-        el.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-
-    function scrollPrev() {
-        const el = containerRef.current;
-        if (!el) return;
-        const scrollAmount = el.clientWidth * 0.8;
-        el.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-    }
+    React.useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(totalPages);
+        }
+    }, [posts.length, currentPage, totalPages]);
 
     function handleReadMore(post: Post) {
         router.push(`/story/${post.slug.current}`);
     }
 
-    const renderLoader = () => {
-        return Array.from({ length: 3 }).map((_, idx) => (
-            <div
-                key={idx}
-                className="snap-start flex-shrink-0 w-full lg:w-[calc(33.333%-1rem)] h-[500px] rounded-3xl bg-gray-800 relative overflow-hidden border border-white/10"
-            >
-                <div className="absolute inset-0 bg-gray-800 animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4 z-10">
-                    <div className="w-24 h-6 bg-gray-700 rounded-full animate-pulse"></div>
-                    <div className="space-y-2">
-                        <div className="w-full h-8 bg-gray-700 rounded animate-pulse"></div>
-                        <div className="w-3/4 h-8 bg-gray-700 rounded animate-pulse"></div>
-                    </div>
-                    <div className="w-32 h-6 bg-gray-700 rounded animate-pulse mt-4"></div>
-                </div>
-            </div>
-        ));
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+            document.getElementById("top-stories")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
     };
 
-    // Don't render anything if there are no posts (all inactive)
-    if (!loading && posts.length === 0) {
-        return null;
+    const renderLoader = () => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
+            <div className="lg:col-span-2 h-[300px] lg:h-[500px] rounded-2xl skeleton opacity-30" />
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 lg:gap-4">
+                <div className="h-[180px] lg:h-[238px] rounded-2xl skeleton opacity-30" />
+                <div className="h-[180px] lg:h-[238px] rounded-2xl skeleton opacity-30" />
+            </div>
+        </div>
+    );
+
+    if (!loading && posts.length === 0) return null;
+    if (!loading && !featuredPost) return null;
+
+    const paginationPages: number[] = [];
+    paginationPages.push(1);
+    if (currentPage !== 1 && currentPage !== totalPages) {
+        paginationPages.push(currentPage);
+    }
+    if (totalPages > 1) {
+        paginationPages.push(totalPages);
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
-            {/* Controls - Only show if more than 1 post on desktop, or more than 3 posts */}
-            {!loading && posts.length > 1 && (
+        <div className="relative">
+            {loading ? renderLoader() : (
                 <>
-                    <div className="absolute top-1/2 -translate-y-1/2 -left-4 z-20 hidden lg:flex">
-                        <button
-                            onClick={scrollPrev}
-                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
-                        >
-                            <FaChevronLeft />
-                        </button>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4">
+                        <FeaturedSlot post={featuredPost} pageKey={currentPage} onRead={handleReadMore} />
+
+                        {sidePosts.length > 0 && (
+                            <div className={`grid gap-3 lg:gap-4 ${sidePosts.length >= 2 ? "grid-cols-2 lg:grid-cols-1" : "grid-cols-1"}`}>
+                                {sidePosts.map((post, i) => (
+                                    <SideSlot
+                                        key={`${currentPage}-${post._id}`}
+                                        post={post}
+                                        index={i}
+                                        pageKey={currentPage}
+                                        onRead={handleReadMore}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <div className="absolute top-1/2 -translate-y-1/2 -right-4 z-20 hidden lg:flex">
-                        <button
-                            onClick={scrollNext}
-                            className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300 shadow-lg"
-                        >
-                            <FaChevronRight />
-                        </button>
-                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-2 sm:gap-3 mt-8">
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`pagination-btn ${currentPage === 1 ? "pagination-btn-dark-disabled" : "pagination-btn-dark-enabled"}`}
+                                aria-label="Previous page"
+                            >
+                                <FaChevronLeft size={12} />
+                                <span className="text-sm font-bold">Prev</span>
+                            </button>
+
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                {paginationPages.map((page) => (
+                                    <button
+                                        key={`page-${page}`}
+                                        type="button"
+                                        onClick={() => handlePageChange(page)}
+                                        className={`pagination-page ${currentPage === page ? "pagination-page-dark-current" : "pagination-page-dark-default"}`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`pagination-btn ${currentPage === totalPages ? "pagination-btn-dark-disabled" : "pagination-btn-dark-enabled"}`}
+                                aria-label="Next page"
+                            >
+                                <span className="text-sm font-bold">Next</span>
+                                <FaChevronRight size={12} />
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
+        </div>
+    );
+}
 
-            {/* Carousel */}
-            <div
-                ref={containerRef}
-                className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 no-scrollbar"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+function FeaturedSlot({
+    post,
+    pageKey,
+    onRead,
+}: {
+    post: Post;
+    pageKey: number;
+    onRead: (p: Post) => void;
+}) {
+    return (
+        <AnimatePresence mode="wait">
+            <motion.div
+                key={`featured-${pageKey}-${post._id}`}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="lg:col-span-2"
             >
-                {loading ? renderLoader() : posts.map((post) => (
-                    <article
-                        key={post._id}
-                        onClick={() => handleReadMore(post)}
-                        className={`snap-start flex-shrink-0 w-full ${posts.length === 1
-                            ? 'lg:w-full'
-                            : posts.length === 2
-                                ? 'lg:w-[calc(50%-0.75rem)]'
-                                : 'lg:w-[calc(33.333%-1rem)]'
-                            } h-[500px] relative rounded-3xl overflow-hidden cursor-pointer group transition-transform duration-300 hover:-translate-y-2`}
-                    >
-                        {/* Image Background */}
-                        <div className="absolute inset-0">
-                            {post.mainImage ? (
-                                <>
-                                    <Image
-                                        src={post.mainImage}
-                                        alt={post.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
-                                </>
-                            ) : (
-                                <>
-                                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-gray-800" />
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                                        <Image
-                                            src="/gramika.png"
-                                            alt="Gramika"
-                                            width={200}
-                                            height={200}
-                                            className="object-contain"
-                                        />
-                                    </div>
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90" />
-                                </>
-                            )}
-                        </div>
+                <FeaturedCard post={post} onRead={onRead} size="large" />
+            </motion.div>
+        </AnimatePresence>
+    );
+}
 
-                        {/* Content */}
-                        <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                            <div className="absolute top-4 right-4 z-20" onClick={(e) => e.stopPropagation()}>
-                                <NewsShareMenu
-                                    shareUrl={`${getSiteOrigin()}${getStorySharePath(post.slug.current)}`}
-                                    size="sm"
-                                />
-                            </div>
-                            <div className="transform transition-transform duration-300 translate-y-4 group-hover:translate-y-0">
-                                <span className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full mb-4">
-                                    Featured
-                                </span>
-                                <h3 className="text-lg sm:text-xl font-bold text-white mb-3 leading-tight line-clamp-3">
-                                    {post.title}
-                                </h3>
-                                <div
-                                    className="text-gray-300 line-clamp-2 mb-6 text-xs sm:text-sm opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 delay-100 [&>p]:mb-1 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 [&>h1]:font-bold [&>h2]:font-bold [&>strong]:text-white"
-                                    dangerouslySetInnerHTML={{ __html: post.excerpt || "മുഴുവൻ വാർത്ത വായിക്കാൻ ക്ലിക്ക് ചെയ്യുക..." }}
-                                />
-                                <div className="flex items-center gap-2 text-white font-semibold text-sm uppercase tracking-wide group-hover:text-red-400 transition-colors">
-                                    വാർത്ത വായിക്കുക <FaArrowRight />
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                ))}
+function SideSlot({
+    post,
+    index,
+    pageKey,
+    onRead,
+}: {
+    post: Post;
+    index: number;
+    pageKey: number;
+    onRead: (p: Post) => void;
+}) {
+    return (
+        <AnimatePresence mode="popLayout">
+            <motion.div
+                key={`side-${pageKey}-${index}-${post._id}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, delay: index * 0.05 }}
+            >
+                <FeaturedCard post={post} onRead={onRead} size="small" />
+            </motion.div>
+        </AnimatePresence>
+    );
+}
+
+function FeaturedCard({ post, onRead, size }: { post: Post; onRead: (p: Post) => void; size: "large" | "small" }) {
+    const heights = {
+        large: "h-[300px] sm:h-[360px] lg:h-[500px]",
+        small: "h-[180px] lg:h-[238px]",
+    };
+
+    return (
+        <article
+            onClick={() => onRead(post)}
+            className={`group relative ${heights[size]} rounded-2xl overflow-hidden cursor-pointer border border-white/15 active:scale-[0.99] transition-transform`}
+        >
+            <StoryCardContent post={post} size={size} />
+        </article>
+    );
+}
+
+function StoryCardContent({ post, size }: { post: Post; size: "large" | "small" }) {
+    const isLarge = size === "large";
+    const [excerptExpanded, setExcerptExpanded] = useState(false);
+    const excerptText = stripHtml(post.excerpt);
+
+    React.useEffect(() => {
+        setExcerptExpanded(false);
+    }, [post._id]);
+
+    return (
+        <>
+            <div className="absolute inset-0">
+                {post.mainImage ? (
+                    <Image
+                        src={post.mainImage}
+                        alt={post.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                        sizes={isLarge ? "(max-width: 1024px) 100vw, 66vw" : "(max-width: 1024px) 50vw, 33vw"}
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center">
+                        <Image src="/gramika.png" alt="Gramika" width={isLarge ? 100 : 64} height={isLarge ? 100 : 64} className="object-contain opacity-20" />
+                    </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/55 to-black/15" />
             </div>
 
-            {/* Carousel Indicators - Mobile Only */}
-            {!loading && posts.length > 1 && (
-                <div className="flex justify-center gap-2 mt-6 lg:hidden">
-                    {posts.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => {
-                                const container = containerRef.current;
-                                if (container) {
-                                    container.scrollTo({
-                                        left: idx * container.clientWidth,
-                                        behavior: 'smooth'
-                                    });
-                                }
-                            }}
-                            className={`h-2 rounded-full transition-all duration-300 ${idx === currentIndex
-                                ? 'w-8 bg-white'
-                                : 'w-2 bg-white/40 hover:bg-white/60'
-                                }`}
-                            aria-label={`Go to slide ${idx + 1}`}
-                        />
-                    ))}
+            <div className={`absolute inset-0 flex flex-col justify-end ${isLarge ? "p-5 sm:p-8" : "p-4"}`}>
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30" onClick={(e) => e.stopPropagation()}>
+                    <NewsShareMenu
+                        shareUrl={`${getSiteOrigin()}${getStorySharePath(post.slug.current)}`}
+                        size="sm"
+                        variant="on-dark"
+                        menuPlacement="below"
+                    />
                 </div>
-            )}
 
-            {/* Swipe Hint - Mobile Only */}
-            {!loading && posts.length > 1 && currentIndex === 0 && (
-                <div className="flex justify-center items-center gap-2 mt-4 lg:hidden text-white/60 text-sm animate-pulse">
-                    <span>Swipe to explore</span>
-                    <FaChevronRight className="text-xs" />
+                <span className="inline-flex w-fit px-2 py-0.5 sm:px-2.5 sm:py-1 bg-white/20 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-[family-name:var(--font-display)] font-semibold uppercase tracking-wider rounded-md mb-2 sm:mb-3 border border-white/20">
+                    Featured
+                </span>
+
+                <h3 className={`font-semibold text-white leading-snug mb-1.5 sm:mb-2 shrink-0 ${
+                    isLarge
+                        ? "text-lg sm:text-2xl lg:text-3xl line-clamp-2 lg:line-clamp-3"
+                        : "text-sm lg:text-base line-clamp-2 lg:line-clamp-3"
+                }`}>
+                    {post.title}
+                </h3>
+
+                {isLarge && excerptText && (
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setExcerptExpanded((prev) => !prev);
+                        }}
+                        className={`text-left w-full mb-3 min-h-0 rounded-md transition-colors hover:bg-white/5 cursor-pointer ${
+                            excerptExpanded ? "max-h-32 overflow-y-auto pr-1" : ""
+                        }`}
+                        aria-expanded={excerptExpanded}
+                        aria-label={excerptExpanded ? "Collapse description" : "Expand description"}
+                    >
+                        <p className={`text-zinc-200 text-sm leading-relaxed ${excerptExpanded ? "" : "line-clamp-1"}`}>
+                            {excerptText}
+                        </p>
+                    </button>
+                )}
+
+                <div className="flex items-center gap-1.5 text-zinc-200 text-[11px] sm:text-xs font-[family-name:var(--font-display)] font-medium">
+                    Read story <FaArrowRight className="text-[9px] sm:text-[10px]" />
                 </div>
-            )}
-        </div>
+            </div>
+        </>
     );
 }

@@ -32,24 +32,23 @@ export default function AdminLayout({
     }[maxWidth];
 
     return (
-        <div className="min-h-screen bg-[#f8fafc]">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="admin-shell">
+            <header className="admin-header sticky top-0 z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             {showBackButton && (
                                 <Link
                                     href="/admin/dashboard"
-                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-[var(--bg-muted)] rounded-lg transition-colors"
                                 >
-                                    <FaArrowLeft className="text-gray-600" />
+                                    <FaArrowLeft className="text-[var(--text-secondary)]" />
                                 </Link>
                             )}
                             <div>
-                                <h1 className="text-2xl font-black text-slate-950 tracking-tight">{title}</h1>
+                                <h1 className="text-2xl font-black text-[var(--text-primary)] tracking-tight">{title}</h1>
                                 {description && (
-                                    <p className="text-sm text-slate-500 font-medium mt-0.5">{description}</p>
+                                    <p className="text-sm text-[var(--text-tertiary)] font-medium mt-0.5">{description}</p>
                                 )}
                             </div>
                         </div>
@@ -57,7 +56,6 @@ export default function AdminLayout({
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className={`${maxWidthClass} mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
                 {children}
             </main>
@@ -65,7 +63,6 @@ export default function AdminLayout({
     );
 }
 
-// Reusable Card Component
 export function AdminCard({
     children,
     className = ''
@@ -74,13 +71,12 @@ export function AdminCard({
     className?: string;
 }) {
     return (
-        <div className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 ${className}`}>
+        <div className={`admin-card p-6 sm:p-8 ${className}`}>
             {children}
         </div>
     );
 }
 
-// Reusable Section Header
 export function SectionHeader({
     title,
     subtitle,
@@ -93,15 +89,14 @@ export function SectionHeader({
     return (
         <div className="flex items-center justify-between mb-6">
             <div>
-                <h2 className="text-xl font-black text-slate-900 tracking-tight">{title}</h2>
-                {subtitle && <p className="text-sm text-slate-500 font-medium mt-1">{subtitle}</p>}
+                <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight">{title}</h2>
+                {subtitle && <p className="text-sm text-[var(--text-tertiary)] font-medium mt-1">{subtitle}</p>}
             </div>
             {action && <div>{action}</div>}
         </div>
     );
 }
 
-// Reusable Form Input
 export function FormInput({
     label,
     required = false,
@@ -118,25 +113,21 @@ export function FormInput({
 } & React.InputHTMLAttributes<HTMLInputElement>) {
     return (
         <div>
-            <label className="block text-[11px] font-black mb-2 text-slate-400 uppercase tracking-widest">
+            <label className="block text-[11px] font-black mb-2 text-[var(--text-tertiary)] uppercase tracking-widest">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
-                {optional && <span className="text-slate-400 font-normal ml-1 lowercase">(optional)</span>}
+                {optional && <span className="text-[var(--text-tertiary)] font-normal ml-1 lowercase">(optional)</span>}
             </label>
             <input
                 {...props}
-                className={`w-full px-4 py-3 border border-slate-200 bg-white rounded-xl text-slate-900 font-medium placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all ${error
-                        ? 'border-red-300 focus:ring-red-50'
-                        : 'border-slate-200'
-                    } ${props.className || ''}`}
+                className={`admin-input ${error ? 'border-red-300 focus:ring-red-100' : ''} ${props.className || ''}`}
             />
             {error && <p className="text-xs text-red-600 font-bold mt-1.5">{error}</p>}
-            {helpText && !error && <p className="text-xs text-slate-400 font-medium mt-1.5">{helpText}</p>}
+            {helpText && !error && <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1.5">{helpText}</p>}
         </div>
     );
 }
 
-// Reusable Form Textarea
 export function FormTextarea({
     label,
     required = false,
@@ -153,25 +144,21 @@ export function FormTextarea({
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
     return (
         <div>
-            <label className="block text-[11px] font-black mb-2 text-slate-400 uppercase tracking-widest">
+            <label className="block text-[11px] font-black mb-2 text-[var(--text-tertiary)] uppercase tracking-widest">
                 {label}
                 {required && <span className="text-red-500 ml-1">*</span>}
-                {optional && <span className="text-slate-400 font-normal ml-1 lowercase">(optional)</span>}
+                {optional && <span className="text-[var(--text-tertiary)] font-normal ml-1 lowercase">(optional)</span>}
             </label>
             <textarea
                 {...props}
-                className={`w-full px-4 py-3 border border-slate-200 bg-white rounded-xl text-slate-900 font-medium placeholder:text-slate-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all ${error
-                        ? 'border-red-300 focus:ring-red-50'
-                        : 'border-slate-200'
-                    } ${props.className || ''}`}
+                className={`admin-input ${error ? 'border-red-300 focus:ring-red-100' : ''} ${props.className || ''}`}
             />
             {error && <p className="text-xs text-red-600 font-bold mt-1.5">{error}</p>}
-            {helpText && !error && <p className="text-xs text-slate-400 font-medium mt-1.5">{helpText}</p>}
+            {helpText && !error && <p className="text-xs text-[var(--text-tertiary)] font-medium mt-1.5">{helpText}</p>}
         </div>
     );
 }
 
-// Reusable Button
 export function Button({
     children,
     variant = 'primary',
@@ -187,8 +174,8 @@ export function Button({
     const baseClasses = 'inline-flex items-center justify-center font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantClasses = {
-        primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-200',
-        secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-4 focus:ring-gray-200',
+        primary: 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] focus:ring-4 focus:ring-[var(--accent-muted)]',
+        secondary: 'bg-[var(--bg-muted)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] border border-[var(--border-default)]',
         danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-4 focus:ring-red-200',
         success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-4 focus:ring-green-200'
     }[variant];
@@ -211,7 +198,6 @@ export function Button({
     );
 }
 
-// Loading Spinner
 export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
     const sizeClass = {
         sm: 'w-4 h-4',
@@ -221,12 +207,11 @@ export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
 
     return (
         <div className="flex items-center justify-center p-8">
-            <div className={`${sizeClass} border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin`}></div>
+            <div className={`${sizeClass} border-4 border-[var(--border-default)] border-t-[var(--accent)] rounded-full animate-spin`} />
         </div>
     );
 }
 
-// Empty State
 export function EmptyState({
     icon: Icon,
     title,
@@ -242,19 +227,18 @@ export function EmptyState({
         <div className="text-center py-12">
             {Icon && (
                 <div className="flex justify-center mb-4">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Icon className="text-3xl text-gray-400" />
+                    <div className="w-16 h-16 rounded-full bg-[var(--bg-muted)] flex items-center justify-center">
+                        <Icon className="text-3xl text-[var(--text-tertiary)]" />
                     </div>
                 </div>
             )}
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-            {description && <p className="text-gray-600 mb-6">{description}</p>}
+            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">{title}</h3>
+            {description && <p className="text-[var(--text-secondary)] mb-6">{description}</p>}
             {action && <div>{action}</div>}
         </div>
     );
 }
 
-// Success/Error Alert
 export function Alert({
     type = 'info',
     children
@@ -263,14 +247,14 @@ export function Alert({
     children: React.ReactNode;
 }) {
     const classes = {
-        success: 'bg-green-50 border-green-200 text-green-800',
-        error: 'bg-red-50 border-red-200 text-red-800',
-        warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-        info: 'bg-blue-50 border-blue-200 text-blue-800'
+        success: 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300',
+        error: 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-300',
+        warning: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-300',
+        info: 'bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300'
     }[type];
 
     return (
-        <div className={`border-2 rounded-xl p-4 ${classes}`}>
+        <div className={`border rounded-xl p-4 ${classes}`}>
             {children}
         </div>
     );

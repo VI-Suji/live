@@ -50,6 +50,11 @@ export const getCachedData = (key: string): any | null => {
 };
 
 export const setCachedData = (key: string, data: any) => {
+    // Don't cache empty arrays — CMS content may be added shortly after
+    if (Array.isArray(data) && data.length === 0) {
+        return;
+    }
+
     cache.set(key, {
         data,
         timestamp: Date.now(),

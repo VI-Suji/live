@@ -79,10 +79,10 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
     if (status === "loading" || isChecking) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen page-bg flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading...</p>
+                    <div className="w-16 h-16 border-4 border-[var(--border-default)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-[var(--text-secondary)] font-medium">Loading...</p>
                 </div>
             </div>
         );
@@ -94,14 +94,14 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
     if (accessLevel === 'none') {
         return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-                <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-xl">
+            <div className="min-h-screen page-bg flex items-center justify-center p-4">
+                <div className="surface-elevated max-w-md w-full p-8">
                     <div className="text-center mb-6">
-                        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <div className="w-16 h-16 bg-red-500/10 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                             <FaLock />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900">Security Check</h2>
-                        <p className="text-gray-600 mt-2">Please enter your secondary admin password to continue.</p>
+                        <h2 className="text-display text-2xl">Security Check</h2>
+                        <p className="text-body mt-2">Please enter your secondary admin password to continue.</p>
                     </div>
 
                     <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -113,7 +113,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
                                     setPasswordInput(e.target.value);
                                     setError("");
                                 }}
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-black"
+                                className="admin-input"
                                 placeholder="Enter Password"
                                 autoFocus
                             />
@@ -121,13 +121,13 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
                         </div>
                         <button
                             type="submit"
-                            className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
                         >
                             Unlock Dashboard
                         </button>
                     </form>
                     <div className="mt-6 text-center">
-                        <p className="text-xs text-gray-400">Authorized Personnel Only</p>
+                        <p className="text-xs text-[var(--text-tertiary)]">Authorized Personnel Only</p>
                     </div>
                 </div>
             </div>
@@ -138,17 +138,17 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
     if (isMaintenanceMonth) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 flex flex-col items-center justify-center p-4">
-                <div className="bg-white max-w-lg w-full p-10 rounded-3xl shadow-2xl text-center border border-gray-100">
-                    <div className="w-24 h-24 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">
+            <div className="min-h-screen page-bg flex flex-col items-center justify-center p-4">
+                <div className="surface-elevated max-w-lg w-full p-10 text-center">
+                    <div className="w-24 h-24 bg-amber-500/10 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
                         <FaLock />
                     </div>
-                    <h2 className="text-3xl font-black text-gray-900 mb-4">Under Maintenance</h2>
-                    <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                    <h2 className="text-display text-3xl mb-4">Under Maintenance</h2>
+                    <p className="text-body text-lg mb-8">
                         Normal editing capabilities will automatically resume on <strong>April 1st, 2026</strong>.
                     </p>
-                    <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm font-medium mb-8 text-left">
-                        <span className="font-bold flex items-center gap-2 mb-1">ℹ️ Public Site is Live</span>
+                    <div className="bg-[var(--accent-muted)] text-[var(--accent)] p-4 rounded-xl text-sm font-medium mb-8 text-left">
+                        <span className="font-bold flex items-center gap-2 mb-1">Public Site is Live</span>
                         The main website is completely unaffected and is successfully serving to visitors.
                     </div>
                     <button
@@ -156,7 +156,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
                             localStorage.removeItem("gramika_admin_access");
                             import("next-auth/react").then(m => m.signOut({ callbackUrl: "/" }));
                         }}
-                        className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        className="w-full py-4 bg-[var(--bg-invert)] text-[var(--bg-page)] rounded-xl font-bold hover:opacity-90 transition-colors"
                     >
                         Sign Out & Return to Website
                     </button>

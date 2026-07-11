@@ -7,43 +7,34 @@ const LiveDateTime: React.FC = () => {
 
     useEffect(() => {
         setCurrentTime(new Date());
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 1000);
-
+        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
     if (!currentTime) return null;
 
-    const formatDate = (date: Date) => {
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        };
-        return date.toLocaleDateString('en-US', options);
-    };
-
-    const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
+    const formatDate = (date: Date) =>
+        date.toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
         });
-    };
+
+    const formatTime = (date: Date) =>
+        date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-6 text-emerald-50">
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-4">
+            <span className="text-xs sm:text-sm font-[family-name:var(--font-display)] font-medium text-white tracking-wide">
+                {formatDate(currentTime)}
+            </span>
+            <div className="w-px h-3.5 bg-zinc-500" />
             <div className="flex items-center gap-2">
-                <span className="text-[10px] sm:text-sm font-semibold uppercase tracking-wider">{formatDate(currentTime)}</span>
-            </div>
-            <div className="hidden sm:block w-px h-4 bg-emerald-400/50"></div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-400 animate-pulse"></div>
-                <span className="text-[10px] sm:text-sm font-bold tabular-nums text-white">{formatTime(currentTime)}</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                <span className="text-xs sm:text-sm font-[family-name:var(--font-display)] font-semibold tabular-nums text-white">
+                    {formatTime(currentTime)}
+                </span>
             </div>
         </div>
     );

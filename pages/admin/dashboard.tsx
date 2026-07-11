@@ -241,21 +241,21 @@ const DashboardContent = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="min-h-screen admin-shell">
             {/* Header */}
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+            <header className="admin-header sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex-shrink-0">
-                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900">GRAMIKA NEWS ONLINE</h1>
-                            <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Admin Dashboard</p>
+                            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">GRAMIKA NEWS ONLINE</h1>
+                            <p className="text-xs sm:text-sm text-[var(--text-tertiary)] hidden sm:block">Admin Dashboard</p>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-4">
                             <div className="text-right hidden md:block">
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-sm font-medium text-[var(--text-primary)]">
                                     {session?.user?.name}
                                 </p>
-                                <p className="text-xs text-gray-500">{session?.user?.email}</p>
+                                <p className="text-xs text-[var(--text-tertiary)]">{session?.user?.email}</p>
                             </div>
                             <button
                                 onClick={() => {

@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX } from "react-icons/fi";
 import BreakingNewsTicker from "./BreakingNewsTicker";
 import LiveDateTime from "./LiveDateTime";
+import ThemeToggle from "./ThemeToggle";
+import { navigateToHomeSection } from "../utils/slugify";
 
 const Header: React.FC = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -17,13 +19,10 @@ const Header: React.FC = () => {
         topStoriesVisible: true,
     });
     const [menuItems, setMenuItems] = useState<Array<{ label: string; target: string }>>([]);
-
-    // Rotating Image State
     const [headerImages, setHeaderImages] = useState<string[]>(["/gramika.png"]);
     const [rotationInterval, setRotationInterval] = useState(20000);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    // Fetch site settings
     useEffect(() => {
         const fetchSettings = () => {
             fetch(`/api/sanity/siteSettings?t=${Date.now()}`)
@@ -35,16 +34,13 @@ const Header: React.FC = () => {
                         topStoriesVisible: data.topStoriesVisible ?? true,
                     });
 
-
-                    // Update header images - Always include Gramika logo as first item
                     if (data.headerImages && Array.isArray(data.headerImages) && data.headerImages.length > 0) {
-                        const fetchedUrls = data.headerImages.map((img: any) => img.url);
+                        const fetchedUrls = data.headerImages.map((img: { url: string }) => img.url);
                         setHeaderImages(["/gramika.png", ...fetchedUrls]);
                     } else {
                         setHeaderImages(["/gramika.png"]);
                     }
 
-                    // Update rotation interval
                     if (data.rotationInterval) {
                         setRotationInterval(data.rotationInterval * 1000);
                     }
@@ -52,19 +48,13 @@ const Header: React.FC = () => {
                 .catch(console.error);
         };
 
-        // Initial fetch
         fetchSettings();
-
-        // Refresh settings every 10 seconds
         const interval = setInterval(fetchSettings, 10000);
-
         return () => clearInterval(interval);
     }, []);
 
-    // Rotation Timer
     useEffect(() => {
         if (headerImages.length <= 1) return;
-
         const interval = setInterval(() => {
             setCurrentImageIndex((prev) => (prev + 1) % headerImages.length);
         }, rotationInterval);
@@ -76,9 +66,7 @@ const Header: React.FC = () => {
         topStories: false,
     });
 
-    // Check content availability
     useEffect(() => {
-        // Check local news
         fetch('/api/sanity/localNews')
             .then(res => res.json())
             .then(data => {
@@ -89,7 +77,6 @@ const Header: React.FC = () => {
             })
             .catch(console.error);
 
-        // Check top stories
         fetch('/api/sanity/topStories')
             .then(res => res.json())
             .then(data => {
@@ -101,97 +88,51 @@ const Header: React.FC = () => {
             .catch(console.error);
     }, []);
 
-    // Update menu items based on site settings and content availability
     useEffect(() => {
         const items = [];
-
-        // Show HOME if hero section is visible
-        if (siteSettings.heroSectionVisible) {
-            items.push({ label: "HOME", target: "home" });
-        }
-
-        // Show NEWS only if content exists
-        if (contentAvailability.localNews) {
-            items.push({ label: "NEWS", target: "local-news" });
-        }
-
-        // Show FEATURE STORIES only if content exists AND setting is enabled
-        if (contentAvailability.topStories && siteSettings.topStoriesVisible) {
-            items.push({ label: "FEATURE STORIES", target: "top-stories" });
-        }
-
-        // Show SOCIALS (it has social media links)
-        items.push({ label: "SOCIALS", target: "socials" });
-
-        // Always show ABOUT
-        items.push({ label: "ABOUT", target: "/about" });
-
+        if (siteSettings.heroSectionVisible) items.push({ label: "Home", target: "home" });
+        if (contentAvailability.localNews) items.push({ label: "News", target: "local-news" });
+        if (contentAvailability.topStories && siteSettings.topStoriesVisible) items.push({ label: "Features", target: "top-stories" });
+        items.push({ label: "Socials", target: "socials" });
+        items.push({ label: "About", target: "/about" });
         setMenuItems(items);
     }, [siteSettings, contentAvailability]);
 
-    // Handle scroll effect and initial section
     useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20);
-        };
-
-        // Set initial active section based on path
+        const handleScroll = () => setIsScrolled(window.scrollY > 12);
         const currentPath = window.location.pathname;
-        if (currentPath === '/about' || currentPath === '/about/') {
-            setActiveSection('/about');
-        } else if (currentPath === '/' || currentPath === '') {
-            setActiveSection('home');
-        }
-
+        if (currentPath === '/about' || currentPath === '/about/') setActiveSection('/about');
+        else if (currentPath === '/' || currentPath === '') setActiveSection('home');
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // Scroll Spy Logic
     useEffect(() => {
         const handleScrollSpy = () => {
             const currentPath = window.location.pathname;
-            // Only run scroll spy on the home page
             if (currentPath !== '/' && currentPath !== '') {
-                if (currentPath === '/about' || currentPath === '/about/') {
-                    setActiveSection('/about');
-                }
+                if (currentPath === '/about' || currentPath === '/about/') setActiveSection('/about');
                 return;
             }
 
-            const scrollPosition = window.scrollY + 150; // Offset for header height
-
-            // Create a copy of menu items and reverse it to check from bottom up
-            // This ensures nested or overlapping sections are handled correctly (most specific first)
+            const scrollPosition = window.scrollY + 150;
             const items = [...menuItems].reverse();
 
             for (const item of items) {
                 let targetId = item.target;
-
-                // Handle responsive Local News section
                 if (targetId === 'local-news') {
                     const desktop = document.getElementById('local-news-desktop');
                     const mobile = document.getElementById('local-news-mobile');
-
-                    // Check which one is visible
-                    if (desktop && desktop.offsetParent !== null) {
-                        targetId = 'local-news-desktop';
-                    } else if (mobile && mobile.offsetParent !== null) {
-                        targetId = 'local-news-mobile';
-                    }
+                    if (desktop && desktop.offsetParent !== null) targetId = 'local-news-desktop';
+                    else if (mobile && mobile.offsetParent !== null) targetId = 'local-news-mobile';
                 }
 
                 const section = document.getElementById(targetId);
                 if (section) {
                     const rect = section.getBoundingClientRect();
                     const absoluteTop = rect.top + window.scrollY;
-                    const height = rect.height;
-
-                    if (
-                        scrollPosition >= absoluteTop &&
-                        scrollPosition < absoluteTop + height
-                    ) {
-                        setActiveSection(item.target); // Keep original target for active state
+                    if (scrollPosition >= absoluteTop && scrollPosition < absoluteTop + rect.height) {
+                        setActiveSection(item.target);
                         break;
                     }
                 }
@@ -199,189 +140,196 @@ const Header: React.FC = () => {
         };
 
         window.addEventListener("scroll", handleScrollSpy);
-        // Call once on mount/update to set initial state
         handleScrollSpy();
-
         return () => window.removeEventListener("scroll", handleScrollSpy);
     }, [menuItems]);
 
-    // Smooth scroll or redirect handler
     const scrollToSection = (targetId: string) => {
         if (targetId.startsWith('/')) {
             window.location.href = targetId;
             return;
         }
 
-        // If we're not on the home page and try to navigate to a home section
-        if (window.location.pathname !== '/' && window.location.pathname !== '') {
-            window.location.href = `/#${targetId}`;
-            return;
-        }
-
-        // Handle clicking Home while already on Home (scroll to top)
         if (targetId === 'home') {
+            if (window.location.pathname !== '/' && window.location.pathname !== '') {
+                window.location.href = '/';
+                return;
+            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
             setActiveSection('home');
             setMobileMenuOpen(false);
             return;
         }
 
-        let actualTargetId = targetId;
+        if (window.location.pathname !== '/' && window.location.pathname !== '') {
+            navigateToHomeSection(targetId);
+            return;
+        }
 
-        // Handle responsive Local News section
+        let actualTargetId = targetId;
         if (targetId === 'local-news') {
             const desktop = document.getElementById('local-news-desktop');
             const mobile = document.getElementById('local-news-mobile');
-
-            if (desktop && desktop.offsetParent !== null) {
-                actualTargetId = 'local-news-desktop';
-            } else if (mobile && mobile.offsetParent !== null) {
-                actualTargetId = 'local-news-mobile';
-            }
+            if (desktop && desktop.offsetParent !== null) actualTargetId = 'local-news-desktop';
+            else if (mobile && mobile.offsetParent !== null) actualTargetId = 'local-news-mobile';
         }
 
         const section = document.getElementById(actualTargetId);
         if (section) {
-            // Offset for sticky header (increased to account for breaking news ticker)
             const headerOffset = 120;
-            const elementPosition = section.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
-            });
+            const offsetPosition = section.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
             setActiveSection(targetId);
             setMobileMenuOpen(false);
         }
     };
 
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '') return;
+
+        const hash = window.location.hash.slice(1);
+        if (!hash || hash.startsWith('news')) return;
+
+        const timer = window.setTimeout(() => {
+            let actualTargetId = hash;
+            if (hash === 'local-news') {
+                const desktop = document.getElementById('local-news-desktop');
+                const mobile = document.getElementById('local-news-mobile');
+                if (desktop && desktop.offsetParent !== null) actualTargetId = 'local-news-desktop';
+                else if (mobile && mobile.offsetParent !== null) actualTargetId = 'local-news-mobile';
+            }
+
+            const section = document.getElementById(actualTargetId);
+            if (section) {
+                const headerOffset = 120;
+                const offsetPosition = section.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                setActiveSection(hash === 'local-news' ? 'local-news' : hash);
+            }
+        }, 350);
+
+        return () => window.clearTimeout(timer);
+    }, []);
+
     return (
         <>
-            {/* Fixed Main Header (Logo + Navigation Only) */}
             <header
-                className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled || mobileMenuOpen
-                    ? "bg-white backdrop-blur-xl shadow-md border-b border-white/20 py-3"
-                    : "bg-white backdrop-blur-lg shadow-sm py-5"
-                    }`}
+                className={`fixed top-0 left-0 right-0 z-50 w-full h-14 sm:h-16 transition-all duration-300 border-b ${
+                    isScrolled || mobileMenuOpen
+                        ? "bg-[var(--bg-surface)]/95 backdrop-blur-xl border-[var(--border-subtle)] shadow-[var(--shadow-sm)]"
+                        : "bg-[var(--bg-surface)]/90 backdrop-blur-md border-[var(--border-subtle)]"
+                }`}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between relative h-16 sm:h-20">
-                        {/* Left: Rotating Image */}
-                        <div className="flex-shrink-0 w-24 sm:w-32 flex justify-start z-10">
+                <div className="page-container h-full">
+                    <div className="flex items-center justify-between relative h-full">
+                        <div className="flex-shrink-0 w-20 sm:w-28 flex justify-start z-10">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={currentImageIndex}
-                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    initial={{ opacity: 0, scale: 0.92 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="relative w-12 h-12 sm:w-16 sm:h-16"
+                                    exit={{ opacity: 0, scale: 0.92 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="relative w-10 h-10 sm:w-12 sm:h-12"
                                 >
                                     <Image
                                         src={headerImages[currentImageIndex]}
                                         alt="Gramika News"
                                         fill
                                         className="object-contain"
-                                        title="Gramika News"
                                     />
                                 </motion.div>
                             </AnimatePresence>
                         </div>
 
-                        {/* Center: Text Only (Logo Removed) - Offset slightly left */}
-                        <div
-                            className="absolute left-1/2 sm:left-[45%] top-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer z-20 flex flex-col items-center gap-0"
+                        <button
+                            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center cursor-pointer"
                             onClick={() => scrollToSection("home")}
                         >
-                            <h1 className="flex flex-col sm:flex-row items-center sm:gap-2 text-center leading-none sm:whitespace-nowrap select-none">
-                                <span className="text-base sm:text-2xl md:text-3xl font-black tracking-tight text-black uppercase">
-                                    GRAMIKA NEWS
-                                </span>
-                                <span className="text-base sm:text-2xl md:text-3xl font-bold sm:font-black tracking-tight text-black uppercase mt-1 sm:mt-0">
-                                    ONLINE
-                                </span>
-                            </h1>
-                            <span className="sr-only">Gramika News</span>
-                        </div>
+                            <span className="font-[family-name:var(--font-display)] text-sm sm:text-xl font-semibold tracking-tight text-[var(--text-primary)] whitespace-nowrap">
+                                GRAMIKA NEWS ONLINE
+                            </span>
+                        </button>
 
-                        {/* Right: Navigation & Mobile Menu */}
-                        <div className="flex-shrink-0 flex items-center justify-end z-10 w-20 sm:w-auto">
-                            {/* Desktop Navigation */}
-                            <nav className="hidden md:flex items-center gap-8">
+                        <div className="flex-shrink-0 flex items-center justify-end gap-1 z-10">
+                            <nav className="hidden md:flex items-center gap-1">
                                 {menuItems.map((item) => (
                                     <div key={item.label} className="relative">
                                         <button
                                             onClick={() => scrollToSection(item.target)}
-                                            className={`text-sm font-bold tracking-wide transition-colors duration-300 hover:text-blue-600 ${activeSection === item.target ? "text-blue-600" : "text-gray-600"
-                                                }`}
+                                            className={`px-3 py-2 text-sm font-[family-name:var(--font-display)] font-medium rounded-lg transition-colors duration-200 ${
+                                                activeSection === item.target
+                                                    ? "text-[var(--accent)]"
+                                                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
+                                            }`}
                                         >
                                             {item.label}
                                         </button>
                                         {activeSection === item.target && (
                                             <motion.div
-                                                layoutId="underline"
-                                                className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-600"
-                                                initial={false}
-                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                                layoutId="nav-indicator"
+                                                className="absolute bottom-0 left-3 right-3 h-0.5 bg-[var(--accent)] rounded-full"
+                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                             />
                                         )}
                                     </div>
                                 ))}
                             </nav>
 
-                            {/* Mobile Menu Button */}
+                            <ThemeToggle className="hidden sm:flex" />
+
                             <button
-                                className="md:hidden p-2 text-gray-900 focus:outline-none"
+                                className="md:hidden p-2 text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-muted)]"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                                 aria-label="Toggle menu"
                             >
-                                {mobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                                {mobileMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Scrollable Content Below Fixed Header */}
-            <div className="pt-28 sm:pt-32"> {/* Spacer for fixed header - adjusted for proper spacing */}
-                {/* Live Date & Time */}
-                <div className="bg-slate-700 shadow-inner">
-                    <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-1 sm:py-2">
+            <div className="pt-14 sm:pt-16">
+                <div className="bg-zinc-800 border-b border-zinc-700">
+                    <div className="page-container py-1.5 sm:py-2">
                         <LiveDateTime />
                     </div>
                 </div>
-
-                {/* News Ticker */}
-                <div className="relative z-40 bg-white">
-                    <BreakingNewsTicker />
-                </div>
+                <BreakingNewsTicker />
             </div>
 
-            {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {mobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                        className="fixed inset-0 z-40 bg-white/95 backdrop-blur-3xl md:hidden pt-24 px-6"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-40 bg-[var(--bg-surface)]/95 backdrop-blur-xl md:hidden pt-20"
                     >
-                        <nav className="flex flex-col gap-6 items-center justify-center h-full pb-24">
+                        <nav className="flex flex-col gap-1 px-6 py-8">
                             {menuItems.map((item, idx) => (
                                 <motion.button
                                     key={item.label}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
+                                    initial={{ opacity: 0, x: -12 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
                                     onClick={() => scrollToSection(item.target)}
-                                    className={`text-2xl font-bold tracking-tight ${activeSection === item.target ? "text-blue-600" : "text-gray-900"
-                                        }`}
+                                    className={`text-left px-4 py-4 text-lg font-[family-name:var(--font-display)] font-medium rounded-xl transition-colors ${
+                                        activeSection === item.target
+                                            ? "text-[var(--accent)] bg-[var(--accent-muted)]"
+                                            : "text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
+                                    }`}
                                 >
                                     {item.label}
                                 </motion.button>
                             ))}
+                            <div className="flex items-center gap-3 px-4 pt-6 mt-4 border-t border-[var(--border-subtle)]">
+                                <span className="text-sm text-[var(--text-tertiary)]">Theme</span>
+                                <ThemeToggle />
+                            </div>
                         </nav>
                     </motion.div>
                 )}

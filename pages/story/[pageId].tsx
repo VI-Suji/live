@@ -2,14 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { GetServerSideProps } from "next";
-import { FaArrowLeft, FaShareAlt, FaCalendarAlt, FaUser, FaClock, FaFacebookF, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaArrowRight,
+  FaClock,
+  FaUser,
+} from "react-icons/fa";
 import { PortableText } from "@portabletext/react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import Meta from "../../components/Meta";
+import NewsShareMenu from "../../components/NewsShareMenu";
+import ThemeToggle from "../../components/ThemeToggle";
 import { findTopStoryByIdentifier, NewsPost } from "../../utils/newsPost";
 import { decodeSlug } from "../../utils/slugify";
 import {
-  buildWhatsAppShareUrl,
   getNewsCategoryLabel,
   getOgImageUrl,
   getPlainTextDescription,
@@ -20,6 +26,15 @@ type SanityPost = NewsPost;
 type Props = {
   post: SanityPost | null;
   currentSlug: string;
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
 };
 
 export default function StoryPage({ post, currentSlug }: Props) {
@@ -36,7 +51,6 @@ export default function StoryPage({ post, currentSlug }: Props) {
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   const [readingTime, setReadingTime] = useState(0);
-  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     if (post?.body) {
@@ -54,8 +68,8 @@ export default function StoryPage({ post, currentSlug }: Props) {
 
   if (router.isFallback || !post) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-12 h-12 border-3 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page)]">
+        <div className="w-10 h-10 border-2 border-[var(--border-default)] border-t-[var(--accent)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -69,27 +83,27 @@ export default function StoryPage({ post, currentSlug }: Props) {
     });
   };
 
-  const shareLinks = {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrlState)}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrlState)}&text=${encodeURIComponent(post.title)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrlState)}`,
-    whatsapp: buildWhatsAppShareUrl(shareUrlState),
+  const stripHtml = (html?: string) => {
+    if (!html) return "";
+    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   };
+
+  const ledeText = stripHtml(post.excerpt);
 
   const portableTextComponents = {
     types: {
-      image: ({ value }: { value: any }) => (
-        <figure className="my-12 sm:my-16 -mx-4 sm:mx-0">
-          <div className="relative aspect-video overflow-hidden bg-gray-100">
+      image: ({ value }: { value: { asset?: { url?: string }; url?: string; alt?: string; caption?: string } }) => (
+        <figure className="my-10 sm:my-14">
+          <div className="image-frame relative aspect-[16/10]">
             <Image
-              src={value.asset?.url || value.url}
+              src={value.asset?.url || value.url || ""}
               alt={value.alt || "Article image"}
               fill
               className="object-cover"
             />
           </div>
           {value.caption && (
-            <figcaption className="text-center text-sm text-gray-500 mt-4 px-4 sm:px-0 italic border-t border-gray-100 pt-3">
+            <figcaption className="text-center text-sm text-[var(--text-tertiary)] mt-3 italic">
               {value.caption}
             </figcaption>
           )}
@@ -98,71 +112,62 @@ export default function StoryPage({ post, currentSlug }: Props) {
     },
     block: {
       h1: ({ children }: { children?: React.ReactNode }) => (
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mt-16 mb-6 leading-[1.15] tracking-tight border-l-4 border-blue-600 pl-5">
+        <h2 className="text-display text-2xl sm:text-3xl text-[var(--text-primary)] mt-12 mb-5 leading-tight border-l-[3px] border-[var(--accent)] pl-4">
           {children}
         </h2>
       ),
       h2: ({ children }: { children?: React.ReactNode }) => (
-        <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mt-14 mb-5 leading-[1.2] tracking-tight">
+        <h3 className="text-display text-xl sm:text-2xl text-[var(--text-primary)] mt-10 mb-4 leading-snug">
           {children}
         </h3>
       ),
       h3: ({ children }: { children?: React.ReactNode }) => (
-        <h4 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-10 mb-4 leading-snug">
+        <h4 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] mt-8 mb-3">
           {children}
         </h4>
       ),
       blockquote: ({ children }: { children?: React.ReactNode }) => (
-        <blockquote className="my-10 sm:my-12 py-6 px-8 bg-gray-50 border-l-4 border-gray-900 relative">
-          <svg className="absolute top-4 left-4 w-8 h-8 text-gray-200" fill="currentColor" viewBox="0 0 32 32">
-            <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zm16 0c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z" />
-          </svg>
-          <p className="text-xl sm:text-2xl leading-relaxed italic text-gray-800 font-serif pl-8">
+        <blockquote className="my-10 py-6 px-6 sm:px-8 bg-[var(--bg-muted)] border-l-[3px] border-[var(--accent)] rounded-r-xl">
+          <p className="text-lg sm:text-xl leading-relaxed italic text-[var(--text-secondary)] pl-6">
             {children}
           </p>
         </blockquote>
       ),
-      normal: ({ children }: { children?: React.ReactNode }) => {
-        return (
-          <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 first-of-type:first-letter:text-7xl first-of-type:first-letter:font-bold first-of-type:first-letter:text-gray-900 first-of-type:first-letter:float-left first-of-type:first-letter:mr-3 first-of-type:first-letter:leading-[0.85]">
-            {children}
-          </p>
-        );
-      },
+      normal: ({ children }: { children?: React.ReactNode }) => (
+        <p className="text-[1.0625rem] sm:text-[1.125rem] leading-[1.85] text-[var(--text-secondary)] mb-6">
+          {children}
+        </p>
+      ),
     },
     list: {
       bullet: ({ children }: { children?: React.ReactNode }) => (
-        <ul className="space-y-3 my-8 pl-6 list-none">{children}</ul>
+        <ul className="space-y-2 my-6 pl-5 list-disc marker:text-[var(--accent)]">{children}</ul>
       ),
       number: ({ children }: { children?: React.ReactNode }) => (
-        <ol className="space-y-3 my-8 pl-6 list-none counter-reset-item">{children}</ol>
+        <ol className="space-y-2 my-6 pl-5 list-decimal marker:text-[var(--accent)] marker:font-semibold">{children}</ol>
       ),
     },
     listItem: {
       bullet: ({ children }: { children?: React.ReactNode }) => (
-        <li className="text-[18px] sm:text-[19px] text-gray-800 leading-[1.8] pl-2 relative before:content-['•'] before:absolute before:left-[-1rem] before:text-blue-600 before:font-bold">
-          {children}
-        </li>
+        <li className="text-[1.0625rem] sm:text-[1.125rem] text-[var(--text-secondary)] leading-[1.85] pl-1">{children}</li>
       ),
       number: ({ children }: { children?: React.ReactNode }) => (
-        <li className="text-[18px] sm:text-[19px] text-gray-800 leading-[1.8] pl-2 relative counter-increment-item before:content-[counter(item)'.'] before:absolute before:left-[-1.5rem] before:text-blue-600 before:font-bold">
-          {children}
-        </li>
+        <li className="text-[1.0625rem] sm:text-[1.125rem] text-[var(--text-secondary)] leading-[1.85] pl-1">{children}</li>
       ),
     },
     marks: {
       strong: ({ children }: { children?: React.ReactNode }) => (
-        <strong className="font-bold text-gray-900">{children}</strong>
+        <strong className="font-semibold text-[var(--text-primary)]">{children}</strong>
       ),
       em: ({ children }: { children?: React.ReactNode }) => (
-        <em className="italic font-serif">{children}</em>
+        <em className="italic">{children}</em>
       ),
-      link: ({ children, value }: { children?: React.ReactNode; value?: any }) => (
+      link: ({ children, value }: { children?: React.ReactNode; value?: { href?: string } }) => (
         <a
           href={value?.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 underline decoration-1 underline-offset-2 transition-colors"
+          className="text-[var(--accent)] hover:underline underline-offset-2 transition-colors"
         >
           {children}
         </a>
@@ -170,340 +175,275 @@ export default function StoryPage({ post, currentSlug }: Props) {
     },
   };
 
+  const showLede = Boolean(ledeText && post.body && Array.isArray(post.body) && post.body.length > 0);
+
+  const articleBody = post.body && Array.isArray(post.body) && post.body.length > 0 ? (
+    <PortableText value={post.body} components={portableTextComponents} />
+  ) : post.excerpt ? (() => {
+    try {
+      const content = (typeof post.excerpt === "string" && (post.excerpt as string).startsWith("{"))
+        ? JSON.parse(post.excerpt as string)
+        : post.excerpt;
+
+      if (typeof content === "string") {
+        if (content.includes("<") && content.includes(">")) {
+          return <div className="story-html-content" dangerouslySetInnerHTML={{ __html: content }} />;
+        }
+        return (
+          <p className="text-[1.0625rem] sm:text-[1.125rem] leading-[1.85] text-[var(--text-secondary)] mb-6 whitespace-pre-line">
+            {content}
+          </p>
+        );
+      }
+
+      return <PortableText value={content} components={portableTextComponents} />;
+    } catch (e) {
+      console.error("Error parsing excerpt:", e);
+      if (typeof post.excerpt === "string") {
+        if (post.excerpt.includes("<") && post.excerpt.includes(">")) {
+          return <div className="story-html-content" dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
+        }
+        return (
+          <p className="text-[1.0625rem] sm:text-[1.125rem] leading-[1.85] text-[var(--text-secondary)] mb-6 whitespace-pre-line">
+            {post.excerpt}
+          </p>
+        );
+      }
+      return null;
+    }
+  })() : null;
+
+  const authorName = post.author || "Gramika Team";
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen page-bg">
       <Meta
         title={shareTitle}
         description={shareDescription}
-        keywords={`${post.title}, ${shareSection || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
+        keywords={`${post.title}, ${shareSection || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Feature Story`}
         image={shareImage}
         imageAlt={post.title}
         url={shareUrl}
         type="article"
         articleData={{
           publishedTime: post.publishedAt,
-          author: post.author || "Gramika Team",
+          author: authorName,
           section: shareSection,
         }}
       />
 
-      {/* CSS for HTML content formatting */}
-      <style jsx global>{`
-        /* Counter support for numbered lists */
-        .counter-reset-item {
-          counter-reset: item;
-        }
-        .counter-increment-item {
-          counter-increment: item;
-        }
-        .counter-increment-item:before {
-          content: counter(item) '. ';
-        }
-
-        /* Article content styling */
-        .prose h1 {
-          font-size: 1.5rem !important;
-          font-weight: 900 !important;
-          color: #111827 !important;
-          margin-top: 3rem !important;
-          margin-bottom: 1.5rem !important;
-          line-height: 1.2 !important;
-          border-left: 4px solid #2563eb !important;
-          padding-left: 1.25rem !important;
-        }
-        
-        .prose h2 {
-          font-size: 1.35rem !important;
-          font-weight: 900 !important;
-          color: #111827 !important;
-          margin-top: 2.5rem !important;
-          margin-bottom: 1.25rem !important;
-          line-height: 1.25 !important;
-        }
-        
-        .prose h3 {
-          font-size: 1.2rem !important;
-          font-weight: 700 !important;
-          color: #111827 !important;
-          margin-top: 2rem !important;
-          margin-bottom: 1rem !important;
-          line-height: 1.3 !important;
-        }
-
-        .prose p {
-          font-size: 1.125rem !important;
-          line-height: 1.8 !important;
-          color: #374151 !important;
-          margin-bottom: 1.5rem !important;
-        }
-
-        .prose strong {
-          font-weight: 700 !important;
-          color: #111827 !important;
-        }
-
-        .prose em {
-          font-style: italic !important;
-          font-family: Georgia, serif !important;
-        }
-
-        .prose ul {
-          list-style: none !important;
-          padding-left: 1.5rem !important;
-          margin: 2rem 0 !important;
-        }
-
-        .prose ul li {
-          position: relative !important;
-          font-size: 1.125rem !important;
-          line-height: 1.8 !important;
-          color: #374151 !important;
-          margin-bottom: 0.75rem !important;
-          padding-left: 0.5rem !important;
-        }
-
-        .prose ul li:before {
-          content: '•' !important;
-          position: absolute !important;
-          left: -1rem !important;
-          color: #2563eb !important;
-          font-weight: bold !important;
-        }
-
-        .prose ol {
-          list-style: decimal !important;
-          padding-left: 1.5rem !important;
-          margin: 2rem 0 !important;
-        }
-
-        .prose ol li {
-          font-size: 1.125rem !important;
-          line-height: 1.8 !important;
-          color: #374151 !important;
-          margin-bottom: 0.75rem !important;
-          padding-left: 0.5rem !important;
-        }
-
-        .prose ol li::marker {
-          color: #2563eb !important;
-          font-weight: bold !important;
-        }
-
-        .prose a {
-          color: #2563eb !important;
-          text-decoration: underline !important;
-          text-underline-offset: 2px !important;
-          transition: color 0.2s !important;
-        }
-
-        .prose a:hover {
-          color: #1d4ed8 !important;
-        }
-
-        .prose img {
-          max-width: 100% !important;
-          height: auto !important;
-          border-radius: 0.5rem !important;
-          margin: 3rem 0 !important;
-        }
-
-        .prose blockquote {
-          border-left: 4px solid #111827 !important;
-          background: #f9fafb !important;
-          padding: 1.5rem 2rem !important;
-          margin: 2.5rem 0 !important;
-          font-style: italic !important;
-          font-size: 1.25rem !important;
-          color: #374151 !important;
-        }
-
-        @media (min-width: 640px) {
-          .prose h1 { font-size: 2.5rem !important; }
-          .prose h2 { font-size: 2rem !important; }
-          .prose h3 { font-size: 1.75rem !important; }
-          .prose p { font-size: 1.1875rem !important; }
-        }
-
-        @media (min-width: 1024px) {
-          .prose h1 { font-size: 3rem !important; }
-          .prose h2 { font-size: 2.25rem !important; }
-          .prose h3 { font-size: 1.875rem !important; }
-        }
-      `}</style>
-
-      {/* Reading Progress Bar */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 origin-left z-50"
+        className="fixed top-0 left-0 right-0 h-0.5 bg-[var(--accent)] origin-left z-50"
         style={{ scaleX }}
       />
 
-      {/* Simple Navigation */}
-      <nav className="sticky top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-40 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between relative">
+      <nav className="sticky top-0 w-full bg-[var(--bg-surface)]/90 backdrop-blur-xl border-b border-[var(--border-subtle)] z-40 overflow-visible">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 grid grid-cols-[auto_1fr_auto] items-center gap-3">
           <button
-            onClick={() => router.push("/")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group"
+            onClick={() => router.push("/#top-stories")}
+            className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group shrink-0"
           >
-            <FaArrowLeft className="text-sm group-hover:-translate-x-0.5 transition-transform" />
-            <span className="text-sm font-medium">Back</span>
+            <FaArrowLeft className="text-xs group-hover:-translate-x-0.5 transition-transform" />
+            <span className="text-sm font-[family-name:var(--font-display)] font-medium">Back</span>
           </button>
 
-          <span className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col sm:flex-row items-center sm:gap-2 text-center leading-none sm:whitespace-nowrap select-none">
-            <span className="text-base sm:text-2xl font-black tracking-tight text-black uppercase">
-              GRAMIKA NEWS
-            </span>
-            <span className="text-base sm:text-2xl font-bold sm:font-black tracking-tight text-black uppercase mt-1 sm:mt-0">
-              ONLINE
-            </span>
+          <span className="font-[family-name:var(--font-display)] text-xs sm:text-sm font-semibold tracking-tight text-[var(--text-primary)] text-center truncate min-w-0">
+            GRAMIKA NEWS ONLINE
           </span>
 
-          <div className="relative">
-            <button
-              onClick={() => setShowShareMenu(!showShareMenu)}
-              className="p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-all"
-            >
-              <FaShareAlt className="text-sm" />
-            </button>
-
-            {showShareMenu && (
-              <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 flex gap-2">
-                <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-blue-50 rounded text-blue-600 transition-colors">
-                  <FaFacebookF className="text-sm" />
-                </a>
-                <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-sky-50 rounded text-sky-500 transition-colors">
-                  <FaTwitter className="text-sm" />
-                </a>
-                <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-blue-50 rounded text-blue-700 transition-colors">
-                  <FaLinkedinIn className="text-sm" />
-                </a>
-                <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="p-2.5 hover:bg-green-50 rounded text-green-600 transition-colors">
-                  <FaWhatsapp className="text-sm" />
-                </a>
-              </div>
-            )}
+          <div className="shrink-0 justify-self-end">
+            <NewsShareMenu
+              shareUrl={shareUrlState}
+              size="sm"
+              variant="prominent"
+              menuPlacement="below"
+            />
           </div>
         </div>
       </nav>
 
-      {/* Article Header */}
-      <article className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-20">
-        {/* Category */}
-        {post.category && (
-          <div className="mb-6">
-            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 rounded">
-              {post.category}
-            </span>
+      {/* Editorial masthead */}
+      <header className="story-masthead">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="story-masthead-accent shrink-0" aria-hidden />
+              <span className="story-masthead-label">Feature Stories</span>
+            </div>
+            <ThemeToggle className="shrink-0 text-white/60 hover:text-white hover:bg-white/10 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10" />
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* Meta Info - Moved to Top */}
-        <div className="flex flex-wrap items-center gap-5 pb-6 mb-6 border-b border-gray-200 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gray-900 text-white rounded-full flex items-center justify-center font-bold">
-              {(post.author || "Gramika Team").charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Author</p>
-              <p className="font-semibold text-gray-900">{post.author || "Gramika Team"}</p>
-            </div>
-          </div>
-          <div className="h-10 w-px bg-gray-300"></div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Published</p>
-            <p className="font-medium text-gray-900">{formatDate(post.publishedAt)}</p>
-          </div>
-          {readingTime > 0 && (
-            <>
-              <div className="h-10 w-px bg-gray-300"></div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-0.5">Reading Time</p>
-                <p className="font-medium text-gray-900">{readingTime} min</p>
+      {/* Hero — split layout on desktop */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-10 sm:pb-14">
+        <div className="grid lg:grid-cols-[1fr_min(38%,300px)] gap-8 lg:gap-12 items-start">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            className="order-2 lg:order-1"
+          >
+            {post.category && (
+              <motion.div custom={0} variants={fadeUp} className="mb-4">
+                <span className="inline-flex px-2.5 py-1 text-[10px] font-[family-name:var(--font-display)] font-semibold uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-muted)] rounded-md border border-[var(--accent)]/15 dark:border-[var(--accent)]/30">
+                  {post.category}
+                </span>
+              </motion.div>
+            )}
+
+            <motion.h1
+              custom={1}
+              variants={fadeUp}
+              className="text-display text-2xl sm:text-3xl lg:text-4xl xl:text-[2.75rem] leading-[1.12] tracking-tight text-[var(--text-primary)] mb-6"
+            >
+              {post.title}
+            </motion.h1>
+
+            <motion.div custom={2} variants={fadeUp} className="flex flex-wrap gap-2 mb-6">
+              <span className="story-meta-chip">
+                <FaUser className="text-[var(--accent)] text-xs" />
+                {authorName}
+              </span>
+              <span className="story-meta-chip">
+                <FaClock className="text-[var(--accent)] text-xs" />
+                {formatDate(post.publishedAt)}
+              </span>
+              {readingTime > 0 && (
+                <span className="story-meta-chip">
+                  {readingTime} min read
+                </span>
+              )}
+            </motion.div>
+
+            {showLede && (
+              <motion.p custom={3} variants={fadeUp} className="story-lede font-medium">
+                {ledeText}
+              </motion.p>
+            )}
+          </motion.div>
+
+          {post.mainImage && (
+            <motion.figure
+              custom={0}
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              className="order-1 lg:order-2 lg:sticky lg:top-20"
+            >
+              <div className="image-frame relative aspect-[16/9] lg:aspect-[4/3] shadow-[var(--shadow-md)]">
+                <Image
+                  src={post.mainImage}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 300px"
+                />
               </div>
-            </>
+            </motion.figure>
           )}
         </div>
+      </section>
 
-        {/* Featured Image - Moved to Top */}
-        {post.mainImage && (
-          <figure className="mb-10 -mx-4 sm:mx-0">
-            <div className="relative aspect-video overflow-hidden bg-gray-100">
-              <Image
-                src={post.mainImage}
-                alt={post.title}
-                fill
-                className="object-cover"
-                priority
-              />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="section-divider" />
+      </div>
+
+      {/* Article body */}
+      <article className="reading-container px-4 sm:px-6 pt-10 sm:pt-12 pb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="article-prose story-article-body"
+        >
+          {articleBody}
+        </motion.div>
+
+        {/* Author recap */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.4 }}
+          className="mt-12 flex items-center gap-4 p-5 bg-[var(--bg-muted)] rounded-xl border border-[var(--border-subtle)]"
+        >
+          <div className="w-12 h-12 shrink-0 story-author-avatar rounded-full flex items-center justify-center text-lg font-semibold font-[family-name:var(--font-display)]">
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-[family-name:var(--font-display)] mb-0.5">
+              Written by
+            </p>
+            <p className="font-medium text-[var(--text-primary)]">{authorName}</p>
+            <p className="text-sm text-[var(--text-tertiary)]">{formatDate(post.publishedAt)}</p>
+          </div>
+        </motion.div>
+
+        {/* Share card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="story-share-card mt-10"
+        >
+          <p className="text-xs font-[family-name:var(--font-display)] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+            Enjoyed this story?
+          </p>
+          <p className="text-[var(--text-primary)] font-medium mb-4">Share it with others</p>
+          <NewsShareMenu shareUrl={shareUrlState} layout="inline" />
+        </motion.div>
+
+        {/* CTA — more stories */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="story-cta-card mt-8 p-6 sm:p-8"
+        >
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="story-cta-eyebrow text-[10px] font-[family-name:var(--font-display)] font-semibold uppercase tracking-wider mb-1">
+                Keep reading
+              </p>
+              <p className="story-cta-title text-lg sm:text-xl font-[family-name:var(--font-display)] font-semibold">
+                Explore more feature stories
+              </p>
             </div>
-          </figure>
-        )}
-
-        {/* Title */}
-        <h1 className="text-2xl sm:text-4xl lg:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-6">
-          {post.title}
-        </h1>
-
-        {/* Article Content */}
-        <div className="prose prose-lg max-w-none">
-          {post.body && Array.isArray(post.body) && post.body.length > 0 ? (
-            <PortableText value={post.body} components={portableTextComponents} />
-          ) : post.excerpt ? (() => {
-            try {
-              const content = (typeof post.excerpt === 'string' && (post.excerpt as string).startsWith('{'))
-                ? JSON.parse(post.excerpt as string)
-                : post.excerpt;
-
-              if (typeof content === 'string') {
-                if (content.includes('<') && content.includes('>')) {
-                  return <div dangerouslySetInnerHTML={{ __html: content }} />;
-                }
-                return (
-                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
-                    {content}
-                  </p>
-                );
-              }
-
-              return <PortableText value={content} components={portableTextComponents} />;
-            } catch (e) {
-              console.error('Error parsing excerpt:', e);
-              if (typeof post.excerpt === 'string') {
-                if (post.excerpt.includes('<') && post.excerpt.includes('>')) {
-                  return <div dangerouslySetInnerHTML={{ __html: post.excerpt }} />;
-                }
-                return (
-                  <p className="text-[18px] sm:text-[19px] leading-[1.8] text-gray-800 mb-6 whitespace-pre-line">
-                    {post.excerpt}
-                  </p>
-                );
-              }
-              return null;
-            }
-          })() : null}
-        </div>
-
-        {/* Share Section */}
-        <div className="mt-16 pt-10 border-t-2 border-gray-900">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-sm font-bold text-gray-900 uppercase tracking-wider">Share Article</p>
-            <div className="flex-1 h-px bg-gray-200 ml-4"></div>
+            <button
+              onClick={() => router.push("/#top-stories")}
+              className="story-cta-btn"
+            >
+              View all stories
+              <FaArrowRight className="text-xs" />
+            </button>
           </div>
-          <div className="flex gap-3">
-            <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md">
-              <FaFacebookF />
-            </a>
-            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-sky-500 text-white rounded hover:bg-sky-600 transition-colors shadow-sm hover:shadow-md">
-              <FaTwitter />
-            </a>
-            <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-blue-700 text-white rounded hover:bg-blue-800 transition-colors shadow-sm hover:shadow-md">
-              <FaLinkedinIn />
-            </a>
-            <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-11 h-11 bg-green-500 text-white rounded hover:bg-green-600 transition-colors shadow-sm hover:shadow-md">
-              <FaWhatsapp />
-            </a>
-          </div>
-        </div>
+        </motion.div>
       </article>
+
+      <style jsx global>{`
+        .story-html-content p {
+          font-size: 1.0625rem;
+          line-height: 1.85;
+          color: var(--text-secondary);
+          margin-bottom: 1.5rem;
+        }
+        .story-html-content h1,
+        .story-html-content h2,
+        .story-html-content h3 {
+          color: var(--text-primary);
+          font-weight: 600;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+        }
+        .story-html-content a {
+          color: var(--accent);
+          text-decoration: underline;
+          text-underline-offset: 2px;
+        }
+      `}</style>
     </div>
   );
 }

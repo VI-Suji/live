@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { sanityClient } from '../../../sanity/config';
+import { sanityLiveClient } from '../../../sanity/config';
 import { setCacheHeaders } from '../../../sanity/cache';
 
 export default async function handler(
@@ -24,7 +24,7 @@ export default async function handler(
                 funeralDetails,
                 active
               }`
-            : `*[_type == "obituary" && active == true] | order(dateOfDeath desc) {
+            : `*[_type == "obituary" && active != false && !(_id in path("drafts.**"))] | order(dateOfDeath desc) {
                 _id,
                 name,
                 "photo": photo.asset->url,
@@ -34,7 +34,7 @@ export default async function handler(
                 funeralDetails
               }`;
 
-        const obituariesList = await sanityClient.fetch(query);
+        const obituariesList = await sanityLiveClient.fetch(query);
 
         res.status(200).json(obituariesList);
     } catch (error) {

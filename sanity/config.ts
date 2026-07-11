@@ -17,7 +17,7 @@ export const sanityClient = createClient({
 });
 
 // Public Live Client (Bypasses CDN, NO token for safety)
-const livePublicClient = createClient({
+export const sanityLiveClient = createClient({
     projectId,
     dataset,
     apiVersion,
@@ -35,7 +35,7 @@ export const adminSanityClient = createClient({
 
 // Capture safe fetch methods
 const cdnFetch = sanityClient.fetch.bind(sanityClient);
-const liveFetch = livePublicClient.fetch.bind(livePublicClient);
+const liveFetch = sanityLiveClient.fetch.bind(sanityLiveClient);
 
 // Wrap public client's fetch with caching
 sanityClient.fetch = async (query: string, params: any = {}, options: any = {}) => {

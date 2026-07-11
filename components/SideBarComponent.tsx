@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 import AdOne from "./AdFirstComponent";
-import BannerAd from "./BannerAdComponent";
 import CategoryNews from "./CategoryNewsComponent";
 import Obituaries from "./ObituariesComponent";
 import LocalNews from "./LocalNewsComponent";
 import VideoGallery from "./VideoGalleryComponent";
-import Image from "next/image";
-
 import LatestNewsComponent from "./LatestNewsComponent";
 
 interface SidebarProps {
@@ -21,25 +18,24 @@ const Sidebar: React.FC<SidebarProps> = ({ siteSettings }) => {
   const showNews = siteSettings?.latestNewsVisible ?? true;
 
   return (
-    <div className="flex flex-col items-start justify-start w-full lg:w-[35%] flex-shrink-0 gap-6">
+    <div className="flex flex-col w-full lg:w-[38%] flex-shrink-0 gap-6 sm:gap-5 lg:gap-6">
       {showAds && <AdOne />}
 
-      {/* Latest News Widget */}
-      {showNews && (
-        <div className="w-full lg:sticky lg:top-24 lg:z-30">
-          <LatestNewsComponent />
+      <div className="flex flex-col gap-6 lg:gap-6">
+        {showNews && (
+          <div className="w-full lg:sticky lg:top-24 lg:z-30">
+            <LatestNewsComponent />
+          </div>
+        )}
+
+        <div id="local-news-mobile" className="w-full lg:hidden pb-2">
+          <LocalNews />
         </div>
-      )}
-
-
-
-
-      {/* Local News Widget - Mobile Only */}
-      <div id="local-news-mobile" className="w-full lg:hidden">
-        <LocalNews />
       </div>
 
-      <CategoryNews latestNewsVisible={showNews} />
+      <div className="w-full mt-8 lg:mt-0">
+        <CategoryNews latestNewsVisible={showNews} />
+      </div>
       <VideoGallery />
       <Obituaries />
     </div>

@@ -16,7 +16,7 @@ export default function LiveNow({ channelId }: LiveNowProps) {
 
 
                 {/* Fallback & Iframe */}
-                <div className="absolute inset-0 bg-gray-900">
+                <div className="absolute inset-0 bg-[var(--bg-invert)]">
                     <iframe
                         title="Live preview"
                         src={embedSrc}
@@ -30,10 +30,10 @@ export default function LiveNow({ channelId }: LiveNowProps) {
 
                 {/* Loading State */}
                 {!loaded && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-[var(--bg-invert)]">
                         <div className="flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                            <p className="text-gray-400 text-sm font-medium animate-pulse">Connecting to Live Stream...</p>
+                            <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+                            <p className="text-[var(--text-tertiary)] text-sm font-medium animate-pulse">Connecting to Live Stream...</p>
                         </div>
                     </div>
                 )}

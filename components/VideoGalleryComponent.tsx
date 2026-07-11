@@ -53,27 +53,27 @@ const VideoGallery = () => {
         <div className="w-full mt-8">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-6 bg-red-600 rounded-full"></div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight">Watch Shorts</h2>
+                    <div className="w-1.5 h-6 bg-red-600 rounded-full" />
+                    <h2 className="text-display text-xl tracking-tight">Watch Shorts</h2>
                 </div>
 
                 {!loading && videos.length > 0 && (
                     <div className="flex gap-2">
                         <button
                             onClick={() => scroll('left')}
-                            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                            className="w-10 h-10 rounded-full bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center hover:bg-[var(--bg-muted)] transition-colors shadow-sm"
                             aria-label="Previous"
                         >
-                            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                         <button
                             onClick={() => scroll('right')}
-                            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm"
+                            className="w-10 h-10 rounded-full bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center hover:bg-[var(--bg-muted)] transition-colors shadow-sm"
                             aria-label="Next"
                         >
-                            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
@@ -84,7 +84,7 @@ const VideoGallery = () => {
             {loading ? (
                 <div className="flex gap-4 overflow-hidden">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="w-[65%] sm:w-[calc(46%)] flex-shrink-0 aspect-[9/16] bg-gray-200 rounded-2xl animate-pulse"></div>
+                        <div key={i} className="w-[65%] sm:w-[calc(46%)] flex-shrink-0 aspect-[9/16] skeleton rounded-2xl" />
                     ))}
                 </div>
             ) : (
@@ -97,7 +97,7 @@ const VideoGallery = () => {
                         <div
                             key={video._id}
                             onClick={() => handleVideoClick(video.videoUrl)}
-                            className="group relative w-[65%] sm:w-[calc(46%)] flex-shrink-0 aspect-[9/16] cursor-pointer overflow-hidden rounded-2xl bg-gray-900 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 snap-start"
+                            className="group relative w-[65%] sm:w-[calc(46%)] flex-shrink-0 aspect-[9/16] cursor-pointer overflow-hidden rounded-2xl bg-[var(--bg-invert)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all duration-300 transform hover:-translate-y-1 snap-start"
                         >
 
 
@@ -109,8 +109,8 @@ const VideoGallery = () => {
                                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                                    <span className="text-gray-400 text-xs text-center px-2">{video.title}</span>
+                                <div className="w-full h-full bg-[var(--bg-muted)] flex items-center justify-center">
+                                    <span className="text-[var(--text-tertiary)] text-xs text-center px-2">{video.title}</span>
                                 </div>
                             )}
 
@@ -129,7 +129,7 @@ const VideoGallery = () => {
                                 <p className="text-white text-sm font-bold line-clamp-2 leading-tight drop-shadow-md">
                                     {video.title}
                                 </p>
-                                <p className="text-gray-300 text-[10px] font-medium">Watch now</p>
+                                <p className="text-white/70 text-[10px] font-medium">Watch now</p>
                             </div>
                         </div>
                     ))}

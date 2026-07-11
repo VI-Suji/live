@@ -8,6 +8,7 @@ import TopStories from "./TopStoriesComponent";
 import Footer from "./FooterComponent";
 import LocalNews from "./LocalNewsComponent";
 import BannerAd from "./BannerAdComponent";
+import SectionHeader from "./SectionHeader";
 
 const MainSection: React.FC = () => {
     const topStoriesRef = useRef<HTMLElement>(null);
@@ -41,10 +42,7 @@ const MainSection: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-
-
     useEffect(() => {
-        // Check if there are any active top stories
         const checkTopStories = () => {
             fetch('/api/sanity/topStories')
                 .then(res => res.json())
@@ -64,15 +62,13 @@ const MainSection: React.FC = () => {
     };
 
     return (
-        <main className="w-full min-h-screen">
-            {/* Hero Section - Light with subtle gradient */}
-            <section
-                className="relative bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-hidden"
-            >
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-8 lg:py-12">
-                    <div className="flex flex-col lg:flex-row items-start justify-center gap-6 sm:gap-10">
-                        <div className="flex flex-col gap-8 sm:gap-10 w-full lg:w-[65%]">
-                            <div id="home" className="flex flex-col gap-8 sm:gap-10">
+        <main className="w-full">
+            {/* Hero + Sidebar */}
+            <section className="relative">
+                <div className="page-container pt-3 sm:pt-5 pb-8 sm:pb-10">
+                    <div className="flex flex-col lg:flex-row items-start gap-4 sm:gap-6 lg:gap-10">
+                        <div className="flex flex-col gap-6 w-full lg:w-[62%]">
+                            <div id="home" className="flex flex-col">
                                 {siteSettings.heroSectionVisible && (
                                     <Hero
                                         onReadMore={handleScrollToTopStories}
@@ -81,10 +77,9 @@ const MainSection: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Local News Section - Desktop Only */}
                             <section
                                 id="local-news-desktop"
-                                className="hidden lg:block transition-all duration-500"
+                                className="hidden lg:block"
                             >
                                 <LocalNews />
                             </section>
@@ -95,48 +90,45 @@ const MainSection: React.FC = () => {
                 </div>
             </section>
 
-            {/* Banner Ad Section - Full width, pushes down sidebar content */}
+            {/* Banner Ad */}
             {siteSettings.advertisementsVisible && (
-                <section className="bg-gradient-to-br from-gray-50 via-white to-blue-50 py-6 sm:py-8">
-                    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+                <section className="border-t border-[var(--border-subtle)]">
+                    <div className="page-container py-6 sm:py-8">
                         <BannerAd />
                     </div>
                 </section>
             )}
 
-            {/* Top Stories Section - Dark dramatic */}
+            {/* Feature Stories */}
             {siteSettings.topStoriesVisible && hasActiveTopStories && (
                 <section
                     ref={topStoriesRef}
                     id="top-stories"
-                    className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white py-20 sm:py-28 overflow-hidden"
+                    className="feature-stories-section relative py-12 sm:py-20 overflow-hidden"
                 >
-                    {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(96,165,250,0.15),transparent)] pointer-events-none" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_100%_100%,rgba(255,255,255,0.04),transparent)] pointer-events-none" />
 
-                    <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
-                        <div className="text-center mb-16">
-                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black mb-6 bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                                Feature Stories
-                            </h2>
-                        </div>
+                    <div className="relative z-10 page-container">
+                        <SectionHeader
+                            title="Feature Stories"
+                            align="center"
+                            className="[&_h2]:!text-white [&_.section-divider]:via-zinc-500"
+                        />
                         <TopStories />
                     </div>
                 </section>
             )}
 
-
-
-            {/* Socials Section */}
-            <section id="socials" className="relative bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8 sm:py-12">
-                <Socials />
+            {/* Socials */}
+            <section id="socials" className="border-t border-[var(--border-subtle)]">
+                <div className="page-container py-12 sm:py-20">
+                    <Socials />
+                </div>
             </section>
 
-            <section className="bg-white">
-                <Footer />
-            </section>
-        </main >
+            <Footer />
+        </main>
     );
 };
 

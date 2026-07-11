@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import { socialItems } from "./SocialsComponent";
 import LiveNow from "./LiveComponent";
 import { FaArrowRight } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 interface Props {
     onReadMore: () => void;
@@ -36,115 +39,86 @@ const Hero: React.FC<Props> = ({ onReadMore, showLive }) => {
     }, []);
 
     return (
-        <div className="w-full relative rounded-[2.5rem] sm:rounded-[3.5rem] overflow-hidden shadow-2xl shadow-gray-200 border border-white">
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gray-100" />
-                <img
-                    src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2000&auto=format&fit=crop"
-                    alt="Background"
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                />
-
-                {/* Visual Overlay - Minimal gradient to ensure text readability only on the very left */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/20 to-transparent z-10" />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent sm:hidden z-10" />
-            </div>
-
-            <div className="relative z-20 flex flex-col lg:flex-row items-stretch h-auto lg:min-h-[500px]">
-                {/* Main Content Area */}
-                <div className={`flex-1 p-6 sm:p-12 lg:p-16 flex flex-col gap-6 lg:gap-8 justify-center ${!showLive ? 'lg:pr-14' : ''}`}>
-                    <div className="space-y-4 lg:space-y-6 max-w-2xl">
-
-
-                        <div className="space-y-3 lg:space-y-4">
-                            <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black text-gray-900 leading-[0.9] tracking-tighter drop-shadow-sm">
-                                {heroData.greeting}
-                            </h1>
-
-                            {!showLive && (
-                                <p className="text-gray-500 text-base sm:text-xl font-medium leading-relaxed max-w-lg">
-                                    {heroData.tagline}
-                                </p>
-                            )}
-                        </div>
+        <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="surface-elevated w-full overflow-hidden"
+        >
+            <div className="flex flex-col lg:flex-row">
+                {/* Main content */}
+                <div className={`flex-1 p-6 sm:p-10 lg:p-12 flex flex-col gap-8 justify-center ${!showLive ? 'lg:pr-8' : ''}`}>
+                    <div className="space-y-4 max-w-2xl">
+                        <h1 className="text-display text-3xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-[var(--text-primary)]">
+                            {heroData.greeting}
+                        </h1>
+                        {!showLive && (
+                            <p className="text-body text-base sm:text-lg max-w-lg">
+                                {heroData.tagline}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Mobile Socials - Swapped to be above Button */}
-                    <div className="flex lg:hidden flex-row flex-wrap gap-4 items-center justify-center">
+                    {/* Mobile socials */}
+                    <div className="flex lg:hidden flex-row flex-wrap gap-3">
                         {socialItems.map((social) => (
                             <a
                                 key={social.id}
                                 href={social.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group flex items-center bg-transparent p-0 rounded-full hover:scale-110 transition-all duration-300"
+                                className="group w-10 h-10 rounded-lg flex items-center justify-center text-white transition-transform duration-200 hover:scale-105"
+                                style={{ background: social.color }}
+                                aria-label={social.title}
                             >
-                                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${social.gradient} flex items-center justify-center text-white shadow-lg group-hover:rotate-6 transition-transform`}>
-                                    <div className="text-xl">
-                                        {social.icon}
-                                    </div>
-                                </div>
+                                <span className="text-base">{social.icon}</span>
                             </a>
                         ))}
                     </div>
 
-                    {/* Content Section (Live or Button) */}
                     {showLive ? (
-                        <div className="w-full">
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-blue-900/20 border-4 border-white aspect-video bg-gray-900 max-w-2xl group">
+                        <div className="w-full max-w-2xl">
+                            <div className="relative rounded-xl overflow-hidden border border-[var(--border-subtle)] aspect-video bg-zinc-900 group">
                                 <LiveNow channelId="UCgkLuDaFGUrfljjp7cNtQcw" />
-
-                                <div className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-red-600/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg">
+                                <div className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-red-600/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
                                     <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Live</span>
+                                    <span className="text-[10px] font-semibold text-white uppercase tracking-widest font-[family-name:var(--font-display)]">Live</span>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <div className="flex flex-col sm:flex-row items-center gap-4 lg:gap-6">
-                            <button
-                                onClick={onReadMore}
-                                className="group flex items-center justify-center gap-3 px-8 py-3.5 lg:py-4 bg-gray-900 text-white rounded-2xl font-bold text-base shadow-xl hover:bg-blue-600 hover:shadow-blue-600/30 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto"
-                            >
-                                View Stories
-                                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
+                        <button onClick={onReadMore} className="btn-primary w-full sm:w-auto">
+                            View Stories
+                            <FaArrowRight className="text-xs opacity-70 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
                     )}
                 </div>
 
-                {/* Socials Sidebar - Hidden on mobile, shown on Desktop */}
-                <div className="hidden lg:flex lg:w-[340px] px-6 pb-8 lg:p-12 flex-col justify-center gap-4 lg:gap-5 border-t lg:border-t-0 lg:border-l border-white/40 bg-white/20 backdrop-blur-sm">
-                    <div className="hidden lg:block mb-2">
-                        <h3 className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] drop-shadow-sm">Socials</h3>
-                    </div>
-
-                    <div className="flex flex-row lg:flex-col flex-wrap gap-3 justify-center lg:justify-start items-center lg:items-stretch">
-                        {socialItems.map((social) => (
-                            <a
-                                key={social.id}
-                                href={social.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group flex items-center gap-3 lg:gap-4 bg-transparent lg:bg-white/90 lg:hover:bg-white p-0 lg:p-3 rounded-full lg:rounded-2xl lg:shadow-sm hover:scale-110 lg:hover:scale-[1.02] transition-all duration-300"
+                {/* Desktop social sidebar */}
+                <div className="hidden lg:flex lg:w-72 flex-col justify-center gap-1 p-8 border-l border-[var(--border-subtle)] bg-[var(--bg-muted)]/50">
+                    {socialItems.map((social) => (
+                        <a
+                            key={social.id}
+                            href={social.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--bg-surface)] transition-all duration-200"
+                        >
+                            <div
+                                className="w-9 h-9 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
+                                style={{ background: social.color }}
                             >
-                                <div className={`w-10 h-10 lg:w-10 lg:h-10 rounded-full lg:rounded-xl bg-gradient-to-br ${social.gradient} flex items-center justify-center text-white shadow-lg lg:shadow-md group-hover:rotate-6 transition-transform`}>
-                                    <div className="text-xl lg:text-lg">
-                                        {social.icon}
-                                    </div>
-                                </div>
-                                <div className="hidden lg:block">
-                                    <h4 className="font-bold text-gray-900 text-sm">{social.title}</h4>
-                                    <p className="text-[10px] text-gray-400 font-bold group-hover:text-blue-500 transition-colors">Connect</p>
-                                </div>
-                            </a>
-                        ))}
-                    </div>
+                                <span className="text-sm">{social.icon}</span>
+                            </div>
+                            <div className="min-w-0">
+                                <h4 className="font-[family-name:var(--font-display)] font-medium text-sm text-[var(--text-primary)]">{social.title}</h4>
+                                <p className="text-xs text-[var(--text-tertiary)] truncate">{social.subtitle}</p>
+                            </div>
+                        </a>
+                    ))}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

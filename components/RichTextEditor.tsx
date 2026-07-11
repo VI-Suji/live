@@ -169,7 +169,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, onUplo
     }), [imageHandler]);
 
     return (
-        <div className="bg-white text-gray-900">
+        <div className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
             <style jsx global>{`
                 .ql-container {
                     font-family: inherit;

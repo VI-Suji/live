@@ -36,8 +36,8 @@ export default function BannerAd() {
     const ad = ads[currentIndex];
 
     return (
-        <div className={`w-full relative rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="relative w-full aspect-video sm:aspect-[21/9] bg-gray-100 flex items-center justify-center">
+        <div className={`w-full relative rounded-2xl shadow-[var(--shadow-md)] overflow-hidden border border-[var(--border-default)] bg-[var(--bg-surface)] transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="relative w-full aspect-video sm:aspect-[21/9] bg-[var(--bg-muted)] flex items-center justify-center">
                 {(ad.videoUrl || ad.video) ? (
                     <video
                         key={ad._id} // Key ensures video reloads/plays when ad changes

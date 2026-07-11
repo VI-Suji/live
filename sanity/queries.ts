@@ -98,7 +98,7 @@ export const GET_DOCTORS = `*[_type == "doctor" && active == true] | order(order
 /**
  * Get active obituaries, ordered by date of death (most recent first)
  */
-export const GET_OBITUARIES = `*[_type == "obituary" && active == true] | order(dateOfDeath desc) {
+export const GET_OBITUARIES = `*[_type == "obituary" && active != false && !(_id in path("drafts.**"))] | order(dateOfDeath desc) {
   _id,
   name,
   "photo": photo.asset->url,
