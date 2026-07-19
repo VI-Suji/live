@@ -17,7 +17,9 @@ export type NewsPost = {
   category?: string;
 };
 
-const OG_IMAGE_PARAMS = "?w=1200&h=630&fit=crop&auto=format&q=80";
+// fm=jpg (not auto=format): crawlers without an Accept: image/webp header would
+// otherwise get the original PNG, which can exceed WhatsApp's ~600 KB preview limit.
+const OG_IMAGE_PARAMS = "?w=1200&h=630&fit=crop&fm=jpg&q=80";
 
 const NEWS_POST_FIELDS = `{
   _id,

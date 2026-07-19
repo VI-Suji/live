@@ -11,6 +11,8 @@ const DEFAULT_OG_IMAGE = getOptimizedSiteImageUrl('/gramika.png');
 
 export const getOgImageType = (imageUrl: string) => {
   const lower = imageUrl.toLowerCase();
+  // Sanity delivers JPEG when fm=jpg is set, regardless of the original extension.
+  if (lower.includes('fm=jpg')) return 'image/jpeg';
   if (lower.includes('.png')) return 'image/png';
   if (lower.includes('.webp')) return 'image/webp';
   if (lower.includes('.gif')) return 'image/gif';
@@ -26,9 +28,18 @@ export const getOgImageUrl = (image?: string | null) => {
     if (image.includes('gramika.in') && image.includes('/gramika.png')) {
       return DEFAULT_OG_IMAGE;
     }
-    if (image.includes('cdn.sanity.io') && !image.includes('w=')) {
-      const separator = image.includes('?') ? '&' : '?';
-      return `${image}${separator}w=1200&h=630&fit=crop&auto=format&q=80`;
+    if (image.includes('cdn.sanity.io')) {
+      // Force JPEG: WhatsApp's crawler doesn't send Accept: image/webp, so
+      // auto=format falls back to the original (often a >1 MB PNG) and the
+      // preview image gets dropped for exceeding the crawler's size limit.
+      if (!image.includes('w=')) {
+        const separator = image.includes('?') ? '&' : '?';
+        return `${image}${separator}w=1200&h=630&fit=crop&fm=jpg&q=80`;
+      }
+      if (image.includes('auto=format')) {
+        return image.replace('auto=format', 'fm=jpg');
+      }
+      return image;
     }
     return image;
   }
