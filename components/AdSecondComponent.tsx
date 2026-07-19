@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import VideoAdPlayer from "./VideoAdPlayer";
 
 export default function AdTwo() {
     const [ad, setAd] = useState<any>(null);
 
     useEffect(() => {
-        console.log('Fetching ad-two...');
-        // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
         fetch(`/api/sanity/advertisement?position=ad-two&t=${timestamp}`)
             .then((res) => {
-                console.log('Ad-two response status:', res.status);
-                if (res.status === 404) {
-                    console.log('Ad-two not found (404)');
-                    return null;
-                }
+                if (res.status === 404) return null;
                 return res.json();
             })
             .then((data) => {
-                console.log('Ad-two data:', data);
-                // Only set ad if we have valid data (not null and not an error object)
                 if (data && !data.error) {
                     setAd(data);
                 }
@@ -30,24 +23,20 @@ export default function AdTwo() {
     }, []);
 
     if (!ad || !ad.active) {
-        return null; // Hide if no ad is active
+        return null;
     }
+
+    const hasVideo = !!(ad.videoUrl || ad.video);
 
     return (
         <div className="w-full relative rounded-3xl shadow-[var(--shadow-md)] overflow-hidden aspect-video border border-[var(--border-default)]">
             <div className="w-full h-full bg-[var(--bg-muted)] flex items-center justify-center">
-                {(ad.videoUrl || ad.video) ? (
-                    <video
+                {hasVideo ? (
+                    <VideoAdPlayer
                         src={ad.videoUrl || ad.video}
                         poster={ad.image || ""}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                        className="w-full h-full object-cover transition-opacity duration-500"
-                        onLoadedData={(e) => (e.currentTarget.style.opacity = "1")}
-                        style={{ opacity: ad.image ? 1 : 0 }}
+                        link={ad.link}
+                        title={ad.title}
                     />
                 ) : ad.image ? (
                     <div className="relative w-full h-full">
@@ -60,7 +49,7 @@ export default function AdTwo() {
                     </div>
                 ) : null}
             </div>
-            {ad.link && (
+            {!hasVideo && ad.link && (
                 <a
                     href={ad.link}
                     target="_blank"

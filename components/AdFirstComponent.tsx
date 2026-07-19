@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import VideoAdPlayer from "./VideoAdPlayer";
 
 export default function AdOne() {
     const [ads, setAds] = useState<any[]>([]);
@@ -35,21 +36,18 @@ export default function AdOne() {
     if (ads.length === 0) return null;
 
     const ad = ads[currentIndex];
+    const hasVideo = !!(ad.videoUrl || ad.video);
 
     return (
         <div className={`w-full relative rounded-3xl shadow-[var(--shadow-md)] overflow-hidden aspect-video border border-[var(--border-default)] transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             <div className="w-full h-full bg-[var(--bg-muted)] flex items-center justify-center">
-                {(ad.videoUrl || ad.video) ? (
-                    <video
-                        key={ad._id} // Key ensures video reloads/plays when ad changes
+                {hasVideo ? (
+                    <VideoAdPlayer
+                        videoKey={ad._id}
                         src={ad.videoUrl || ad.video}
                         poster={ad.image || ""}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="auto"
-                        className="w-full h-full object-cover"
+                        link={ad.link}
+                        title={ad.title}
                     />
                 ) : ad.image ? (
                     <div className="relative w-full h-full">
@@ -62,7 +60,7 @@ export default function AdOne() {
                     </div>
                 ) : null}
             </div>
-            {ad.link && (
+            {!hasVideo && ad.link && (
                 <a
                     href={ad.link}
                     target="_blank"
