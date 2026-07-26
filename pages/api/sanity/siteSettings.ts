@@ -10,7 +10,7 @@ export default async function handler(
     setCacheHeaders(res);
 
     try {
-        const query = `*[_type == "siteSettings"][0] {
+        const query = `*[_type == "siteSettings"] | order(_updatedAt desc)[0] {
             _id,
             liveStreamVisible,
             heroSectionVisible,

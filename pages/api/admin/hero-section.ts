@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminSanityClient } from '../../../sanity/config';
+import { clearCache } from '../../../sanity/cache';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -72,8 +73,9 @@ export default async function handler(
                 return res.status(405).end(`Method ${method} Not Allowed`);
         }
 
-        // NO automatic clearCache() here.
+        clearCache();
         return res.status(method === 'POST' ? 201 : 200).json(result);
+
     } catch (error: any) {
         console.error('API Error:', error);
         console.error('Error details:', error.message);
