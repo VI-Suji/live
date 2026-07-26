@@ -20,7 +20,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-Y7CSJ909QJ";
 
 export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
   const router = useRouter();
