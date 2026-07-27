@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // Allow all domains (not recommended for production, safer to list only needed ones)
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -11,5 +11,6 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
   },
 };
+
 
 module.exports = nextConfig;
