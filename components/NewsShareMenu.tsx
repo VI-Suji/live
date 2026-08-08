@@ -25,9 +25,17 @@ const NewsShareMenu = ({
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const decodedShareUrl = (() => {
+    try {
+      return decodeURIComponent(shareUrl);
+    } catch {
+      return shareUrl;
+    }
+  })();
+
   const shareLinks = {
-    whatsapp: buildWhatsAppShareUrl(shareUrl),
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    whatsapp: buildWhatsAppShareUrl(decodedShareUrl),
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(decodedShareUrl)}`,
     instagram: "https://www.instagram.com/",
   };
 
@@ -58,7 +66,7 @@ const NewsShareMenu = ({
 
   const copyToClipboard = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(shareUrl);
+    navigator.clipboard.writeText(decodedShareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -16,6 +16,7 @@ import ThemeToggle from "../../components/ThemeToggle";
 import { findTopStoryByIdentifier, NewsPost } from "../../utils/newsPost";
 import { decodeSlug } from "../../utils/slugify";
 import {
+  getCanonicalStoryShareUrl,
   getNewsCategoryLabel,
   getOgImageUrl,
   getPlainTextDescription,
@@ -39,7 +40,7 @@ const fadeUp = {
 
 export default function StoryPage({ post, currentSlug }: Props) {
   const router = useRouter();
-  const shareUrl = `https://www.gramika.in/story/${currentSlug}`;
+  const shareUrl = getCanonicalStoryShareUrl(currentSlug);
   const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
   const shareDescription = post
     ? getPlainTextDescription(post.excerpt, post.title)
@@ -63,7 +64,11 @@ export default function StoryPage({ post, currentSlug }: Props) {
   const [shareUrlState, setShareUrlState] = useState(shareUrl);
 
   useEffect(() => {
-    setShareUrlState(window.location.href);
+    try {
+      setShareUrlState(decodeURIComponent(window.location.href));
+    } catch {
+      setShareUrlState(window.location.href);
+    }
   }, []);
 
   if (router.isFallback || !post) {

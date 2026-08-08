@@ -28,7 +28,7 @@ export const getNewsSharePath = (title: string, id?: string) => {
 /** Legacy hash URL — kept for old bookmarks; redirects to the article page in _app. */
 export const getLegacyNewsHashUrl = (title: string) => `/#news/${getNewsSlug(title)}`;
 
-export const getStorySharePath = (slug: string) => `/story/${slug}`;
+export const getStorySharePath = (slug: string) => `/story/${decodeSlug(slug)}`;
 
 export const getAbsoluteShareUrl = (origin: string, path: string) => `${origin}${path}`;
 

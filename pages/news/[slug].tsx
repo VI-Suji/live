@@ -50,7 +50,11 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
   const [shareUrlState, setShareUrlState] = useState(shareUrl);
 
   useEffect(() => {
-    setShareUrlState(window.location.href);
+    try {
+      setShareUrlState(decodeURIComponent(window.location.href));
+    } catch {
+      setShareUrlState(window.location.href);
+    }
   }, []);
 
   if (router.isFallback || !post) {
