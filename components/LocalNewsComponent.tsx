@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -26,11 +27,22 @@ type LocalNewsItem = {
 };
 
 const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: LocalNewsItem) => void }) => {
+    const newsHref = getNewsSharePath(news.title);
+
+    const handleClick = (e: React.MouseEvent) => {
+        // Allow ctrl/cmd/shift click to open in new tab
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            e.preventDefault();
+            onOpen(news);
+        }
+    };
+
     return (
-        <div
+        <Link
+            href={newsHref}
             id={`news-${news._id}`}
-            onClick={() => onOpen(news)}
-            className="group surface-card surface-card-interactive p-3 sm:p-5 items-start relative cursor-pointer flex flex-col sm:flex-row gap-4 sm:gap-5"
+            onClick={handleClick}
+            className="group surface-card surface-card-interactive p-3 sm:p-5 items-start relative cursor-pointer flex flex-col sm:flex-row gap-4 sm:gap-5 block"
         >
             <div className="image-frame relative h-40 sm:h-40 w-full sm:w-44 flex-shrink-0">
                 <Image
@@ -72,7 +84,7 @@ const LocalNewsItem = ({ news, onOpen }: { news: LocalNewsItem, onOpen: (news: L
                     />
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

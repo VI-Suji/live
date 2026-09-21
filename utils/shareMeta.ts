@@ -1,4 +1,4 @@
-import { getNewsSharePath, getStorySharePath } from './slugify';
+import { getNewsSharePath, getNewsSlug, getStorySharePath } from './slugify';
 
 const SITE_ORIGIN = 'https://www.gramika.in';
 
@@ -85,8 +85,15 @@ export const buildWhatsAppShareUrl = (shareUrl: string) =>
   `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
 
 /**
- * Canonical share URL for WhatsApp / social previews.
- * Uses readable Malayalam /news/slug (not percent-encoded) plus optional Sanity id
+ * Clean canonical URL strictly for search engine indexing (<link rel="canonical">, sitemap).
+ * Never contains query parameters like ?id=... so Google indexing matches sitemap URLs 100%.
+ */
+export const getCanonicalNewsUrl = (title: string) =>
+  `${SITE_ORIGIN}/news/${getNewsSlug(title)}`;
+
+/**
+ * Share URL for WhatsApp / social previews.
+ * Uses readable Malayalam /news/slug plus optional Sanity id
  * so the correct article (and image) is resolved even when titles slug-collide.
  */
 export const getCanonicalNewsShareUrl = (title: string, id?: string) =>

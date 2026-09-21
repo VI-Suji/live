@@ -10,6 +10,7 @@ import { findNewsPostByIdentifier, NewsPost } from "../../utils/newsPost";
 import { decodeSlug, getNewsSlug } from "../../utils/slugify";
 import {
   buildWhatsAppShareUrl,
+  getCanonicalNewsUrl,
   getCanonicalNewsShareUrl,
   getNewsCategoryLabel,
   getOgImageUrl,
@@ -25,6 +26,7 @@ type Props = {
 
 export default function NewsSlugPage({ post, currentSlug }: Props) {
   const router = useRouter();
+  const canonicalUrl = getCanonicalNewsUrl(post?.title || currentSlug);
   const shareUrl = getCanonicalNewsShareUrl(post?.title || currentSlug, post?._id);
   const shareTitle = post ? `${post.title} | Gramika News` : "Gramika News";
   const shareDescription = post
@@ -174,7 +176,7 @@ export default function NewsSlugPage({ post, currentSlug }: Props) {
         keywords={`${post.title}, ${shareSection || ''}, Gramika News, ഗ്രാമിക, Malayalam News, Kerala News, Local News`}
         image={shareImage}
         imageAlt={post.title}
-        url={shareUrl}
+        url={canonicalUrl}
         type="article"
         articleData={{
           publishedTime: post.publishedAt,

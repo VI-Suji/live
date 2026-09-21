@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -24,10 +25,20 @@ interface CategoryNewsItemData {
 }
 
 const CategoryNewsItem = ({ news, onOpen }: { news: CategoryNewsItemData, onOpen: (news: CategoryNewsItemData) => void }) => {
+    const newsHref = getNewsSharePath(news.title);
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            e.preventDefault();
+            onOpen(news);
+        }
+    };
+
     return (
-        <div
-            onClick={() => onOpen(news)}
-            className="group surface-card surface-card-interactive p-3 flex flex-col gap-3 cursor-pointer relative h-full overflow-hidden"
+        <Link
+            href={newsHref}
+            onClick={handleClick}
+            className="group surface-card surface-card-interactive p-3 flex flex-col gap-3 cursor-pointer relative h-full overflow-hidden block"
         >
             <div className="image-frame relative aspect-[16/9] w-full">
                 <Image
@@ -70,7 +81,7 @@ const CategoryNewsItem = ({ news, onOpen }: { news: CategoryNewsItemData, onOpen
                     />
                 </div>
             </div>
-        </div>
+        </Link>
     );
 };
 

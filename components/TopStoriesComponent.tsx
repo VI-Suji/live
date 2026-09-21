@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { FaChevronLeft, FaChevronRight, FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import NewsShareMenu from "./NewsShareMenu";
 import { getCanonicalStoryShareUrl } from "../utils/shareMeta";
@@ -277,9 +278,15 @@ function FeaturedCard({
     };
 
     return (
-        <article
-            onClick={() => !isDisabled && onRead(post)}
-            className={`group relative ${heights[size]} rounded-2xl overflow-hidden border border-white/15 transition-transform ${
+        <Link
+            href={`/story/${post.slug.current}`}
+            onClick={(e) => {
+                if (!isDisabled && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                    e.preventDefault();
+                    onRead(post);
+                }
+            }}
+            className={`group relative ${heights[size]} rounded-2xl overflow-hidden border border-white/15 transition-transform block ${
                 isDisabled ? "cursor-wait" : "cursor-pointer active:scale-[0.99]"
             } ${isNavigating ? "ring-2 ring-white/40" : ""}`}
             aria-busy={isNavigating}
@@ -290,7 +297,7 @@ function FeaturedCard({
                 </div>
             )}
             <StoryCardContent post={post} size={size} />
-        </article>
+        </Link>
     );
 }
 

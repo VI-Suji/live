@@ -4,6 +4,16 @@ import { slugify } from '../utils/slugify';
 
 const EXTERNAL_DATA_URL = 'https://www.gramika.in';
 
+const formatLastMod = (dateStr?: string) => {
+  if (!dateStr) return new Date().toISOString();
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+};
+
 function generateSiteMap(posts: any[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>
    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -34,13 +44,13 @@ function generateSiteMap(posts: any[]) {
       .map(({ _type, slug, title, publishedAt }) => {
         const path = _type === 'topStory' ? 'story' : 'news';
         const finalSlug = (slug && slug.current) || slugify(title || '');
-        if (!finalSlug) return '';
+        if (!finalSlug || !title) return '';
 
         return `
        <url>
            <loc>${`${EXTERNAL_DATA_URL}/${path}/${finalSlug}`}</loc>
-           <lastmod>${publishedAt || new Date().toISOString()}</lastmod>
-           <changefreq>weekly</changefreq>
+           <lastmod>${formatLastMod(publishedAt)}</lastmod>
+           <changefreq>daily</changefreq>
            <priority>0.8</priority>
        </url>
      `;
@@ -55,15 +65,15 @@ function SiteMap() {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  // We make an API call to gather the URLs for our site
+  // Only query active, published posts (exclude drafts and inactive items to avoid 404s)
   const query = `{
-    "standard": *[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"]] {
+    "standard": *[_type in ["topStory", "localNews", "nationalNews", "entertainmentNews", "healthNews", "sportsNews"] && (!defined(active) || active == true) && !(_id in path("drafts.**"))] {
       _type,
       slug,
       title,
       publishedAt
     },
-    "latest": *[_type == "latestNews" && active == true] {
+    "latest": *[_type == "latestNews" && active == true && !(_id in path("drafts.**"))] {
       _type,
       "title": heading,
       "publishedAt": date
@@ -73,11 +83,11 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const data = await sanityClient.fetch(query);
   const posts = [...(data.standard || []), ...(data.latest || []).map((item: any) => ({ ...item, _type: 'latestNews' }))];
 
-  // We generate the XML sitemap with the posts data
+  // Generate the XML sitemap with active posts
   const sitemap = generateSiteMap(posts);
 
   res.setHeader('Content-Type', 'text/xml');
-  // we send the XML to the browser
+  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1800');
   res.write(sitemap);
   res.end();
 
